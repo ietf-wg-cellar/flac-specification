@@ -1,48 +1,13 @@
----
+
 author: Josh Coalson
-description: |
+description:
     A free, open source codec for lossless audio compression and
     decompression
 keywords: 'free,lossless,audio,codec,encoder,decoder,compression,compressor,archival,archive,archiving,backup,music'
 title: 'FLAC - format'
----
 
-<div class="logo">
-
-[![FLAC Logo](images/logo130.gif)](index.html)
-
-</div>
-
-<div class="above_nav">
-
-</div>
-
-<div class="navbar">
-
- [home](index.html)  |  [faq](faq.html)  |  [news](news.html)  |
- [download](download.html)  |  [documentation](documentation.html)  |
- [comparison](comparison.html)  |  [changelog](changelog.html)  |
- [links](links.html)  |  [developers](developers.html) 
-
-</div>
-
-<div class="below_nav">
-
-</div>
-
-<div class="box">
-
-<div class="box_title">
 
 format
-
-</div>
-
-<div class="box_header">
-
-</div>
-
-<div class="box_body">
 
 This is a detailed description of the FLAC format. There is also a
 companion document that describes [FLAC-to-Ogg
@@ -51,7 +16,7 @@ mapping](ogg_mapping.html).\
 For a user-oriented overview, see [About the FLAC
 Format](documentation_format_overview.html).\
 \
-[**Table of Contents**]{#toc}
+# [Table of Contents](#toc)
 -   [Acknowledgments](#acknowledgments)
 -   [Scope](#scope)
 -   [Architecture](#architecture)
@@ -92,8 +57,8 @@ Format](documentation_format_overview.html).\
                         -   [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2](#partitioned_rice2)
                             -   [RICE2\_PARTITION](#rice2_partition)
 
-[**Acknowledgments**]{#acknowledgments}\
-\
+# [Acknowledgments](#acknowledgments)
+
 FLAC owes much to the many people who have advanced the audio
 compression field so freely. For instance:
 -   [A. J. Robinson](http://svr-www.eng.cam.ac.uk/~ajr/) for his work on
@@ -111,25 +76,25 @@ compression field so freely. For instance:
 -   And of course, [Claude
     Shannon](http://en.wikipedia.org/wiki/Claude_Shannon)
 
-[**Scope**]{#scope}\
-\
+# [Scope](#scope)
+
 It is a known fact that no algorithm can losslessly compress all
 possible input, so most compressors restrict themselves to a useful
 domain and try to work as well as possible within that domain. FLAC's
 domain is audio data. Though it can losslessly **code** any input, only
 certain kinds of input will get smaller. FLAC exploits the fact that
-audio data typically has a high degree of sample-to-sample correlation.\
-\
+audio data typically has a high degree of sample-to-sample correlation.
+
 Within the audio domain, there are many possible subdomains. For
 example: low bitrate speech, high-bitrate multi-channel music, etc. FLAC
 itself does not target a specific subdomain but many of the default
 parameters of the reference encoder are tuned to CD-quality music data
 (i.e. 44.1kHz, 2 channel, 16 bits per sample). The effect of the
 encoding parameters on different kinds of audio data will be examined
-later.\
-\
-[**Architecture**]{#architecture}\
-\
+later.
+
+# [Architecture](#architecture)
+
 Similar to many audio coders, a FLAC encoder has the following stages:
 -   [Blocking](#blocking). The input is broken up into many contiguous
     blocks. With FLAC, the blocks may vary in size. The optimal size of
@@ -166,10 +131,10 @@ Similar to many audio coders, a FLAC encoder has the following stages:
 
 In addition, FLAC specifies a metadata system, which allows arbitrary
 information about the stream to be included at the beginning of the
-stream.\
-\
-[**Definitions**]{#definitions}\
-\
+stream.
+
+# [Definitions](#definitions)
+
 Many terms like "block" and "frame" are used to mean different things in
 differenct encoding schemes. For example, a frame in MP3 corresponds to
 many samples across several channels, whereas an S/PDIF frame represents
@@ -190,8 +155,8 @@ to the FLAC-encoded data.
     from a given channel. All subframes within a frame will contain the
     same number of samples.
 
-[**Blocking**]{#blocking}\
-\
+# [Blocking](#blocking)
+
 The size used for blocking the audio data has a direct effect on the
 compression ratio. If the block size is too small, the resulting large
 number of frames mean that excess bits will be wasted on frame headers.
@@ -200,20 +165,20 @@ vary so much that the encoder will be unable to find a good predictor.
 In order to simplify encoder/decoder design, FLAC imposes a minimum
 block size of 16 samples, and a maximum block size of 65535 samples.
 This range covers the optimal size for all of the audio data FLAC
-supports.\
-\
+supports.
+
 Currently the reference encoder uses a fixed block size, optimized on
 the sample rate of the input. Future versions may vary the block size
-depending on the characteristics of the signal.\
-\
+depending on the characteristics of the signal.
+
 Blocked data is passed to the predictor stage one subblock (channel) at
 a time. Each subblock is independently coded into a subframe, and the
 subframes are concatenated into a frame. Because each channel is coded
 separately, it means that one channel of a stereo frame may be encoded
-as a constant subframe, and the other an LPC subframe.\
-\
-[**Interchannel Decorrelation**]{#interchannel}\
-\
+as a constant subframe, and the other an LPC subframe.
+
+# [Interchannel Decorrelation](#interchannel)
+
 In stereo streams, many times there is an exploitable amount of
 correlation between the left and right channels. FLAC allows the frames
 of stereo streams to have different channel assignments, and an encoder
@@ -232,8 +197,8 @@ efficient in many frames, even though the raw number of bits per sample
 needed for the original signal is slightly more than that needed for
 independent or mid-side coding.\
 \
-[**Prediction**]{#prediction}\
-\
+# [Prediction](#prediction)
+
 FLAC uses four methods for modeling the input signal:
 -   **Verbatim**. This is essentially a zero-order predictor of the
     signal. The predicted signal is zero, meaning the residual is the
@@ -273,8 +238,8 @@ FLAC uses four methods for modeling the input signal:
     reference encoder estimates the optimal precision to use based on
     the block size and dynamic range of the original signal.
 
-[**Residual Coding**]{#residualcoding}\
-\
+# [Residual Coding](residualcoding)
+
 FLAC currently defines two similar methods for the coding of the error
 signal from the prediction stage. The error signal is coded using Rice
 codes in one of two ways: 1) the encoder estimates a single Rice
@@ -284,17 +249,17 @@ into several equal-length regions of contiguous samples, and each region
 is coded with its own Rice parameter based on the region's mean. (Note
 that the first method is a special case of the second method with one
 partition, except the Rice parameter is based on the residual variance
-instead of the mean.)\
-\
+instead of the mean.)
+
 The FLAC format has reserved space for other coding methods. Some
 possiblities for volunteers would be to explore better context-modeling
 of the Rice parameter, or Huffman coding. See
 [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and
 [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for
-descriptions of several universal codes.\
-\
-[**Format**]{#format_overview}\
-\
+descriptions of several universal codes.
+
+# [Format](#format_overview)
+
 This section specifies the FLAC bitstream format. FLAC has no format
 version information, but it does contain reserved space in several
 places. Future versions of the format may use this reserved space safely
@@ -304,12 +269,12 @@ reserved patterns, in places the format specifies invalid patterns,
 meaning that the patterns may never appear in any valid bitstream, in
 any prior, present, or future versions of the format. These invalid
 patterns are usually used to make the synchronization mechanism more
-robust.\
-\
+robust.
+
 All numbers used in a FLAC bitstream are integers; there are no
 floating-point representations. All numbers are big-endian coded. All
-numbers are unsigned unless otherwise specified.\
-\
+numbers are unsigned unless otherwise specified.
+
 Before the formal description of the stream, an overview might be
 helpful.
 -   A FLAC bitstream consists of the "fLaC" marker at the beginning of
@@ -318,19 +283,19 @@ helpful.
     audio frames.
 -   FLAC supports up to 128 kinds of metadata blocks; currently the
     following are defined:
-    -   [**STREAMINFO**]{#def_STREAMINFO}: This block has information
+    -   [STREAMINFO](#def_STREAMINFO): This block has information
         about the whole stream, like sample rate, number of channels,
         total number of samples, etc. It must be present as the first
         metadata block in the stream. Other metadata blocks may follow,
         and ones that the decoder doesn't understand, it will skip.
-    -   [**APPLICATION**]{#def_APPLICATION}: This block is for use by
+    -   [APPLICATION](#def_APPLICATION): This block is for use by
         third-party applications. The only mandatory field is a 32-bit
         identifier. This ID is granted upon request to an application by
         the FLAC maintainers. The remainder is of the block is defined
         by the registered application. Visit the [registration
         page](id.html) if you would like to register an ID for your
         application with FLAC.
-    -   [**PADDING**]{#def_PADDING}: This block allows for an arbitrary
+    -   [PADDING](#def_PADDING): This block allows for an arbitrary
         amount of padding. The contents of a PADDING block have no
         meaning. This block is useful when it is known that metadata
         will be edited after encoding; the user can instruct the encoder
@@ -339,7 +304,7 @@ helpful.
         is relatively quick) instead of having to insert it into the
         right place in the existing file (which would normally require
         rewriting the entire file).
-    -   [**SEEKTABLE**]{#def_SEEKTABLE}: This is an optional block for
+    -   [SEEKTABLE](#def_SEEKTABLE): This is an optional block for
         storing seek points. It is possible to seek to any given sample
         in a FLAC stream without a seek table, but the delay can be
         unpredictable since the bitrate may vary widely within a stream.
@@ -350,7 +315,7 @@ helpful.
         seek points. There is also a special 'placeholder' seekpoint
         which will be ignored by decoders but which can be used to
         reserve space for future seek point insertion.
-    -   [**VORBIS\_COMMENT**]{#def_VORBIS_COMMENT}: This block is for
+    -   [VORBIS\_COMMENT](#def_VORBIS_COMMENT): This block is for
         storing a list of human-readable name/value pairs. Values are
         encoded using UTF-8. It is an implementation of the [Vorbis
         comment
@@ -359,14 +324,14 @@ helpful.
         tagging mechanism in FLAC. There may be only one VORBIS\_COMMENT
         block in a stream. In some external documentation, Vorbis
         comments are called FLAC tags to lessen confusion.
-    -   [**CUESHEET**]{#def_CUESHEET}: This block is for storing various
+    -   [CUESHEET](#def_CUESHEET): This block is for storing various
         information that can be used in a cue sheet. It supports track
         and index points, compatible with Red Book CD digital audio
         discs, as well as other CD-DA metadata such as media catalog
         number and track ISRCs. The CUESHEET block is especially useful
         for backing up CD-DA discs, but it can be used as a general
         purpose cueing mechanism for playback.
-    -   [**PICTURE**]{#def_PICTURE}: This block is for storing pictures
+    -   [PICTURE](#def_PICTURE): This block is for storing pictures
         associated with the file, most commonly cover art from CDs.
         There may be more than one PICTURE block in a file. The picture
         format is similar to the [APIC frame in
@@ -451,49 +416,27 @@ helpful.
 
 The following tables constitute a formal description of the FLAC format.
 Numbers in angle brackets indicate how many bits are used for a given
-field.\
+field.
 
-</div>
-
-<div class="box_footer">
-
-</div>
-
-</div>
-
-\
-<div class="box">
-
-[**STREAM**]{#stream}
+## [STREAM](#stream)
 &lt;32&gt;
 "fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is
 0x66, followed by 0x4C 0x61 0x43
 [*METADATA\_BLOCK*](#metadata_block_streaminfo)
 This is the mandatory STREAMINFO metadata block that has the basic
 properties of the stream
-[*METADATA\_BLOCK*](#metadata_block)\*
+[*METADATA\_BLOCK*](#metadata_block)
 Zero or more metadata blocks
 [*FRAME*](#frame)+
 One or more audio frames
 
-</div>
-
-\
-<div class="box">
-
-[**METADATA\_BLOCK**]{#metadata_block}
-[*METADATA\_BLOCK\_HEADER*](#metadata_block_header)
+## [METADATA\_BLOCK](#metadata_block)
+[METADATA\_BLOCK\_HEADER](#metadata_block_header)
 A block header that specifies the type and size of the metadata block
 data.
-[*METADATA\_BLOCK\_DATA*](#metadata_block_data)
+[METADATA\_BLOCK\_DATA](#metadata_block_data)
  
-
-</div>
-
-\
-<div class="box">
-
-[**METADATA\_BLOCK\_HEADER**]{#metadata_block_header}
+## [METADATA\_BLOCK\_HEADER](#metadata_block_header)
 &lt;1&gt;
 Last-metadata-block flag: '1' if this block is the last metadata block
 before the audio blocks, '0' otherwise.
@@ -513,27 +456,24 @@ BLOCK\_TYPE\
 Length (in bytes) of metadata to follow (does not include the size of
 the METADATA\_BLOCK\_HEADER)
 
-</div>
+## [METADATA\_BLOCK\_DATA](#metadata_block_data)
+[METADATA\_BLOCK\_STREAMINFO](#metadata_block_streaminfo)
 
-\
-<div class="box">
+|| [*METADATA\_BLOCK\_PADDING*](#metadata_block_padding)
 
-[**METADATA\_BLOCK\_DATA**]{#metadata_block_data}
-[*METADATA\_BLOCK\_STREAMINFO*](#metadata_block_streaminfo)\
-|| [*METADATA\_BLOCK\_PADDING*](#metadata_block_padding)\
-|| [*METADATA\_BLOCK\_APPLICATION*](#metadata_block_application)\
-|| [*METADATA\_BLOCK\_SEEKTABLE*](#metadata_block_seektable)\
-|| [*METADATA\_BLOCK\_VORBIS\_COMMENT*](#metadata_block_vorbis_comment)\
-|| [*METADATA\_BLOCK\_CUESHEET*](#metadata_block_cuesheet)\
+|| [*METADATA\_BLOCK\_APPLICATION*](#metadata_block_application)
+
+|| [*METADATA\_BLOCK\_SEEKTABLE*](#metadata_block_seektable)
+
+|| [*METADATA\_BLOCK\_VORBIS\_COMMENT*](#metadata_block_vorbis_comment)
+
+|| [*METADATA\_BLOCK\_CUESHEET*](#metadata_block_cuesheet)
+
 || [*METADATA\_BLOCK\_PICTURE*](#metadata_block_picture)
+
 The block data must match the block type in the block header.
 
-</div>
-
-\
-<div class="box">
-
-[**METADATA\_BLOCK\_STREAMINFO**]{#metadata_block_streaminfo}
+## [METADATA\_BLOCK\_STREAMINFO](#metadata_block_streaminfo)
 &lt;16&gt;
 The minimum block size (in samples) used in the stream.
 &lt;16&gt;
@@ -569,45 +509,25 @@ NOTES\
     of 65535, meaning the bit patterns corresponding to the numbers 0-15
     in the minimum blocksize and maximum blocksize fields are invalid.
 
-</div>
-
-\
-<div class="box">
-
-[**METADATA\_BLOCK\_PADDING**]{#metadata_block_padding}
+## [METADATA\_BLOCK\_PADDING](#metadata_block_padding)
 &lt;n&gt;
 n '0' bits (n must be a multiple of 8)
 
-</div>
-
-\
-<div class="box">
-
-[**METADATA\_BLOCK\_APPLICATION**]{#metadata_block_application}
+## [METADATA\_BLOCK\_APPLICATION](#metadata_block_application)
 &lt;32&gt;
 Registered application ID. (Visit the [registration page](id.html) to
 register an ID with FLAC.)
 &lt;n&gt;
 Application data (n must be a multiple of 8)
 
-</div>
-
-\
-<div class="box">
-
-[**METADATA\_BLOCK\_SEEKTABLE**]{#metadata_block_seektable}
+## [METADATA\_BLOCK\_SEEKTABLE](#metadata_block_seektable)
 [*SEEKPOINT*](#seekpoint)+
 One or more seek points.
 NOTE\
 -   The number of seek points is implied by the metadata header 'length'
     field, i.e. equal to length / 18.
 
-</div>
-
-\
-<div class="box">
-
-[**SEEKPOINT**]{#seekpoint}
+## [SEEKPOINT](#seekpoint)
 &lt;64&gt;
 Sample number of first sample in the target frame, or 0xFFFFFFFFFFFFFFFF
 for a placeholder point.
@@ -626,12 +546,7 @@ NOTES\
 -   The previous two notes imply that there may be any number of
     placeholder points, but they must all occur at the end of the table.
 
-</div>
-
-\
-<div class="box">
-
-[**METADATA\_BLOCK\_VORBIS\_COMMENT**]{#metadata_block_vorbis_comment}
+## [METADATA\_BLOCK\_VORBIS\_COMMENT](#metadata_block_vorbis_comment)
 &lt;n&gt;
 Also known as FLAC tags, the contents of a vorbis comment packet as
 specified [here](http://www.xiph.org/vorbis/doc/v-comment.html) (without
@@ -643,12 +558,7 @@ restrictive. Also note that the 32-bit field lengths are little-endian
 coded according to the vorbis spec, as opposed to the usual big-endian
 coding of fixed-length integers in the rest of FLAC.
 
-</div>
-
-\
-<div class="box">
-
-[**METADATA\_BLOCK\_CUESHEET**]{#metadata_block_cuesheet}
+## [METADATA\_BLOCK\_CUESHEET](#metadata_block_cuesheet)
 &lt;128\*8&gt;
 Media catalog number, in ASCII printable characters 0x20-0x7e. In
 general, the media catalog number may be 0 to 128 bytes long; any unused
@@ -681,12 +591,7 @@ track; it is always the last track in the CUESHEET. For CD-DA, the
 lead-out track number must be 170 as specified by the Red Book,
 otherwise is must be 255.
 
-</div>
-
-\
-<div class="box">
-
-[**CUESHEET\_TRACK**]{#cuesheet_track}
+## [CUESHEET\_TRACK](#cuesheet_track)
 &lt;64&gt;
 Track offset in samples, relative to the beginning of the FLAC audio
 stream. It is the offset to the first index point of the track. (Note
@@ -724,12 +629,7 @@ zero. For CD-DA, this number may be no more than 100.
 For all tracks except the lead-out track, one or more track index
 points.
 
-</div>
-
-\
-<div class="box">
-
-[**CUESHEET\_TRACK\_INDEX**]{#cuesheet_track_index}
+## [CUESHEET\_TRACK\_INDEX](#cuesheet_track_index)
 &lt;64&gt;
 Offset in samples, relative to the track offset, of the index point. For
 CD-DA, the offset must be evenly divisible by 588 samples (588 samples =
@@ -743,12 +643,7 @@ must be unique within a track.
 &lt;3\*8&gt;
 Reserved. All bits must be set to zero.
 
-</div>
-
-\
-<div class="box">
-
-[**METADATA\_BLOCK\_PICTURE**]{#metadata_block_picture}
+## [METADATA\_BLOCK\_PICTURE](#metadata_block_picture)
 &lt;32&gt;
 The picture type according to the ID3v2 APIC frame:\
 -   0 - Other
@@ -799,12 +694,8 @@ The length of the picture data in bytes.
 &lt;n\*8&gt;
 The binary picture data.
 
-</div>
 
-\
-<div class="box">
-
-[**FRAME**]{#frame}
+## [FRAME](#frame)
 [*FRAME\_HEADER*](#frame_header)
  
 [*SUBFRAME*](#subframe)+
@@ -814,12 +705,7 @@ Zero-padding to byte alignment.
 [*FRAME\_FOOTER*](#frame_footer)
  
 
-</div>
-
-\
-<div class="box">
-
-[**FRAME\_HEADER**]{#frame_header}
+## [FRAME\_HEADER](#frame_header)
 &lt;14&gt;
 Sync code '`11111111111110`'
 &lt;1&gt;
@@ -941,23 +827,13 @@ everything before the crc, including the sync code
     variable length code used to store compressed UCS-2, extended to
     handle larger input.
 
-</div>
-
-\
-<div class="box">
-
-[**FRAME\_FOOTER**]{#frame_footer}
+## [FRAME\_FOOTER](#frame_footer)
 &lt;16&gt;
 CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of
 everything before the crc, back to and including the frame header sync
 code
 
-</div>
-
-\
-<div class="box">
-
-[**SUBFRAME**]{#subframe}
+## [SUBFRAME](#subframe)
 [*SUBFRAME\_HEADER*](#subframe_header)
  
 [*SUBFRAME\_CONSTANT*](#subframe_constant)\
@@ -966,12 +842,7 @@ code
 || [*SUBFRAME\_VERBATIM*](#subframe_verbatim)
 The SUBFRAME\_HEADER specifies which one.
 
-</div>
-
-\
-<div class="box">
-
-[**SUBFRAME\_HEADER**]{#subframe_header}
+## [SUBFRAME\_HEADER](#subframe_header)
 &lt;1&gt;
 Zero bit padding, to prevent sync-fooling string of 1s
 &lt;6&gt;
@@ -991,33 +862,18 @@ Subframe type:
 -   `1` : k wasted bits-per-sample in source subblock, k-1 follows,
     unary coded; e.g. k=3 =&gt; 001 follows, k=7 =&gt; 0000001 follows.
 
-</div>
-
-\
-<div class="box">
-
-[**SUBFRAME\_CONSTANT**]{#subframe_constant}
+## [SUBFRAME\_CONSTANT](#subframe_constant)
 &lt;n&gt;
 Unencoded constant value of the subblock, n = frame's bits-per-sample.
 
-</div>
-
-\
-<div class="box">
-
-[**SUBFRAME\_FIXED**]{#subframe_fixed}
+## [SUBFRAME\_FIXED](#subframe_fixed)
 &lt;n&gt;
 Unencoded warm-up samples (n = frame's bits-per-sample \* predictor
 order).
 [*RESIDUAL*](#residual)
 Encoded residual
 
-</div>
-
-\
-<div class="box">
-
-[**SUBFRAME\_LPC**]{#subframe_lpc}
+## [SUBFRAME\_LPC](#subframe_lpc)
 &lt;n&gt;
 Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
 &lt;4&gt;
@@ -1032,21 +888,12 @@ Unencoded predictor coefficients (n = qlp coeff precision \* lpc order)
 [*RESIDUAL*](#residual)
 Encoded residual
 
-</div>
 
-\
-<div class="box">
-
-[**SUBFRAME\_VERBATIM**]{#subframe_verbatim}
+##[SUBFRAME\_VERBATIM](#subframe_verbatim)
 &lt;n\*i&gt;
 Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
 
-</div>
-
-\
-<div class="box">
-
-[**RESIDUAL**]{#residual}
+## [RESIDUAL](#residual)
 &lt;2&gt;
 Residual coding method:\
 -   `00` : partitioned Rice coding with 4-bit Rice parameter;
@@ -1059,23 +906,13 @@ Residual coding method:\
 [*RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2*](#partitioned_rice2)
  
 
-</div>
-
-\
-<div class="box">
-
-[**RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE**]{#partitioned_rice}
+## [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE](#partitioned_rice)
 &lt;4&gt;
 Partition order.
 [*RICE\_PARTITION*](#rice_partition)+
 There will be 2\^order partitions.
 
-</div>
-
-\
-<div class="box">
-
-[**RICE\_PARTITION**]{#rice_partition}
+## [RICE\_PARTITION](#rice_partition)
 &lt;4(+5)&gt;
 Encoding parameter:\
 -   `0000-1110` : Rice parameter.
@@ -1092,40 +929,29 @@ determined as follows:\
 -   else n = (frame's blocksize / (2\^partition order)) - predictor
     order
 
-</div>
-
-\
-<div class="box">
-
-[**RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2**]{#partitioned_rice2}
+## [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2](#partitioned_rice2)
 &lt;4&gt;
 Partition order.
 [*RICE2\_PARTITION*](#rice2_partition)+
 There will be 2\^order partitions.
 
-</div>
 
-\
-<div class="box">
-
-[**RICE2\_PARTITION**]{#rice2_partition}
+## [RICE2\_PARTITION](#rice2_partition)
 &lt;5(+5)&gt;
-Encoding parameter:\
+Encoding parameter:
 -   `00000-11110` : Rice parameter.
 -   `11111` : Escape code, meaning the partition is in unencoded binary
     form using n bits per sample; n follows as a 5-bit number.
 
 &lt;?&gt;
 Encoded residual. The number of samples (n) in the partition is
-determined as follows:\
+determined as follows:
 -   if the partition order is zero, n = frame's blocksize - predictor
     order
 -   else if this is not the first partition of the subframe, n =
     (frame's blocksize / (2\^partition order))
 -   else n = (frame's blocksize / (2\^partition order)) - predictor
     order
-
-</div>
 
 <div class="copyright">
 
