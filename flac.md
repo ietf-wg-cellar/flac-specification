@@ -425,47 +425,31 @@ field.
 - [*FRAME*](#frame)+ One or more audio frames
 
 ## [METADATA\_BLOCK](#metadata_block)
-[METADATA\_BLOCK\_HEADER](#metadata_block_header)
-A block header that specifies the type and size of the metadata block
-data.
-[METADATA\_BLOCK\_DATA](#metadata_block_data)
+- [METADATA\_BLOCK\_HEADER](#metadata_block_header) A block header that specifies the type and size of the metadata block data.
+- [METADATA\_BLOCK\_DATA](#metadata_block_data)
  
 ## [METADATA\_BLOCK\_HEADER](#metadata_block_header)
-&lt;1&gt;
-Last-metadata-block flag: '1' if this block is the last metadata block
-before the audio blocks, '0' otherwise.
-&lt;7&gt;
-BLOCK\_TYPE\
--   `0` : STREAMINFO
--   `1` : PADDING
--   `2` : APPLICATION
--   `3` : SEEKTABLE
--   `4` : VORBIS\_COMMENT
--   `5` : CUESHEET
--   `6` : PICTURE
--   `7-126` : reserved
--   `127` : invalid, to avoid confusion with a frame sync code
-
-&lt;24&gt;
-Length (in bytes) of metadata to follow (does not include the size of
-the METADATA\_BLOCK\_HEADER)
+- <1> Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
+- <7> BLOCK\_TYPE
+  -   0 : STREAMINFO
+  -   1 : PADDING
+  -   2 : APPLICATION
+  -   3 : SEEKTABLE
+  -   4 : VORBIS\_COMMENT
+  -   5 : CUESHEET
+  -   6 : PICTURE
+  -   7-126 : reserved
+  -   127 : invalid, to avoid confusion with a frame sync code
+- <24> Length (in bytes) of metadata to follow (does not include the size of the METADATA\_BLOCK\_HEADER)
 
 ## [METADATA\_BLOCK\_DATA](#metadata_block_data)
-[METADATA\_BLOCK\_STREAMINFO](#metadata_block_streaminfo)
-
-|| [*METADATA\_BLOCK\_PADDING*](#metadata_block_padding)
-
-|| [*METADATA\_BLOCK\_APPLICATION*](#metadata_block_application)
-
-|| [*METADATA\_BLOCK\_SEEKTABLE*](#metadata_block_seektable)
-
-|| [*METADATA\_BLOCK\_VORBIS\_COMMENT*](#metadata_block_vorbis_comment)
-
-|| [*METADATA\_BLOCK\_CUESHEET*](#metadata_block_cuesheet)
-
-|| [*METADATA\_BLOCK\_PICTURE*](#metadata_block_picture)
-
-The block data must match the block type in the block header.
+- <16> [METADATA\_BLOCK\_STREAMINFO](#metadata_block_streaminfo)
+- <16> [*METADATA\_BLOCK\_PADDING*](#metadata_block_padding)
+- <24> [*METADATA\_BLOCK\_APPLICATION*](#metadata_block_application)
+- <24> [*METADATA\_BLOCK\_SEEKTABLE*](#metadata_block_seektable)
+- <20> [*METADATA\_BLOCK\_VORBIS\_COMMENT*](#metadata_block_vorbis_comment)
+- <3> [*METADATA\_BLOCK\_CUESHEET*](#metadata_block_cuesheet)
+- <5> [*METADATA\_BLOCK\_PICTURE*](#metadata_block_picture) The block data must match the block type in the block header.
 
 ## [METADATA\_BLOCK\_STREAMINFO](#metadata_block_streaminfo)
 &lt;16&gt;
