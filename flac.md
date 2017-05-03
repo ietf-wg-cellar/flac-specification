@@ -419,16 +419,10 @@ Numbers in angle brackets indicate how many bits are used for a given
 field.
 
 ## [STREAM](#stream)
-&lt;32&gt;
-"fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is
-0x66, followed by 0x4C 0x61 0x43
-[*METADATA\_BLOCK*](#metadata_block_streaminfo)
-This is the mandatory STREAMINFO metadata block that has the basic
-properties of the stream
-[*METADATA\_BLOCK*](#metadata_block)
-Zero or more metadata blocks
-[*FRAME*](#frame)+
-One or more audio frames
+- <32> "fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43
+- [*METADATA\_BLOCK*](#metadata_block_streaminfo) This is the mandatory STREAMINFO metadata block that has the basic properties of the stream
+- [*METADATA\_BLOCK*](#metadata_block) Zero or more metadata blocks
+- [*FRAME*](#frame)+ One or more audio frames
 
 ## [METADATA\_BLOCK](#metadata_block)
 [METADATA\_BLOCK\_HEADER](#metadata_block_header)
