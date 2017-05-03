@@ -515,70 +515,47 @@ NOTES
 - [*CUESHEET\_TRACK\_INDEX*](#cuesheet_track_index)+ For all tracks except the lead-out track, one or more track index points.
 
 ## [CUESHEET\_TRACK\_INDEX](#cuesheet_track_index)
-&lt;64&gt;
-Offset in samples, relative to the track offset, of the index point. For
-CD-DA, the offset must be evenly divisible by 588 samples (588 samples =
-44100 samples/sec \* 1/75th of a sec). Note that the offset is from the
-beginning of the track, not the beginning of the audio data.
-&lt;8&gt;
-The index point number. For CD-DA, an index number of 0 corresponds to
-the track pre-gap. The first index in a track must have a number of 0 or
-1, and subsequently, index numbers must increase by 1. Index numbers
-must be unique within a track.
-&lt;3\*8&gt;
-Reserved. All bits must be set to zero.
+- <64> Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75th of a sec). Note that the offset is from the beginning of the track, not the beginning of the audio data.
+- <8> The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track must have a number of 0 or 1, and subsequently, index numbers must increase by 1. Index numbers must be unique within a track.
+- <3\*8> Reserved. All bits must be set to zero.
 
 ## [METADATA\_BLOCK\_PICTURE](#metadata_block_picture)
-&lt;32&gt;
-The picture type according to the ID3v2 APIC frame:\
--   0 - Other
--   1 - 32x32 pixels 'file icon' (PNG only)
--   2 - Other file icon
--   3 - Cover (front)
--   4 - Cover (back)
--   5 - Leaflet page
--   6 - Media (e.g. label side of CD)
--   7 - Lead artist/lead performer/soloist
--   8 - Artist/performer
--   9 - Conductor
--   10 - Band/Orchestra
--   11 - Composer
--   12 - Lyricist/text writer
--   13 - Recording Location
--   14 - During recording
--   15 - During performance
--   16 - Movie/video screen capture
--   17 - A bright coloured fish
--   18 - Illustration
--   19 - Band/artist logotype
--   20 - Publisher/Studio logotype
+- <32> The picture type according to the ID3v2 APIC frame:
+  -   0 - Other
+  -   1 - 32x32 pixels 'file icon' (PNG only)
+  -   2 - Other file icon
+  -   3 - Cover (front)
+  -   4 - Cover (back)
+  -   5 - Leaflet page
+  -   6 - Media (e.g. label side of CD)
+  -   7 - Lead artist/lead performer/soloist
+  -   8 - Artist/performer
+  -   9 - Conductor
+  -   10 - Band/Orchestra
+  -   11 - Composer
+  -   12 - Lyricist/text writer
+  -   13 - Recording Location
+  -   14 - During recording
+  -   15 - During performance
+  -   16 - Movie/video screen capture
+  -   17 - A bright coloured fish
+  -   18 - Illustration
+  -   19 - Band/artist logotype
+  -   20 - Publisher/Studio logotype
 
 Others are reserved and should not be used. There may only be one each
 of picture type 1 and 2 in a file.
-&lt;32&gt;
-The length of the MIME type string in bytes.
-&lt;n\*8&gt;
-The MIME type string, in printable ASCII characters 0x20-0x7e. The MIME
-type may also be `-->` to signify that the data part is a URL of the
-picture instead of the picture data itself.
-&lt;32&gt;
-The length of the description string in bytes.
-&lt;n\*8&gt;
-The description of the picture, in UTF-8.
-&lt;32&gt;
-The width of the picture in pixels.
-&lt;32&gt;
-The height of the picture in pixels.
-&lt;32&gt;
-The color depth of the picture in bits-per-pixel.
-&lt;32&gt;
-For indexed-color pictures (e.g. GIF), the number of colors used, or `0`
-for non-indexed pictures.
-&lt;32&gt;
-The length of the picture data in bytes.
-&lt;n\*8&gt;
-The binary picture data.
 
+- <32> The length of the MIME type string in bytes.
+- <n\*8> The MIME type string, in printable ASCII characters 0x20-0x7e. The MIME type may also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
+- <32> The length of the description string in bytes.
+- <n\*8> The description of the picture, in UTF-8.
+- <32> The width of the picture in pixels.
+- <32> The height of the picture in pixels.
+- <32> The color depth of the picture in bits-per-pixel.
+- <32> For indexed-color pictures (e.g. GIF), the number of colors used, or `0` for non-indexed pictures.
+- <32> The length of the picture data in bytes.
+- <n\*8> The binary picture data.
 
 ## [FRAME](#frame)
 [*FRAME\_HEADER*](#frame_header)
