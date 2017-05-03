@@ -443,78 +443,47 @@ field.
 - <24> Length (in bytes) of metadata to follow (does not include the size of the METADATA\_BLOCK\_HEADER)
 
 ## [METADATA\_BLOCK\_DATA](#metadata_block_data)
-- <16> [METADATA\_BLOCK\_STREAMINFO](#metadata_block_streaminfo)
-- <16> [*METADATA\_BLOCK\_PADDING*](#metadata_block_padding)
-- <24> [*METADATA\_BLOCK\_APPLICATION*](#metadata_block_application)
-- <24> [*METADATA\_BLOCK\_SEEKTABLE*](#metadata_block_seektable)
-- <20> [*METADATA\_BLOCK\_VORBIS\_COMMENT*](#metadata_block_vorbis_comment)
-- <3> [*METADATA\_BLOCK\_CUESHEET*](#metadata_block_cuesheet)
-- <5> [*METADATA\_BLOCK\_PICTURE*](#metadata_block_picture) The block data must match the block type in the block header.
+- [METADATA\_BLOCK\_STREAMINFO](#metadata_block_streaminfo)
+- ||[*METADATA\_BLOCK\_PADDING*](#metadata_block_padding)
+- ||[*METADATA\_BLOCK\_APPLICATION*](#metadata_block_application)
+- ||[*METADATA\_BLOCK\_SEEKTABLE*](#metadata_block_seektable)
+- ||[*METADATA\_BLOCK\_VORBIS\_COMMENT*](#metadata_block_vorbis_comment)
+- ||[*METADATA\_BLOCK\_CUESHEET*](#metadata_block_cuesheet)
+- ||[*METADATA\_BLOCK\_PICTURE*](#metadata_block_picture) The block data must match the block type in the block header.
 
 ## [METADATA\_BLOCK\_STREAMINFO](#metadata_block_streaminfo)
-&lt;16&gt;
-The minimum block size (in samples) used in the stream.
-&lt;16&gt;
-The maximum block size (in samples) used in the stream. (Minimum
-blocksize == maximum blocksize) implies a fixed-blocksize stream.
-&lt;24&gt;
-The minimum frame size (in bytes) used in the stream. May be 0 to imply
-the value is not known.
-&lt;24&gt;
-The maximum frame size (in bytes) used in the stream. May be 0 to imply
-the value is not known.
-&lt;20&gt;
-Sample rate in Hz. Though 20 bits are available, the maximum sample rate
-is limited by the structure of frame headers to 655350Hz. Also, a value
-of 0 is invalid.
-&lt;3&gt;
-(number of channels)-1. FLAC supports from 1 to 8 channels
-&lt;5&gt;
-(bits per sample)-1. FLAC supports from 4 to 32 bits per sample.
-Currently the reference encoder and decoders only support up to 24 bits
-per sample.
-&lt;36&gt;
-Total samples in stream. 'Samples' means inter-channel sample, i.e. one
-second of 44.1Khz audio will have 44100 samples regardless of the number
-of channels. A value of zero here means the number of total samples is
-unknown.
-&lt;128&gt;
-MD5 signature of the unencoded audio data. This allows the decoder to
-determine if an error exists in the audio data even when the error does
-not result in an invalid bitstream.
-NOTES\
--   FLAC specifies a minimum block size of 16 and a maximum block size
-    of 65535, meaning the bit patterns corresponding to the numbers 0-15
-    in the minimum blocksize and maximum blocksize fields are invalid.
+- <16> The minimum block size (in samples) used in the stream.
+- <16> The maximum block size (in samples) used in the stream. (Minimum blocksize == maximum blocksize) implies a fixed-blocksize stream.
+- <24> The minimum frame size (in bytes) used in the stream. May be 0 to imply the value is not known.
+- <24> The maximum frame size (in bytes) used in the stream. May be 0 to imply the value is not known.
+- <20> Sample rate in Hz. Though 20 bits are available, the maximum sample rate is limited by the structure of frame headers to 655350Hz. Also, a value of 0 is invalid.
+- <3> (number of channels)-1. FLAC supports from 1 to 8 channels
+- <5> (bits per sample)-1. FLAC supports from 4 to 32 bits per sample. Currently the reference encoder and decoders only support up to 24 bits per sample.
+- <36> Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1Khz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
+- <128> MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream.
+
+NOTES 
+- FLAC specifies a minimum block size of 16 and a maximum block size of 65535, meaning the bit patterns corresponding to the numbers 0-15 in the minimum blocksize and maximum blocksize fields are invalid.
 
 ## [METADATA\_BLOCK\_PADDING](#metadata_block_padding)
-&lt;n&gt;
-n '0' bits (n must be a multiple of 8)
+- < n > n '0' bits (n must be a multiple of 8)
 
 ## [METADATA\_BLOCK\_APPLICATION](#metadata_block_application)
-&lt;32&gt;
-Registered application ID. (Visit the [registration page](id.html) to
-register an ID with FLAC.)
-&lt;n&gt;
-Application data (n must be a multiple of 8)
+- <32> Registered application ID. (Visit the [registration page](id.html) to register an ID with FLAC.)
+- < n > Application data (n must be a multiple of 8)
 
 ## [METADATA\_BLOCK\_SEEKTABLE](#metadata_block_seektable)
-[*SEEKPOINT*](#seekpoint)+
-One or more seek points.
-NOTE\
--   The number of seek points is implied by the metadata header 'length'
-    field, i.e. equal to length / 18.
+- [*SEEKPOINT*](#seekpoint)+ One or more seek points.
+
+NOTE 
+- The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18.
 
 ## [SEEKPOINT](#seekpoint)
-&lt;64&gt;
-Sample number of first sample in the target frame, or 0xFFFFFFFFFFFFFFFF
-for a placeholder point.
-&lt;64&gt;
-Offset (in bytes) from the first byte of the first frame header to the
-first byte of the target frame's header.
-&lt;16&gt;
-Number of samples in the target frame.
-NOTES\
+- <64> Sample number of first sample in the target frame, or 0xFFFFFFFFFFFFFFFF for a placeholder point.
+- <64> Offset (in bytes) from the first byte of the first frame header to the first byte of the target frame's header.
+- <16> Number of samples in the target frame.
+
+NOTES
 -   For placeholder points, the second and third field values are
     undefined.
 -   Seek points within a table must be sorted in ascending order by
