@@ -25,7 +25,7 @@ Format](documentation_format_overview.html).
 -   [Architecture](#architecture)
 -   [Definitions](#definitions)
 -   [Blocking](#blocking)
--   [Interchannel Decorrelation](#interchannel_decorrelation)
+-   [Interchannel Decorrelation](#interchannel-decorrelation)
 -   [Prediction](#prediction)
 -   [Residual Coding](#residualcoding)
 -   [Format](#format_overview)
@@ -180,7 +180,7 @@ subframes are concatenated into a frame. Because each channel is coded
 separately, it means that one channel of a stereo frame may be encoded
 as a constant subframe, and the other an LPC subframe.
 
-# [Interchannel Decorrelation](#interchannel_decorrelation)
+# [Interchannel Decorrelation](#interchannel-decorrelation)
 
 In stereo streams, many times there is an exploitable amount of
 correlation between the left and right channels. FLAC allows the frames
