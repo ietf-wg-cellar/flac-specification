@@ -641,7 +641,7 @@ else
 - <?> if(sample rate bits == 11xx) 8/16 bit sample rate
 - <8> CRC-8 (polynomial = x\^8 + x\^2 + x\^1 + x\^0, initialized with 0) of everything before the crc, including the sync code
 
-- [NOTES]{#frame_header_notes}
+- [NOTES](#frame_header_notes)
 1.  This bit must remain reserved for `0` in order for a FLAC frame's
     initial 15 bits to be distinguishable from the start of an MPEG
     audio frame ([see
