@@ -261,7 +261,7 @@ of the Rice parameter, or Huffman coding. See
 [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for
 descriptions of several universal codes.
 
-# [Format](#format-overview)
+# [Format](format-overview)
 
 This section specifies the FLAC bitstream format. FLAC has no format
 version information, but it does contain reserved space in several
