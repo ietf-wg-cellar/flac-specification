@@ -55,9 +55,9 @@ Format](documentation_format_overview.html).
                 -   [SUBFRAME\_LPC](#subframe_lpc)
                 -   [SUBFRAME\_VERBATIM](#subframe_verbatim)
                     -   [RESIDUAL](#residual)
-                        -   [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE](#residual-coding-method-partitioned-rice)
+                        -   [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE](#residual_coding_method_partitioned_rice)
                             -   [RICE\_PARTITION](#rice_partition)
-                        -   [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2](#residual-coding-method-partitioned-rice2)
+                        -   [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2](#residual_coding_method_partitioned_rice2)
                             -   [RICE2\_PARTITION](#rice2_partition)
 
 # [Acknowledgments](#acknowledgments)
@@ -714,7 +714,7 @@ else
 - [*RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2*](#partitioned_rice2)
  
 
-## [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE](#residual-coding-method-partitioned-rice)
+## [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE](#residual_coding_method_partitioned_rice)
 - <4> Partition order.
 - [*RICE\_PARTITION*](#rice_partition)+ There will be 2\^order partitions.
 
@@ -727,7 +727,7 @@ else
   - else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
   - else n = (frame's blocksize / (2\^partition order)) - predictor order
 
-## [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2](#residual-coding-method-partitioned-rice2)
+## [RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2](#residual_coding_method_partitioned_rice2)
 - <4> Partition order.
 - [*RICE2\_PARTITION*](#rice2_partition)+ There will be 2\^order partitions.
 
