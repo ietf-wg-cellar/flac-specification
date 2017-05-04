@@ -195,8 +195,8 @@ may choose to use the best representation on a frame-by-frame basis.
 Surprisingly, the left-side and right-side forms can be the most
 efficient in many frames, even though the raw number of bits per sample
 needed for the original signal is slightly more than that needed for
-independent or mid-side coding.\
-\
+independent or mid-side coding.
+
 # [Prediction](#prediction)
 
 FLAC uses four methods for modeling the input signal:
@@ -629,19 +629,16 @@ of picture type 1 and 2 in a file.
   - 1 : reserved for future use
 
 - <?> if(variable blocksize)
-<8-56>:"UTF-8" coded sample number (decoded number is 36 bits) [\[4\]](#frame_header_notes)
+- <8-56>:"UTF-8" coded sample number (decoded number is 36 bits) [\[4\]](#frame_header_notes)
 
 else
 
-<8-48>:"UTF-8" coded frame number (decoded number is 31 bits) [\[4\]](#frame_header_notes)
-- <?> if(blocksize bits == 011x)
-
-8/16 bit (blocksize-1)
-- <?> if(sample rate bits == 11xx)
-
-8/16 bit sample rate
+- <8-48>:"UTF-8" coded frame number (decoded number is 31 bits) [\[4\]](#frame_header_notes)
+- <?> if(blocksize bits == 011x) 8/16 bit (blocksize-1)
+- <?> if(sample rate bits == 11xx) 8/16 bit sample rate
 - <8> CRC-8 (polynomial = x\^8 + x\^2 + x\^1 + x\^0, initialized with 0) of everything before the crc, including the sync code
-[NOTES]{#frame_header_notes}
+
+- [NOTES]{#frame_header_notes}
 1.  This bit must remain reserved for `0` in order for a FLAC frame's
     initial 15 bits to be distinguishable from the start of an MPEG
     audio frame ([see
@@ -701,7 +698,7 @@ else
 - < n > Unencoded predictor coefficients (n = qlp coeff precision \* lpc order) (NOTE: the coefficients are signed two's-complement).
 - [*RESIDUAL*](#residual) Encoded residual
 
-##[SUBFRAME\_VERBATIM](#subframe_verbatim)
+## [SUBFRAME\_VERBATIM](#subframe_verbatim)
 - <n\*i> Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
 
 ## [RESIDUAL](#residual)
