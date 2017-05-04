@@ -27,9 +27,9 @@ Format](documentation_format_overview.html).
 -   [Blocking](#blocking)
 -   [Interchannel Decorrelation](#interchannel-decorrelation)
 -   [Prediction](#prediction)
--   [Residual Coding](#residualcoding)
--   [Format](#format_overview)
--   [FLAC Subset](#subset)
+-   [Residual Coding](#residual-coding)
+-   [Format](#format-overview)
+-   [FLAC Subset](#flac-subset)
 -   Specification
     -   [STREAM](#stream)
         -   [METADATA\_BLOCK](#metadata_block)
@@ -241,7 +241,7 @@ FLAC uses four methods for modeling the input signal:
     reference encoder estimates the optimal precision to use based on
     the block size and dynamic range of the original signal.
 
-# [Residual Coding](residualcoding)
+# [Residual Coding](residual-coding)
 
 FLAC currently defines two similar methods for the coding of the error
 signal from the prediction stage. The error signal is coded using Rice
@@ -261,7 +261,7 @@ of the Rice parameter, or Huffman coding. See
 [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for
 descriptions of several universal codes.
 
-# [Format](#format_overview)
+# [Format](#format-overview)
 
 This section specifies the FLAC bitstream format. FLAC has no format
 version information, but it does contain reserved space in several
@@ -392,7 +392,7 @@ helpful.
     subframe, like prediction method and order, residual coding
     parameters, etc. The header is followed by the encoded audio data
     for that channel.
--   [FLAC]{#subset} specifies a subset of itself as the Subset format.
+-   [FLAC]{#flac-subset} specifies a subset of itself as the Subset format.
     The purpose of this is to ensure that any streams encoded according
     to the Subset are truly "streamable", meaning that a decoder that
     cannot seek within the stream can still pick up in the middle of the
