@@ -28,7 +28,7 @@ Format](documentation_format_overview.html).
 -   [Interchannel Decorrelation](#interchannel-decorrelation)
 -   [Prediction](#prediction)
 -   [Residual Coding](#residual-coding)
--   [Format](#format-overview)
+-   [Format](#format)
 -   [FLAC Subset](#flac-subset)
 -   Specification
     -   [STREAM](#stream)
@@ -261,7 +261,7 @@ of the Rice parameter, or Huffman coding. See
 [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for
 descriptions of several universal codes.
 
-# [Format](#format-overview)
+# [Format](#format)
 
 This section specifies the FLAC bitstream format. FLAC has no format
 version information, but it does contain reserved space in several
@@ -392,7 +392,7 @@ helpful.
     subframe, like prediction method and order, residual coding
     parameters, etc. The header is followed by the encoded audio data
     for that channel.
--   [FLAC]{#flac-subset} specifies a subset of itself as the Subset format.
+-   [FLAC](#flac-subset) specifies a subset of itself as the Subset format.
     The purpose of this is to ensure that any streams encoded according
     to the Subset are truly "streamable", meaning that a decoder that
     cannot seek within the stream can still pick up in the middle of the
