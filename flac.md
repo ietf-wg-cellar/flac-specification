@@ -1,21 +1,24 @@
 
 author: Josh Coalson
+
 description:
     A free, open source codec for lossless audio compression and
     decompression
+    
 keywords: 'free,lossless,audio,codec,encoder,decoder,compression,compressor,archival,archive,archiving,backup,music'
+
 title: 'FLAC - format'
 
 
-format
+# format
 
 This is a detailed description of the FLAC format. There is also a
 companion document that describes [FLAC-to-Ogg
-mapping](ogg_mapping.html).\
-\
+mapping](ogg_mapping.html).
+
 For a user-oriented overview, see [About the FLAC
-Format](documentation_format_overview.html).\
-\
+Format](documentation_format_overview.html).
+
 # [Table of Contents](#toc)
 -   [Acknowledgments](#acknowledgments)
 -   [Scope](#scope)
