@@ -738,11 +738,5 @@ else
   - if the partition order is zero, n = frame's blocksize - predictor order
   - else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
   - else n = (frame's blocksize / (2\^partition order)) - predictor order
-
-<div class="copyright">
-
-  --------------------------------------------------------------------- --------------------------------------------------------------------------------------------------------------------
-  Copyright (c) 2000-2009 Josh Coalson, 2011-2014 Xiph.Org Foundation   [![Valid XHTML 1.0!](images/valid-xhtml10.png){width="88" height="31"}](http://validator.w3.org/check?uri=referer)
-  --------------------------------------------------------------------- --------------------------------------------------------------------------------------------------------------------
-
-</div>
+- - - 
+  Copyright (c) 2000-2009 Josh Coalson, 2011-2014 Xiph.Org Foundation   
