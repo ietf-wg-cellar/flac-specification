@@ -241,7 +241,7 @@ FLAC uses four methods for modeling the input signal:
     reference encoder estimates the optimal precision to use based on
     the block size and dynamic range of the original signal.
 
-# [Residual Coding](residual-coding)
+# [Residual Coding](#residual-coding)
 
 FLAC currently defines two similar methods for the coding of the error
 signal from the prediction stage. The error signal is coded using Rice
@@ -261,7 +261,7 @@ of the Rice parameter, or Huffman coding. See
 [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for
 descriptions of several universal codes.
 
-# [Format](format-overview)
+# [Format](#format-overview)
 
 This section specifies the FLAC bitstream format. FLAC has no format
 version information, but it does contain reserved space in several
