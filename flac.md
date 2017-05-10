@@ -377,7 +377,7 @@ field.
 ## METADATA_BLOCK
 - [METADATA\_BLOCK\_HEADER](#metadata_block_header) A block header that specifies the type and size of the metadata block data.
 - [METADATA\_BLOCK\_DATA](#metadata_block_data)
- 
+
 ## METADATA_BLOCK_HEADER
 - <1> Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
 - <7> BLOCK\_TYPE
@@ -412,7 +412,7 @@ field.
 - <36> Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1Khz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
 - <128> MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream.
 
-NOTES 
+NOTES
 - FLAC specifies a minimum block size of 16 and a maximum block size of 65535, meaning the bit patterns corresponding to the numbers 0-15 in the minimum blocksize and maximum blocksize fields are invalid.
 
 ## METADATA_BLOCK_PADDING
@@ -425,7 +425,7 @@ NOTES
 ## METADATA_BLOCK_SEEKTABLE
 - [*SEEKPOINT*](#seekpoint)+ One or more seek points.
 
-NOTE 
+NOTE
 - The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18.
 
 ## SEEKPOINT
@@ -688,5 +688,5 @@ else
   - if the partition order is zero, n = frame's blocksize - predictor order
   - else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
   - else n = (frame's blocksize / (2\^partition order)) - predictor order
-- - - 
-  Copyright (c) 2000-2009 Josh Coalson, 2011-2014 Xiph.Org Foundation   
+- - -
+  Copyright (c) 2000-2009 Josh Coalson, 2011-2014 Xiph.Org Foundation
