@@ -565,14 +565,14 @@ of picture type 1 and 2 in a file.
   - 1011-1111 : reserved
 
 - (3) Sample size in bits:
-- 000 : get from STREAMINFO metadata block
-- 001 : 8 bits per sample
-- 010 : 12 bits per sample
-- 011 : reserved
-- 100 : 16 bits per sample
-- 101 : 20 bits per sample
-- 110 : 24 bits per sample
-- 111 : reserved
+  - 000 : get from STREAMINFO metadata block
+  - 001 : 8 bits per sample
+  - 010 : 12 bits per sample
+  - 011 : reserved
+  - 100 : 16 bits per sample
+  - 101 : 20 bits per sample
+  - 110 : 24 bits per sample
+  - 111 : reserved
 
 - (1) Reserved:
   - 0 : mandatory value
@@ -612,12 +612,9 @@ else
 ## FRAME_FOOTER
 - (16) CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the crc, back to and including the frame header sync code
 
-- [*SUBFRAME\_HEADER*](#subframe_header)
-- [*SUBFRAME\_CONSTANT*](#subframe_constant) The SUBFRAME\_HEADER specifies which one.
-- || [*SUBFRAME\_FIXED*](#subframe_fixed)
-- || [*SUBFRAME\_LPC*](#subframe_lpc)\
-- || [*SUBFRAME\_VERBATIM*](#subframe_verbatim)
 ## SUBFRAME
+- [*SUBFRAME_HEADER*](#subframe_header)
+- [*SUBFRAME_CONSTANT*](#subframe_constant) || [*SUBFRAME_FIXED*](#subframe_fixed) || [*SUBFRAME_LPC*](#subframe_lpc) || [*SUBFRAME_VERBATIM*](#subframe_verbatim) The SUBFRAME_HEADER specifies which one.
 
 ## SUBFRAME_HEADER
 - (1) Zero bit padding, to prevent sync-fooling string of 1s
@@ -626,13 +623,13 @@ else
   -   000001 : [SUBFRAME\_VERBATIM](#subframe_verbatim)
   -   00001x : reserved
   -   0001xx : reserved
-  -   001xxx : if(xxx &lt;= 4) [SUBFRAME\_FIXED](#subframe_fixed), xxx=order ; else reserved
+  -   001xxx : if(xxx <= 4) [SUBFRAME\_FIXED](#subframe_fixed), xxx=order ; else reserved
   -   01xxxx : reserved
   -   1xxxxx : [SUBFRAME\_LPC](#subframe_lpc), xxxxx=order-1
 
 - (1+k) 'Wasted bits-per-sample' flag:
   - 0 : no wasted bits-per-sample in source subblock, k=0
-  - 1 : k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 =&gt; 001 follows, k=7 =&gt; 0000001 follows.
+  - 1 : k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 001 follows, k=7 => 0000001 follows.
 
 ## SUBFRAME_CONSTANT
 - (n) Unencoded constant value of the subblock, n = frame's bits-per-sample.
@@ -653,12 +650,11 @@ else
 
 ## RESIDUAL
 - (2) Residual coding method:
-  - 00 : partitioned Rice coding with 4-bit Rice parameter; RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE follows
-  - 01 : partitioned Rice coding with 5-bit Rice parameter; RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2 follows
+  - 00 : partitioned Rice coding with 4-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE follows
+  - 01 : partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
   - 10-11 : reserved
 
-- [*RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE*](#partitioned_rice) ||
-- [*RESIDUAL\_CODING\_METHOD\_PARTITIONED\_RICE2*](#partitioned_rice2)
+- [*RESIDUAL_CODING_METHOD_PARTITIONED_RICE*](#partitioned_rice) || [*RESIDUAL_CODING_METHOD_PARTITIONED_RICE2*](#partitioned_rice2)
  
 
 ## RESIDUAL_CODING_METHOD_PARTITIONED_RICE
