@@ -265,7 +265,7 @@ helpful.
         seek points. There is also a special 'placeholder' seekpoint
         which will be ignored by decoders but which can be used to
         reserve space for future seek point insertion.
-    -   [VORBIS\_COMMENT](#def_VORBIS_COMMENT): This block is for
+    -   [VORBIS_COMMENT](#def_VORBIS_COMMENT): This block is for
         storing a list of human-readable name/value pairs. Values are
         encoded using UTF-8. It is an implementation of the [Vorbis
         comment
@@ -351,13 +351,13 @@ helpful.
     Subset makes the following limitations on what may be used in the
     stream:
     -   The blocksize bits in the [frame header](#frame_header) must be
-        0001-1110. The blocksize must be &lt;=16384; if the sample rate
-        is &lt;= 48000Hz, the blocksize must be &lt;=4608.
+        0001-1110. The blocksize must be <=16384; if the sample rate
+        is <= 48000Hz, the blocksize must be <=4608.
     -   The sample rate bits in the [frame header](#frame_header) must
         be 0001-1110.
     -   The bits-per-sample bits in the [frame header](#frame_header)
         must be 001-111.
-    -   If the sample rate is &lt;= 48000Hz, the filter order in [LPC
+    -   If the sample rate is <= 48000Hz, the filter order in [LPC
         subframes](#subframe_lpc) must be less than or equal to 12, i.e.
         the subframe type bits in the [subframe
         header](#subframe_header) may not be 101100-111111.
@@ -369,13 +369,13 @@ Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 
 ## STREAM
 - `u(32)` "fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43
-- [*METADATA\_BLOCK*](#metadata_block_streaminfo) This is the mandatory STREAMINFO metadata block that has the basic properties of the stream
-- [*METADATA\_BLOCK*](#metadata_block) Zero or more metadata blocks
-- [*FRAME*](#frame)+ One or more audio frames
+- [*METADATA_BLOCK*](#metadata_block_streaminfo) This is the mandatory STREAMINFO metadata block that has the basic properties of the stream
+- `METADATA_BLOCK` Zero or more metadata blocks
+- `FRAME`+ One or more audio frames
 
 ## METADATA_BLOCK
-- [METADATA\_BLOCK\_HEADER](#metadata_block_header) A block header that specifies the type and size of the metadata block data.
-- [METADATA\_BLOCK\_DATA](#metadata_block_data)
+- `METADATA_BLOCK_HEADER` A block header that specifies the type and size of the metadata block data.
+- `METADATA_BLOCK_DATA`
 
 ## METADATA_BLOCK_HEADER
 - `u(1)` Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
@@ -389,16 +389,16 @@ Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
   -   6 : PICTURE
   -   7-126 : reserved
   -   127 : invalid, to avoid confusion with a frame sync code
-- `u(24)` Length (in bytes) of metadata to follow (does not include the size of the METADATA\_BLOCK\_HEADER)
+- `u(24)` Length (in bytes) of metadata to follow (does not include the size of the METADATA_BLOCK_HEADER)
 
 ## METADATA_BLOCK_DATA
-- [METADATA\_BLOCK\_STREAMINFO](#metadata_block_streaminfo)
-- ||[*METADATA\_BLOCK\_PADDING*](#metadata_block_padding)
-- ||[*METADATA\_BLOCK\_APPLICATION*](#metadata_block_application)
-- ||[*METADATA\_BLOCK\_SEEKTABLE*](#metadata_block_seektable)
-- ||[*METADATA\_BLOCK\_VORBIS\_COMMENT*](#metadata_block_vorbis_comment)
-- ||[*METADATA\_BLOCK\_CUESHEET*](#metadata_block_cuesheet)
-- ||[*METADATA\_BLOCK\_PICTURE*](#metadata_block_picture) The block data must match the block type in the block header.
+- `METADATA_BLOCK_STREAMINFO`
+- ||`METADATA_BLOCK_PADDING`
+- ||`METADATA_BLOCK_APPLICATION`
+- ||`METADATA_BLOCK_SEEKTABLE`
+- ||`METADATA_BLOCK_VORBIS_COMMENT`
+- ||`METADATA_BLOCK_CUESHEET`
+- ||`METADATA_BLOCK_PICTURE` The block data must match the block type in the block header.
 
 ## METADATA_BLOCK_STREAMINFO
 - `u(16)` The minimum block size (in samples) used in the stream.
@@ -422,7 +422,7 @@ NOTES
 - `u(n)` Application data (n must be a multiple of 8)
 
 ## METADATA_BLOCK_SEEKTABLE
-- [*SEEKPOINT*](#seekpoint)+ One or more seek points.
+- `SEEKPOINT`+ One or more seek points.
 
 NOTE
 - The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18.
@@ -451,7 +451,7 @@ NOTES
 - `u(1)` `1` if the CUESHEET corresponds to a Compact Disc, else `0`.
 - `u(7+258\*8)` Reserved. All bits must be set to zero.
 - `u(8)` The number of tracks. Must be at least 1 (because of the requisite lead-out track). For CD-DA, this number must be no more than 100 (99 regular tracks and one lead-out track).
-- [*CUESHEET\_TRACK*](#cuesheet_track)+ One or more tracks. A CUESHEET block is required to have a lead-out track; it is always the last track in the CUESHEET. For CD-DA, the lead-out track number must be 170 as specified by the Red Book, otherwise is must be 255.
+- `CUESHEET_TRACK`+ One or more tracks. A CUESHEET block is required to have a lead-out track; it is always the last track in the CUESHEET. For CD-DA, the lead-out track number must be 170 as specified by the Red Book, otherwise is must be 255.
 
 ## CUESHEET_TRACK
 - `u(64)` Track offset in samples, relative to the beginning of the FLAC audio stream. It is the offset to the first index point of the track. (Note how this differs from CD-DA, where the track's offset in the TOC is that of the track's INDEX 01 even if there is an INDEX 00.) For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75th of a sec).
@@ -461,7 +461,7 @@ NOTES
 - `u(1)` The pre-emphasis flag: 0 for no pre-emphasis, 1 for pre-emphasis. This corresponds to the CD-DA Q-channel control bit 5; see [here](http://www.chipchapin.com/CDMedia/cdda9.php3).
 - `u(6+13\*8)` Reserved. All bits must be set to zero.
 - `u(8)` The number of track index points. There must be at least one index in every track in a CUESHEET except for the lead-out track, which must have zero. For CD-DA, this number may be no more than 100.
-- [*CUESHEET\_TRACK\_INDEX*](#cuesheet_track_index)+ For all tracks except the lead-out track, one or more track index points.
+- `CUESHEET_TRACK_INDEX`+ For all tracks except the lead-out track, one or more track index points.
 
 ## CUESHEET_TRACK_INDEX
 - `u(64)` Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75th of a sec). Note that the offset is from the beginning of the track, not the beginning of the audio data.
@@ -507,9 +507,9 @@ of picture type 1 and 2 in a file.
 - `u(n\*8)` The binary picture data.
 
 ## FRAME
-- [*FRAME\_HEADER*](#frame_header)
+- `FRAME_HEADER`
  
-- [*SUBFRAME*](#subframe)+ One SUBFRAME per channel.
+- `SUBFRAME`+ One SUBFRAME per channel.
 - `u(?)` Zero-padding to byte alignment.
 - `FRAME_FOOTER`
 
@@ -519,7 +519,7 @@ of picture type 1 and 2 in a file.
    -   0 : mandatory value
    -   1 : reserved for future use
 
-- `u(1)` Blocking strategy: [\[2\]](#frame_header_notes) [\[3\]](#frame_header_notes)\
+- `u(1)` Blocking strategy: [\[2\]](#frame_header_notes) [\[3\]](#frame_header_notes)
   -   0 : fixed-blocksize stream; frame header encodes the frame number
   -   1 : variable-blocksize stream; frame header encodes the sample number
 
@@ -611,19 +611,19 @@ of picture type 1 and 2 in a file.
 - `u(16)` CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the crc, back to and including the frame header sync code
 
 ## SUBFRAME
-- [*SUBFRAME_HEADER*](#subframe_header)
-- [*SUBFRAME_CONSTANT*](#subframe_constant) || [*SUBFRAME_FIXED*](#subframe_fixed) || [*SUBFRAME_LPC*](#subframe_lpc) || [*SUBFRAME_VERBATIM*](#subframe_verbatim) The SUBFRAME_HEADER specifies which one.
+- `SUBFRAME_HEADER`
+- `SUBFRAME_CONSTANT` || `SUBFRAME_FIXED` || `SUBFRAME_LPC` || `SUBFRAME_VERBATIM` The SUBFRAME_HEADER specifies which one.
 
 ## SUBFRAME_HEADER
 - `u(1)` Zero bit padding, to prevent sync-fooling string of 1s
 - `u(6)` Subframe type:
-  -   000000 : [SUBFRAME\_CONSTANT](#subframe_constant)
-  -   000001 : [SUBFRAME\_VERBATIM](#subframe_verbatim)
+  -   000000 : `SUBFRAME_CONSTANT`
+  -   000001 : `SUBFRAME_VERBATIM`
   -   00001x : reserved
   -   0001xx : reserved
-  -   001xxx : if(xxx <= 4) [SUBFRAME\_FIXED](#subframe_fixed), xxx=order ; else reserved
+  -   001xxx : if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order ; else reserved
   -   01xxxx : reserved
-  -   1xxxxx : [SUBFRAME\_LPC](#subframe_lpc), xxxxx=order-1
+  -   1xxxxx : `SUBFRAME_LPC`, xxxxx=order-1
 
 - `u(1+k)` 'Wasted bits-per-sample' flag:
   - 0 : no wasted bits-per-sample in source subblock, k=0
@@ -634,14 +634,14 @@ of picture type 1 and 2 in a file.
 
 ## SUBFRAME_FIXED
 - `u(n)` Unencoded warm-up samples (n = frame's bits-per-sample \* predictororder).
-- [*RESIDUAL*](#residual) Encoded residual
+- `RESIDUAL` Encoded residual
 
 ## SUBFRAME_LPC
 - `u(n)` Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
 - `u(4)` (Quantized linear predictor coefficients' precision in bits)-1 (1111 = invalid).
 - `u(5)` Quantized linear predictor coefficient shift needed in bits (NOTE: this number is signed two's-complement).
 - `u(n)` Unencoded predictor coefficients (n = qlp coeff precision \* lpc order) (NOTE: the coefficients are signed two's-complement).
-- [*RESIDUAL*](#residual) Encoded residual
+- `RESIDUAL` Encoded residual
 
 ## SUBFRAME_VERBATIM
 - `u(n\*i)` Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
@@ -657,7 +657,7 @@ of picture type 1 and 2 in a file.
 
 ## RESIDUAL_CODING_METHOD_PARTITIONED_RICE
 - `u(4)` Partition order.
-- [*RICE\_PARTITION*](#rice_partition)+ There will be 2\^order partitions.
+- `RICE_PARTITION`+ There will be 2\^order partitions.
 
 ## RICE_PARTITION
 - `u(4(+5))` Encoding parameter:
@@ -670,7 +670,7 @@ of picture type 1 and 2 in a file.
 
 ## RESIDUAL_CODING_METHOD_PARTITIONED_RICE2
 - `u(4)` Partition order.
-- [*RICE2\_PARTITION*](#rice2_partition)+ There will be 2\^order partitions.
+- `RICE2_PARTITION`+ There will be 2\^order partitions.
 
 
 ## RICE2_PARTITION
