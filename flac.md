@@ -71,7 +71,7 @@ Similar to many audio coders, a FLAC encoder has the following stages:
 -   [Residual coding](#residualcoding). If the predictor does not
     describe the signal exactly, the difference between the original
     signal and the predicted signal (called the error or residual
-    signal) must be coded losslessy. If the predictor is effective, the
+    signal) must be coded losslessly. If the predictor is effective, the
     residual signal will require fewer bits per sample than the original
     signal. FLAC currently uses only one method for encoding the
     residual (see the [Residual coding](#residualcoding) section), but
