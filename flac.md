@@ -394,12 +394,12 @@ field.
 
 ## METADATA_BLOCK_DATA
 - [METADATA\_BLOCK\_STREAMINFO](#metadata_block_streaminfo)
-- ||[*METADATA\_BLOCK\_PADDING*](#metadata_block_padding)
-- ||[*METADATA\_BLOCK\_APPLICATION*](#metadata_block_application)
-- ||[*METADATA\_BLOCK\_SEEKTABLE*](#metadata_block_seektable)
-- ||[*METADATA\_BLOCK\_VORBIS\_COMMENT*](#metadata_block_vorbis_comment)
-- ||[*METADATA\_BLOCK\_CUESHEET*](#metadata_block_cuesheet)
-- ||[*METADATA\_BLOCK\_PICTURE*](#metadata_block_picture) The block data must match the block type in the block header.
+- [*METADATA\_BLOCK\_PADDING*](#metadata_block_padding)
+- [*METADATA\_BLOCK\_APPLICATION*](#metadata_block_application)
+- [*METADATA\_BLOCK\_SEEKTABLE*](#metadata_block_seektable)
+- [*METADATA\_BLOCK\_VORBIS\_COMMENT*](#metadata_block_vorbis_comment)
+- [*METADATA\_BLOCK\_CUESHEET*](#metadata_block_cuesheet)
+- [*METADATA\_BLOCK\_PICTURE*](#metadata_block_picture) The block data must match the block type in the block header.
 
 ## METADATA_BLOCK_STREAMINFO
 - <16> The minimum block size (in samples) used in the stream.
@@ -614,9 +614,9 @@ else
 
 - [*SUBFRAME\_HEADER*](#subframe_header)
 - [*SUBFRAME\_CONSTANT*](#subframe_constant) The SUBFRAME\_HEADER specifies which one.
-- || [*SUBFRAME\_FIXED*](#subframe_fixed)
-- || [*SUBFRAME\_LPC*](#subframe_lpc)\
-- || [*SUBFRAME\_VERBATIM*](#subframe_verbatim)
+- [*SUBFRAME\_FIXED*](#subframe_fixed)
+- [*SUBFRAME\_LPC*](#subframe_lpc)\
+- [*SUBFRAME\_VERBATIM*](#subframe_verbatim)
 ## SUBFRAME
 
 ## SUBFRAME_HEADER
