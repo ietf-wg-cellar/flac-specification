@@ -260,7 +260,7 @@ helpful.
         unpredictable since the bitrate may vary widely within a stream.
         By adding seek points to a stream, this delay can be
         significantly reduced. Each seek point takes 18 bytes, so 1%
-        resolution within a stream adds less than 2k. There can be only
+        resolution within a stream adds less than 2K. There can be only
         one SEEKTABLE in a stream, but the table can have any number of
         seek points. There is also a special 'placeholder' seekpoint
         which will be ignored by decoders but which can be used to
@@ -408,7 +408,7 @@ Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 - `u(20)` Sample rate in Hz. Though 20 bits are available, the maximum sample rate is limited by the structure of frame headers to 655350Hz. Also, a value of 0 is invalid.
 - `u(3)` (number of channels)-1. FLAC supports from 1 to 8 channels
 - `u(5)` (bits per sample)-1. FLAC supports from 4 to 32 bits per sample. Currently the reference encoder and decoders only support up to 24 bits per sample.
-- `u(36)` Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1Khz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
+- `u(36)` Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1kHz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
 - `u(128)` MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream.
 
 NOTES
@@ -608,7 +608,7 @@ of picture type 1 and 2 in a file.
     handle larger input.
 
 ## FRAME_FOOTER
-- `u(16)` CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the crc, back to and including the frame header sync code
+- `u(16)` CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the CRC, back to and including the frame header sync code
 
 ## SUBFRAME
 - `SUBFRAME_HEADER`
