@@ -21,9 +21,13 @@ Within the audio domain, there are many possible subdomains. For example: low bi
 # Architecture
 
 Similar to many audio coders, a FLAC encoder has the following stages:
+
 - [Blocking](#blocking). The input is broken up into many contiguous blocks. With FLAC, the blocks may vary in size. The optimal size of the block is usually affected by many factors, including the sample rate, spectral characteristics over time, etc. Though FLAC allows the block size to vary within a stream, the reference encoder uses a fixed block size.
+
 - [Interchannel Decorrelation](#interchannel-decorrelation). In the case of stereo streams, the encoder will create mid and side signals based on the average and difference (respectively) of the left and right channels. The encoder will then pass the best form of the signal to the next stage.
+
 - [Prediction](#prediction). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors (described in the [prediction](#prediction) section), but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even within the channels of a block.
+
 - [Residual coding](#residual-coding). If the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) must be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC currently uses only one method for encoding the residual (see the [Residual coding](#residual-coding) section), but the format has reserved space for additional methods. FLAC allows the residual coding method to change from block to block, or even within the channels of a block.
 
 In addition, FLAC specifies a metadata system, which allows arbitrary information about the stream to be included at the beginning of the stream.
@@ -31,10 +35,15 @@ In addition, FLAC specifies a metadata system, which allows arbitrary informatio
 # Definitions
 
 Many terms like "block" and "frame" are used to mean different things in different encoding schemes. For example, a frame in MP3 corresponds to many samples across several channels, whereas an S/PDIF frame represents just one sample for each channel. The definitions we use for FLAC follow. Note that when we talk about blocks and subblocks we are referring to the raw unencoded audio data that is the input to the encoder, and when we talk about frames and subframes, we are referring to the FLAC-encoded data.
+
 - **Block**: One or more audio samples that span several channels.
+
 - **Subblock**: One or more audio samples within a channel. So a block contains one subblock for each channel, and all subblocks contain the same number of samples.
+
 - **Blocksize**: The number of samples in any of a block's subblocks. For example, a one second block sampled at 44.1 kHz has a blocksize of 44100, regardless of the number of channels.
+
 - **Frame**: A frame header plus one or more subframes.
+
 - **Subframe**: A subframe header plus one or more encoded samples from a given channel. All subframes within a frame will contain the same number of samples.
 
 # Blocking
@@ -48,9 +57,13 @@ Blocked data is passed to the predictor stage one subblock (channel) at a time. 
 # Interchannel Decorrelation
 
 In stereo streams, many times there is an exploitable amount of correlation between the left and right channels. FLAC allows the frames of stereo streams to have different channel assignments, and an encoder may choose to use the best representation on a frame-by-frame basis.
+
 - **Independent**. The left and right channels are coded independently.
+
 - **Mid-side**. The left and right channels are transformed into mid and side channels. The mid channel is the midpoint (average) of the left and right signals, and the side is the difference signal (left minus right).
+
 - **Left-side**. The left channel and side channel are coded.
+
 - **Right-side**. The right channel and side channel are coded
 
 Surprisingly, the left-side and right-side forms can be the most efficient in many frames, even though the raw number of bits per sample needed for the original signal is slightly more than that needed for independent or mid-side coding.
@@ -58,15 +71,21 @@ Surprisingly, the left-side and right-side forms can be the most efficient in ma
 # Prediction
 
 FLAC uses four methods for modelling the input signal:
+
 - **Verbatim**. This is essentially a zero-order predictor of the signal. The predicted signal is zero, meaning the residual is the signal itself, and the compression is zero. This is the baseline against which the other predictors are measured. If you feed random data to the encoder, the verbatim predictor will probably be used for every subblock. Since the raw signal is not actually passed through the residual coding stage (it is added to the stream 'verbatim'), the encoding results will not be the same as a zero-order linear predictor.
+
 - **Constant**. This predictor is used whenever the subblock is pure DC ("digital silence"), i.e. a constant value throughout. The signal is run-length encoded and added to the stream.
+
 - **Fixed linear predictor**. FLAC uses a class of computationally-efficient fixed linear predictors (for a good description, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). FLAC adds a fourth-order predictor to the zero-to-third-order predictors used by Shorten. Since the predictors are fixed, the predictor order is the only parameter that needs to be stored in the compressed stream. The error signal is then passed to the residual coder.
+
 - **FIR Linear prediction**. For more accurate modelling (at a cost of slower encoding), FLAC supports up to 32nd order FIR linear prediction (again, for information on linear prediction, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). The reference encoder uses the Levinson-Durbin method for calculating the LPC coefficients from the autocorrelation coefficients, and the coefficients are quantized before computing the residual. Whereas encoders such as Shorten used a fixed quantization for the entire input, FLAC allows the quantized coefficient precision to vary from subframe to subframe. The FLAC reference encoder estimates the optimal precision to use based on the block size and dynamic range of the original signal.
 
 # Residual Coding
 
 FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Rice codes in one of two ways:
+
 1. the encoder estimates a single Rice parameter based on the variance of the residual and Rice codes the entire residual using this parameter;
+
 2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own Rice parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the Rice parameter is based on the residual variance instead of the mean.)
 
 The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the Rice parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
