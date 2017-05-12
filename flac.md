@@ -86,7 +86,7 @@ stream.
 # Definitions
 
 Many terms like "block" and "frame" are used to mean different things in
-differenct encoding schemes. For example, a frame in MP3 corresponds to
+different encoding schemes. For example, a frame in MP3 corresponds to
 many samples across several channels, whereas an S/PDIF frame represents
 just one sample for each channel. The definitions we use for FLAC
 follow. Note that when we talk about blocks and subblocks we are
@@ -149,7 +149,7 @@ independent or mid-side coding.
 
 # Prediction
 
-FLAC uses four methods for modeling the input signal:
+FLAC uses four methods for modelling the input signal:
 -   **Verbatim**. This is essentially a zero-order predictor of the
     signal. The predicted signal is zero, meaning the residual is the
     signal itself, and the compression is zero. This is the baseline
@@ -173,7 +173,7 @@ FLAC uses four methods for modeling the input signal:
     predictor order is the only parameter that needs to be stored in the
     compressed stream. The error signal is then passed to the residual
     coder.
--   **FIR Linear prediction**. For more accurate modeling (at a cost of
+-   **FIR Linear prediction**. For more accurate modelling (at a cost of
     slower encoding), FLAC supports up to 32nd order FIR linear
     prediction (again, for information on linear prediction, see
     [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf)
@@ -202,7 +202,7 @@ partition, except the Rice parameter is based on the residual variance
 instead of the mean.)
 
 The FLAC format has reserved space for other coding methods. Some
-possiblities for volunteers would be to explore better context-modeling
+possibilities for volunteers would be to explore better context-modelling
 of the Rice parameter, or Huffman coding. See
 [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and
 [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for
