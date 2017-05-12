@@ -67,7 +67,7 @@ FLAC uses four methods for modelling the input signal:
 
 FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Rice codes in one of two ways:
 1. the encoder estimates a single Rice parameter based on the variance of the residual and Rice codes the entire residual using this parameter;
-1. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own Rice parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the Rice parameter is based on the residual variance instead of the mean.)
+2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own Rice parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the Rice parameter is based on the residual variance instead of the mean.)
 
 The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the Rice parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
 
