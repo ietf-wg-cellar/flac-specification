@@ -233,19 +233,19 @@ helpful.
     audio frames.
 -   FLAC supports up to 128 kinds of metadata blocks; currently the
     following are defined:
-    -   [STREAMINFO](#def_STREAMINFO): This block has information
+    -   `STREAMINFO`: This block has information
         about the whole stream, like sample rate, number of channels,
         total number of samples, etc. It must be present as the first
         metadata block in the stream. Other metadata blocks may follow,
         and ones that the decoder doesn't understand, it will skip.
-    -   [APPLICATION](#def_APPLICATION): This block is for use by
+    -   `APPLICATION`: This block is for use by
         third-party applications. The only mandatory field is a 32-bit
         identifier. This ID is granted upon request to an application by
         the FLAC maintainers. The remainder is of the block is defined
         by the registered application. Visit the [registration
         page](id.html) if you would like to register an ID for your
         application with FLAC.
-    -   [PADDING](#def_PADDING): This block allows for an arbitrary
+    -   `PADDING`: This block allows for an arbitrary
         amount of padding. The contents of a PADDING block have no
         meaning. This block is useful when it is known that metadata
         will be edited after encoding; the user can instruct the encoder
@@ -254,7 +254,7 @@ helpful.
         is relatively quick) instead of having to insert it into the
         right place in the existing file (which would normally require
         rewriting the entire file).
-    -   [SEEKTABLE](#def_SEEKTABLE): This is an optional block for
+    -   `SEEKTABLE`: This is an optional block for
         storing seek points. It is possible to seek to any given sample
         in a FLAC stream without a seek table, but the delay can be
         unpredictable since the bitrate may vary widely within a stream.
@@ -265,7 +265,7 @@ helpful.
         seek points. There is also a special 'placeholder' seekpoint
         which will be ignored by decoders but which can be used to
         reserve space for future seek point insertion.
-    -   [VORBIS_COMMENT](#def_VORBIS_COMMENT): This block is for
+    -   `VORBIS_COMMENT`: This block is for
         storing a list of human-readable name/value pairs. Values are
         encoded using UTF-8. It is an implementation of the [Vorbis
         comment
@@ -274,14 +274,14 @@ helpful.
         tagging mechanism in FLAC. There may be only one VORBIS\_COMMENT
         block in a stream. In some external documentation, Vorbis
         comments are called FLAC tags to lessen confusion.
-    -   [CUESHEET](#def_CUESHEET): This block is for storing various
+    -   `CUESHEET`: This block is for storing various
         information that can be used in a cue sheet. It supports track
         and index points, compatible with Red Book CD digital audio
         discs, as well as other CD-DA metadata such as media catalog
         number and track ISRCs. The CUESHEET block is especially useful
         for backing up CD-DA discs, but it can be used as a general
         purpose cueing mechanism for playback.
-    -   [PICTURE](#def_PICTURE): This block is for storing pictures
+    -   `PICTURE`: This block is for storing pictures
         associated with the file, most commonly cover art from CDs.
         There may be more than one PICTURE block in a file. The picture
         format is similar to the [APIC frame in
