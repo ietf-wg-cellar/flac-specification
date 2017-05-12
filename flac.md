@@ -86,7 +86,7 @@ stream.
 # Definitions
 
 Many terms like "block" and "frame" are used to mean different things in
-differenct encoding schemes. For example, a frame in MP3 corresponds to
+different encoding schemes. For example, a frame in MP3 corresponds to
 many samples across several channels, whereas an S/PDIF frame represents
 just one sample for each channel. The definitions we use for FLAC
 follow. Note that when we talk about blocks and subblocks we are
@@ -149,7 +149,7 @@ independent or mid-side coding.
 
 # Prediction
 
-FLAC uses four methods for modeling the input signal:
+FLAC uses four methods for modelling the input signal:
 -   **Verbatim**. This is essentially a zero-order predictor of the
     signal. The predicted signal is zero, meaning the residual is the
     signal itself, and the compression is zero. This is the baseline
@@ -173,7 +173,7 @@ FLAC uses four methods for modeling the input signal:
     predictor order is the only parameter that needs to be stored in the
     compressed stream. The error signal is then passed to the residual
     coder.
--   **FIR Linear prediction**. For more accurate modeling (at a cost of
+-   **FIR Linear prediction**. For more accurate modelling (at a cost of
     slower encoding), FLAC supports up to 32nd order FIR linear
     prediction (again, for information on linear prediction, see
     [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf)
@@ -202,7 +202,7 @@ partition, except the Rice parameter is based on the residual variance
 instead of the mean.)
 
 The FLAC format has reserved space for other coding methods. Some
-possiblities for volunteers would be to explore better context-modeling
+possibilities for volunteers would be to explore better context-modelling
 of the Rice parameter, or Huffman coding. See
 [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and
 [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for
@@ -260,7 +260,7 @@ helpful.
         unpredictable since the bitrate may vary widely within a stream.
         By adding seek points to a stream, this delay can be
         significantly reduced. Each seek point takes 18 bytes, so 1%
-        resolution within a stream adds less than 2k. There can be only
+        resolution within a stream adds less than 2K. There can be only
         one SEEKTABLE in a stream, but the table can have any number of
         seek points. There is also a special 'placeholder' seekpoint
         which will be ignored by decoders but which can be used to
@@ -408,7 +408,7 @@ Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 - `u(20)` Sample rate in Hz. Though 20 bits are available, the maximum sample rate is limited by the structure of frame headers to 655350Hz. Also, a value of 0 is invalid.
 - `u(3)` (number of channels)-1. FLAC supports from 1 to 8 channels
 - `u(5)` (bits per sample)-1. FLAC supports from 4 to 32 bits per sample. Currently the reference encoder and decoders only support up to 24 bits per sample.
-- `u(36)` Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1Khz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
+- `u(36)` Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1kHz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
 - `u(128)` MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream.
 
 NOTES
@@ -608,7 +608,7 @@ of picture type 1 and 2 in a file.
     handle larger input.
 
 ## FRAME_FOOTER
-- `u(16)` CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the crc, back to and including the frame header sync code
+- `u(16)` CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the CRC, back to and including the frame header sync code
 
 ## SUBFRAME
 - `SUBFRAME_HEADER`
