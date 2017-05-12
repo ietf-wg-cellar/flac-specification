@@ -515,11 +515,11 @@ of picture type 1 and 2 in a file.
 
 ## FRAME_HEADER
 - `u(14)` Sync code '11111111111110'
-- `u(1)` Reserved: [\[1\]](#frame_header_notes)
+- `u(1)` Reserved: [\[1\]](#frame-header-notes)
    -   0 : mandatory value
    -   1 : reserved for future use
 
-- `u(1)` Blocking strategy: [\[2\]](#frame_header_notes) [\[3\]](#frame_header_notes)
+- `u(1)` Blocking strategy: [\[2\]](#frame-header-notes) [\[3\]](#frame-header-notes)
   -   0 : fixed-blocksize stream; frame header encodes the frame number
   -   1 : variable-blocksize stream; frame header encodes the sample number
 
@@ -577,16 +577,16 @@ of picture type 1 and 2 in a file.
   - 1 : reserved for future use
 
 - `u(?)` if(variable blocksize)
-  - (8-56):"UTF-8" coded sample number (decoded number is 36 bits) [\[4\]](#frame_header_notes)
+  - (8-56):"UTF-8" coded sample number (decoded number is 36 bits) [\[4\]](#frame-header-notes)
 
 - else
 
-  - `u(8-48)`:"UTF-8" coded frame number (decoded number is 31 bits) [\[4\]](#frame_header_notes)
+  - `u(8-48)`:"UTF-8" coded frame number (decoded number is 31 bits) [\[4\]](#frame-header-notes)
 - `u(?)` if(blocksize bits == 011x) 8/16 bit (blocksize-1)
 - `u(?)` if(sample rate bits == 11xx) 8/16 bit sample rate
 - `u(8)` CRC-8 (polynomial = x\^8 + x\^2 + x\^1 + x\^0, initialized with 0) of everything before the crc, including the sync code
 
-- [NOTES](#frame_header_notes)
+### Frame Header Notes
 1.  This bit must remain reserved for `0` in order for a FLAC frame's
     initial 15 bits to be distinguishable from the start of an MPEG
     audio frame ([see
