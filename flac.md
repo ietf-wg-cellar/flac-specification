@@ -339,7 +339,7 @@ helpful.
     subframe, like prediction method and order, residual coding
     parameters, etc. The header is followed by the encoded audio data
     for that channel.
--   [FLAC](#flac-subset) specifies a subset of itself as the Subset format.
+-   `FLAC` specifies a subset of itself as the Subset format.
     The purpose of this is to ensure that any streams encoded according
     to the Subset are truly "streamable", meaning that a decoder that
     cannot seek within the stream can still pick up in the middle of the
