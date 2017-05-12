@@ -52,7 +52,7 @@ Similar to many audio coders, a FLAC encoder has the following stages:
     rate, spectral characteristics over time, etc. Though FLAC allows
     the block size to vary within a stream, the reference encoder uses a
     fixed block size.
--   [Interchannel Decorrelation](#interchannel). In the case of stereo
+-   [Interchannel Decorrelation](#interchannel-decorrelation). In the case of stereo
     streams, the encoder will create mid and side signals based on the
     average and difference (respectively) of the left and right
     channels. The encoder will then pass the best form of the signal to
@@ -68,13 +68,13 @@ Similar to many audio coders, a FLAC encoder has the following stages:
     has reserved space for additional methods. FLAC allows the class of
     predictor to change from block to block, or even within the channels
     of a block.
--   [Residual coding](#residualcoding). If the predictor does not
+-   [Residual coding](#residual-coding). If the predictor does not
     describe the signal exactly, the difference between the original
     signal and the predicted signal (called the error or residual
     signal) must be coded losslessly. If the predictor is effective, the
     residual signal will require fewer bits per sample than the original
     signal. FLAC currently uses only one method for encoding the
-    residual (see the [Residual coding](#residualcoding) section), but
+    residual (see the [Residual coding](#residual-coding) section), but
     the format has reserved space for additional methods. FLAC allows
     the residual coding method to change from block to block, or even
     within the channels of a block.
@@ -350,26 +350,26 @@ helpful.
     by default unless the "--lax" command-line option is used. The
     Subset makes the following limitations on what may be used in the
     stream:
-    -   The blocksize bits in the [frame header](#frame_header) must be
+    -   The blocksize bits in the [frame header](#frameheader) must be
         0001-1110. The blocksize must be <=16384; if the sample rate
         is <= 48000Hz, the blocksize must be <=4608.
-    -   The sample rate bits in the [frame header](#frame_header) must
+    -   The sample rate bits in the [frame header](#frameheader) must
         be 0001-1110.
-    -   The bits-per-sample bits in the [frame header](#frame_header)
+    -   The bits-per-sample bits in the [frame header](#frameheader)
         must be 001-111.
     -   If the sample rate is <= 48000Hz, the filter order in [LPC
-        subframes](#subframe_lpc) must be less than or equal to 12, i.e.
+        subframes](#subframelpc) must be less than or equal to 12, i.e.
         the subframe type bits in the [subframe
-        header](#subframe_header) may not be 101100-111111.
+        header](#subframeheader) may not be 101100-111111.
     -   The Rice partition order in a [Rice-coded residual
-        section](#partitioned_rice) must be less than or equal to 8.
+        section](#ricepartition) must be less than or equal to 8.
 
 The following tables constitute a formal description of the FLAC format.
 Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 
 ## STREAM
 - `u(32)` "fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43
-- [*METADATA_BLOCK*](#metadata_block_streaminfo) This is the mandatory STREAMINFO metadata block that has the basic properties of the stream
+- [*METADATA_BLOCK*](#metadatablockstreaminfo) This is the mandatory STREAMINFO metadata block that has the basic properties of the stream
 - `METADATA_BLOCK` Zero or more metadata blocks
 - `FRAME`+ One or more audio frames
 
@@ -652,7 +652,7 @@ of picture type 1 and 2 in a file.
   - 01 : partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
   - 10-11 : reserved
 
-- [RESIDUAL_CODING_METHOD_PARTITIONED_RICE](#residual_coding_method_partitioned_rice) || [RESIDUAL_CODING_METHOD_PARTITIONED_RICE2](#residual_coding_method_partitioned_rice2)
+- `RESIDUAL_CODING_METHOD_PARTITIONED_RICE` || `RESIDUAL_CODING_METHOD_PARTITIONED_RICE2`
  
 
 ## RESIDUAL_CODING_METHOD_PARTITIONED_RICE
