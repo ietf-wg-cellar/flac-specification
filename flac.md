@@ -652,7 +652,7 @@ of picture type 1 and 2 in a file.
   - 01 : partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
   - 10-11 : reserved
 
-- [*RESIDUAL_CODING_METHOD_PARTITIONED_RICE*](#partitioned_rice) || [*RESIDUAL_CODING_METHOD_PARTITIONED_RICE2*](#partitioned_rice2)
+- [RESIDUAL_CODING_METHOD_PARTITIONED_RICE](#residual_coding_method_partitioned_rice) || [RESIDUAL_CODING_METHOD_PARTITIONED_RICE2](#residual_coding_method_partitioned_rice2)
  
 
 ## RESIDUAL_CODING_METHOD_PARTITIONED_RICE
