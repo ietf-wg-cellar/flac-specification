@@ -70,7 +70,7 @@ Surprisingly, the left-side and right-side forms can be the most efficient in ma
 
 # Prediction
 
-FLAC uses four methods for modelling the input signal:
+FLAC uses four methods for modeling the input signal:
 
 - **Verbatim**. This is essentially a zero-order predictor of the signal. The predicted signal is zero, meaning the residual is the signal itself, and the compression is zero. This is the baseline against which the other predictors are measured. If you feed random data to the encoder, the verbatim predictor will probably be used for every subblock. Since the raw signal is not actually passed through the residual coding stage (it is added to the stream 'verbatim'), the encoding results will not be the same as a zero-order linear predictor.
 
@@ -237,7 +237,7 @@ NOTES
   - 14 - During recording
   - 15 - During performance
   - 16 - Movie/video screen capture
-  - 17 - A bright coloured fish
+  - 17 - A bright colored fish
   - 18 - Illustration
   - 19 - Band/artist logotype
   - 20 - Publisher/Studio logotype
@@ -367,7 +367,7 @@ Others are reserved and should not be used. There may only be one each of pictur
 - `u(n)` Unencoded constant value of the subblock, n = frame's bits-per-sample.
 
 ## SUBFRAME_FIXED
-- `u(n)` Unencoded warm-up samples (n = frame's bits-per-sample \* predictororder).
+- `u(n)` Unencoded warm-up samples (n = frame's bits-per-sample \* predictor order).
 - `RESIDUAL` Encoded residual
 
 ## SUBFRAME_LPC
