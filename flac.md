@@ -133,12 +133,12 @@ The following tables constitute a formal description of the FLAC format. Values 
 
 ## METADATA_BLOCK_HEADER
 - `u(1)` Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
-- `u(7)` BLOCK\_TYPE
+- `u(7)` BLOCK_TYPE
   - 0 : STREAMINFO
   - 1 : PADDING
   - 2 : APPLICATION
   - 3 : SEEKTABLE
-  - 4 : VORBIS\_COMMENT
+  - 4 : VORBIS_COMMENT
   - 5 : CUESHEET
   - 6 : PICTURE
   - 7-126 : reserved
