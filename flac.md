@@ -117,7 +117,7 @@ Before the formal description of the stream, an overview might be helpful.
   - The sample rate bits in the `frame header` (see [section on `frame header`](#frameheader)) must be 0001-1110.
   - The bits-per-sample bits in the `frame header` (see [section on `frame header`](#frameheader)) must be 001-111.
   - If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [section about `LPC subframes`](#subframelpc)) must be less than or equal to 12, i.e. the subframe type bits in the `subframe header` (see [section on `subframe header`](#subframeheader)) may not be 101100-111111.
- - The Rice partition order in a `Rice-coded residual section` ( see [section on `Rice-coded residual section`](#residualcodingmethodpartitionedrice)) must be less than or equal to 8.
+ - The Rice partition order in a `Rice-coded residual section` (see [section on `Rice-coded residual section`](#residualcodingmethodpartitionedrice)) must be less than or equal to 8.
 
 The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 
