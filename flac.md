@@ -417,4 +417,4 @@ Others are reserved and should not be used. There may only be one each of pictur
   - else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
   - else n = (frame's blocksize / (2\^partition order)) - predictor order
 
-  Copyright (c) 2000-2009 Josh Coalson, 2011-2014 Xiph.Org Foundation
+Copyright (c) 2000-2009 Josh Coalson, 2011-2014 Xiph.Org Foundation
