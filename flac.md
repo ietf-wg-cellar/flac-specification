@@ -124,7 +124,7 @@ The following tables constitute a formal description of the FLAC format. Values 
 ## STREAM
 - `u(32)` "fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43
 - [*METADATA_BLOCK*](#metadatablockstreaminfo) This is the mandatory STREAMINFO metadata block that has the basic properties of the stream
-- `METADATA_BLOCK` Zero or more metadata blocks
+- `METADATA_BLOCK`* Zero or more metadata blocks
 - `FRAME`+ One or more audio frames
 
 ## METADATA_BLOCK
