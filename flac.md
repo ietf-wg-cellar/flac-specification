@@ -88,7 +88,7 @@ FLAC currently defines two similar methods for the coding of the error signal fr
 
 2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own Rice parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the Rice parameter is based on the residual variance instead of the mean.)
 
-The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the Rice parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
+The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the Rice parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
 
 # Format
 
