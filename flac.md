@@ -490,7 +490,9 @@ Data       | Description
 `RESIDUAL` | Encoded residual
 
 ## SUBFRAME_VERBATIM
-- `u(n\*i)` Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
+Data      | Description
+:---------|:-----------
+`u(n\*i)` | Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
 
 ## RESIDUAL
 - `u(2)` Residual coding method:
