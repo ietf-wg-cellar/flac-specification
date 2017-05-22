@@ -434,7 +434,9 @@ else if(`SAMPLE RATE` == 1110)
 CRC-8 (polynomial = x\^8 + x\^2 + x\^1 + x\^0, initialized with 0) of everything before the CRC, including the sync code
 
 ## FRAME_FOOTER
-- `u(16)` CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the CRC, back to and including the frame header sync code
+Data      | Description
+:---------|:-----------
+`u(16)`   | CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the CRC, back to and including the frame header sync code
 
 ## SUBFRAME
 - `SUBFRAME_HEADER`
