@@ -133,8 +133,10 @@ Data                        | Description
 `FRAME`+                    | One or more audio frames
 
 ## METADATA_BLOCK
-- `METADATA_BLOCK_HEADER` A block header that specifies the type and size of the metadata block data.
-- `METADATA_BLOCK_DATA`
+Data                    | Description
+:-----------------------|:----------------------------------------------
+`METADATA_BLOCK_HEADER` | A block header that specifies the type and size of the metadata block data.
+`METADATA_BLOCK_DATA`   | 
 
 ## METADATA_BLOCK_HEADER
 - `u(1)` Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
