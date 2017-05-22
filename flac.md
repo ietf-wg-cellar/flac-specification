@@ -290,11 +290,12 @@ Value | Description
 Other values are reserved and should not be used. There may only be one each of picture type 1 and 2 in a file.
 
 ## FRAME
-- `FRAME_HEADER`
- 
-- `SUBFRAME`+ One SUBFRAME per channel.
-- `u(?)` Zero-padding to byte alignment.
-- `FRAME_FOOTER`
+Data           | Description
+:--------------|:-----------
+`FRAME_HEADER` |
+`SUBFRAME`+    | One SUBFRAME per channel.
+`u(?)`         | Zero-padding to byte alignment.
+`FRAME_FOOTER` | 
 
 ## FRAME_HEADER
 - `u(14)` Sync code '11111111111110'
