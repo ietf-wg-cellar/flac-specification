@@ -412,8 +412,10 @@ else
 ### BLOCK SIZE INT
 
 ~~~
-if(blocksize bits == 011x)
-  8/16 bit (blocksize-1)
+if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0110)
+  8 bit (blocksize-1)
+else if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0111)
+  16 bit (blocksize-1)
 ~~~
 
 ### SAMPLE RATE INT
