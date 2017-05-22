@@ -187,8 +187,10 @@ Data     | Description
 `u(n)`   | n '0' bits (n must be a multiple of 8)
 
 ## METADATA_BLOCK_APPLICATION
-- `u(32)` Registered application ID. (Visit the [registration page](id.html) to register an ID with FLAC.)
-- `u(n)` Application data (n must be a multiple of 8)
+Data     | Description
+:--------|:-----------
+`u(32)`  | Registered application ID. (Visit the [registration page](id.html) to register an ID with FLAC.)
+`u(n)`   | Application data (n must be a multiple of 8)
 
 ## METADATA_BLOCK_SEEKTABLE
 - `SEEKPOINT`+ One or more seek points.
