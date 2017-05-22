@@ -439,8 +439,10 @@ Data      | Description
 `u(16)`   | CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the CRC, back to and including the frame header sync code
 
 ## SUBFRAME
-- `SUBFRAME_HEADER`
-- `SUBFRAME_CONSTANT` || `SUBFRAME_FIXED` || `SUBFRAME_LPC` || `SUBFRAME_VERBATIM` The SUBFRAME_HEADER specifies which one.
+Data              | Description
+:-----------------|:-----------
+`SUBFRAME_HEADER` |
+`SUBFRAME_CONSTANT` \|\| `SUBFRAME_FIXED` \|\| `SUBFRAME_LPC` \|\| `SUBFRAME_VERBATIM` | The SUBFRAME_HEADER specifies which one.
 
 ## SUBFRAME_HEADER
 - `u(1)` Zero bit padding, to prevent sync-fooling string of 1s
