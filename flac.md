@@ -421,8 +421,12 @@ else if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0111)
 ### SAMPLE RATE INT
 
 ~~~
-if(sample rate bits == 11xx)
-  8/16 bit sample rate
+if(`SAMPLE RATE` == 1100)
+  8 bit sample rate (in kHz)
+else if(`SAMPLE RATE` == 1101)
+  16 bit sample rate (in Hz)
+else if(`SAMPLE RATE` == 1110)
+  16 bit sample rate in tens of Hz)
 ~~~
 
 ### FRAME CRC
