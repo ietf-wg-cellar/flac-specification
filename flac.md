@@ -241,9 +241,11 @@ Data                    | Description
 `CUESHEET_TRACK_INDEX`+ | For all tracks except the lead-out track, one or more track index points.
 
 ## CUESHEET_TRACK_INDEX
-- `u(64)` Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75 sec). Note that the offset is from the beginning of the track, not the beginning of the audio data.
-- `u(8)` The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track must have a number of 0 or 1, and subsequently, index numbers must increase by 1. Index numbers must be unique within a track.
-- `u(3\*8)` Reserved. All bits must be set to zero.
+Data      | Description
+:---------|:-----------
+`u(64)`   | Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75 sec). Note that the offset is from the beginning of the track, not the beginning of the audio data.
+`u(8)`    | The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track must have a number of 0 or 1, and subsequently, index numbers must increase by 1. Index numbers must be unique within a track.
+`u(3\*8)` | Reserved. All bits must be set to zero.
 
 ## METADATA_BLOCK_PICTURE
 - `u(32)` The picture type according to the ID3v2 APIC frame:
