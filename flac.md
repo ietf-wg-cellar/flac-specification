@@ -481,11 +481,13 @@ Data       | Description
 `RESIDUAL` | Encoded residual
 
 ## SUBFRAME_LPC
-- `u(n)` Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
-- `u(4)` (Quantized linear predictor coefficients' precision in bits)-1 (1111 = invalid).
-- `u(5)` Quantized linear predictor coefficient shift needed in bits (NOTE: this number is signed two's-complement).
-- `u(n)` Unencoded predictor coefficients (n = qlp coeff precision \* lpc order) (NOTE: the coefficients are signed two's-complement).
-- `RESIDUAL` Encoded residual
+Data       | Description
+:----------|:-----------
+`u(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
+`u(4)`     | (Quantized linear predictor coefficients' precision in bits)-1 (1111 = invalid).
+`u(5)`     | Quantized linear predictor coefficient shift needed in bits (NOTE: this number is signed two's-complement).
+`u(n)`     | Unencoded predictor coefficients (n = qlp coeff precision \* lpc order) (NOTE: the coefficients are signed two's-complement).
+`RESIDUAL` | Encoded residual
 
 ## SUBFRAME_VERBATIM
 - `u(n\*i)` Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
