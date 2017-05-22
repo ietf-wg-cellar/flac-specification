@@ -201,9 +201,11 @@ NOTE
 - The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18.
 
 ## SEEKPOINT
-- `u(64)` Sample number of first sample in the target frame, or 0xFFFFFFFFFFFFFFFF for a placeholder point.
-- `u(64)` Offset (in bytes) from the first byte of the first frame header to the first byte of the target frame's header.
-- `u(16)` Number of samples in the target frame.
+Data     | Description
+:--------|:-----------
+`u(64)`  | Sample number of first sample in the target frame, or `0xFFFFFFFFFFFFFFFF` for a placeholder point.
+`u(64)`  | Offset (in bytes) from the first byte of the first frame header to the first byte of the target frame's header.
+`u(16)`  | Number of samples in the target frame.
 
 NOTES
 - For placeholder points, the second and third field values are undefined.
