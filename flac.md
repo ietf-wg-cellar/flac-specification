@@ -22,13 +22,13 @@ Within the audio domain, there are many possible subdomains. For example: low bi
 
 Similar to many audio coders, a FLAC encoder has the following stages:
 
-- `Blocking`: see [section on `Blocking`](#blocking). The input is broken up into many contiguous blocks. With FLAC, the blocks may vary in size. The optimal size of the block is usually affected by many factors, including the sample rate, spectral characteristics over time, etc. Though FLAC allows the block size to vary within a stream, the reference encoder uses a fixed block size.
+- [Blocking](#blocking). The input is broken up into many contiguous blocks. With FLAC, the blocks may vary in size. The optimal size of the block is usually affected by many factors, including the sample rate, spectral characteristics over time, etc. Though FLAC allows the block size to vary within a stream, the reference encoder uses a fixed block size.
 
-- `Interchannel Decorrelation`: see [section on `Interchannel Decorrelation`](#interchannel-decorrelation). In the case of stereo streams, the encoder will create mid and side signals based on the average and difference (respectively) of the left and right channels. The encoder will then pass the best form of the signal to the next stage.
+- [Interchannel Decorrelation](#interchannel-decorrelation). In the case of stereo streams, the encoder will create mid and side signals based on the average and difference (respectively) of the left and right channels. The encoder will then pass the best form of the signal to the next stage.
 
-- `Prediction`: see [section on `Prediction`](#prediction). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors (described in [the `Prediction` section](#prediction)), but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even within the channels of a block.
+- [Prediction](#prediction). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors (described in the [prediction](#prediction) section), but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even within the channels of a block.
 
-- `Residual coding`: see [section on `Residual coding`](#residual-coding). If the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) must be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC currently uses only one method for encoding the residual (see [the `Residual coding` section](#residual-coding)), but the format has reserved space for additional methods. FLAC allows the residual coding method to change from block to block, or even within the channels of a block.
+- [Residual coding](#residual-coding). If the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) must be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC currently uses only one method for encoding the residual (see the [Residual coding](#residual-coding) section), but the format has reserved space for additional methods. FLAC allows the residual coding method to change from block to block, or even within the channels of a block.
 
 In addition, FLAC specifies a metadata system, which allows arbitrary information about the stream to be included at the beginning of the stream.
 
@@ -88,7 +88,7 @@ FLAC currently defines two similar methods for the coding of the error signal fr
 
 2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own Rice parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the Rice parameter is based on the residual variance instead of the mean.)
 
-The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the Rice parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
+The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the Rice parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
 
 # Format
 
@@ -133,12 +133,12 @@ The following tables constitute a formal description of the FLAC format. Values 
 
 ## METADATA_BLOCK_HEADER
 - `u(1)` Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
-- `u(7)` BLOCK_TYPE
+- `u(7)` BLOCK\_TYPE
   - 0 : STREAMINFO
   - 1 : PADDING
   - 2 : APPLICATION
   - 3 : SEEKTABLE
-  - 4 : VORBIS_COMMENT
+  - 4 : VORBIS\_COMMENT
   - 5 : CUESHEET
   - 6 : PICTURE
   - 7-126 : reserved
@@ -264,11 +264,11 @@ Others are reserved and should not be used. There may only be one each of pictur
 
 ## FRAME_HEADER
 - `u(14)` Sync code '11111111111110'
-- `u(1)` Reserved: See note 1 in [Frame Header Notes](#frame-header-notes)
+- `u(1)` Reserved: [\[1\]](#frame-header-notes)
    - 0 : mandatory value
    - 1 : reserved for future use
 
-- `u(1)` Blocking strategy: See notes 2 and 3 in [Frame Header Notes](#frame-header-notes)
+- `u(1)` Blocking strategy: [\[2\]](#frame-header-notes) [\[3\]](#frame-header-notes)
   - 0 : fixed-blocksize stream; frame header encodes the frame number
   - 1 : variable-blocksize stream; frame header encodes the sample number
 
@@ -326,11 +326,11 @@ Others are reserved and should not be used. There may only be one each of pictur
   - 1 : reserved for future use
 
 - `u(?)` if(variable blocksize)
-  - (8-56):"UTF-8" coded sample number (decoded number is 36 bits). See note 4 in  [Frame Header Notes](#frame-header-notes)
+  - (8-56):"UTF-8" coded sample number (decoded number is 36 bits) [\[4\]](#frame-header-notes)
 
 - else
 
-  - `u(8-48)`:"UTF-8" coded frame number (decoded number is 31 bits). See note 4 in  [Frame Header Notes](#frame-header-notes)
+  - `u(8-48)`:"UTF-8" coded frame number (decoded number is 31 bits) [\[4\]](#frame-header-notes)
 - `u(?)` if(blocksize bits == 011x) 8/16 bit (blocksize-1)
 - `u(?)` if(sample rate bits == 11xx) 8/16 bit sample rate
 - `u(8)` CRC-8 (polynomial = x\^8 + x\^2 + x\^1 + x\^0, initialized with 0) of everything before the CRC, including the sync code
@@ -388,7 +388,6 @@ Others are reserved and should not be used. There may only be one each of pictur
 
 - `RESIDUAL_CODING_METHOD_PARTITIONED_RICE` || `RESIDUAL_CODING_METHOD_PARTITIONED_RICE2`
  
-
 ## RESIDUAL_CODING_METHOD_PARTITIONED_RICE
 - `u(4)` Partition order.
 - `RICE_PARTITION`+ There will be 2\^order partitions.
