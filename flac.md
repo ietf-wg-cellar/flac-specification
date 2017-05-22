@@ -139,18 +139,25 @@ Data                    | Description
 `METADATA_BLOCK_DATA`   | 
 
 ## METADATA_BLOCK_HEADER
-- `u(1)` Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
-- `u(7)` BLOCK\_TYPE
-  - 0 : STREAMINFO
-  - 1 : PADDING
-  - 2 : APPLICATION
-  - 3 : SEEKTABLE
-  - 4 : VORBIS\_COMMENT
-  - 5 : CUESHEET
-  - 6 : PICTURE
-  - 7-126 : reserved
-  - 127 : invalid, to avoid confusion with a frame sync code
-- `u(24)` Length (in bytes) of metadata to follow (does not include the size of the METADATA_BLOCK_HEADER)
+Data    | Description
+:-------|:-----------
+`u(1)`  | Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
+`u(7)`  | `BLOCK_TYPE`
+`u(24)` | Length (in bytes) of metadata to follow (does not include the size of the `METADATA_BLOCK_HEADER`)
+
+
+## BLOCK_TYPE
+Value | Description
+:-----|:-----------
+0     | STREAMINFO
+1     | PADDING
+2     | APPLICATION
+3     | SEEKTABLE
+4     | VORBIS_COMMENT
+5     | CUESHEET
+6     | PICTURE
+7-126 | reserved
+127   | invalid, to avoid confusion with a frame sync code
 
 ## METADATA_BLOCK_DATA
 - `METADATA_BLOCK_STREAMINFO`
