@@ -182,7 +182,9 @@ NOTE
 - FLAC specifies a minimum block size of 16 and a maximum block size of 65535, meaning the bit patterns corresponding to the numbers 0-15 in the minimum blocksize and maximum blocksize fields are invalid.
 
 ## METADATA_BLOCK_PADDING
-- `u(n)` n '0' bits (n must be a multiple of 8)
+Data     | Description
+:--------|:-----------
+`u(n)`   | n '0' bits (n must be a multiple of 8)
 
 ## METADATA_BLOCK_APPLICATION
 - `u(32)` Registered application ID. (Visit the [registration page](id.html) to register an ID with FLAC.)
