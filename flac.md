@@ -119,7 +119,9 @@ Before the formal description of the stream, an overview might be helpful.
   - If the sample rate is <= 48000 Hz, the filter order in [LPC subframes](#subframelpc) must be less than or equal to 12, i.e. the subframe type bits in the [subframe header](#subframeheader) may not be 101100-111111.
    - The Rice partition order in a [Rice-coded residual section](#residualcodingmethodpartitionedrice) must be less than or equal to 8.
 
-The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
+## Conventions
+
+The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign (+) indicates one or more occurrences of the value.
 
 ## STREAM
 - `u(32)` "fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43
