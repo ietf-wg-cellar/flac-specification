@@ -113,17 +113,17 @@ Before the formal description of the stream, an overview might be helpful.
 - Again, since a decoder may start decoding at an arbitrary frame in the stream, each frame header must contain some basic information about the stream because the decoder may not have access to the STREAMINFO metadata block at the start of the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is pure overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame parameters. For instance, the sample rate part of the frame header is specified using 4 bits. Eight of the bit patterns correspond to the commonly used sample rates of 8/16/22.05/24/32/44.1/48/96 kHz. However, odd sample rates can be specified by using one of the 'hint' bit patterns, directing the decoder to find the exact sample rate at the end of the frame header. The same method is used for specifying the block size and bits per sample. In this way, the frame header size stays small for all of the most common forms of audio data.
 - Individual subframes (one for each channel) are coded separately within a frame, and appear serially in the stream. In other words, the encoded audio data is NOT channel-interleaved. This reduces decoder complexity at the cost of requiring larger decode buffers. Each subframe has its own header specifying the attributes of the subframe, like prediction method and order, residual coding parameters, etc. The header is followed by the encoded audio data for that channel.
 - `FLAC` specifies a subset of itself as the Subset format. The purpose of this is to ensure that any streams encoded according to the Subset are truly "streamable", meaning that a decoder that cannot seek within the stream can still pick up in the middle of the stream and start decoding. It also makes hardware decoder implementations more practical by limiting the encoding parameters such that decoder buffer sizes and other resource requirements can be easily determined. __flac__ generates Subset streams by default unless the "--lax" command-line option is used. The Subset makes the following limitations on what may be used in the stream:
-  - The blocksize bits in the [frame header](#frameheader) must be 0001-1110. The blocksize must be <= 16384; if the sample rate is <= 48000 Hz, the blocksize must be <= 4608.
-  - The sample rate bits in the [frame header](#frameheader) must be 0001-1110.
-  - The bits-per-sample bits in the [frame header](#frameheader) must be 001-111.
-  - If the sample rate is <= 48000 Hz, the filter order in [LPC subframes](#subframelpc) must be less than or equal to 12, i.e. the subframe type bits in the [subframe header](#subframeheader) may not be 101100-111111.
-   - The Rice partition order in a [Rice-coded residual section](#residualcodingmethodpartitionedrice) must be less than or equal to 8.
+  - The blocksize bits in the `frame header` (see [section on `frame header`](#frameheader)) must be 0001-1110. The blocksize must be <= 16384; if the sample rate is <= 48000 Hz, the blocksize must be <= 4608.
+  - The sample rate bits in the `frame header` (see [section on `frame header`](#frameheader)) must be 0001-1110.
+  - The bits-per-sample bits in the `frame header` (see [section on `frame header`](#frameheader)) must be 001-111.
+  - If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [section about `LPC subframes`](#subframelpc)) must be less than or equal to 12, i.e. the subframe type bits in the `subframe header` (see [section on `subframe header`](#subframeheader)) may not be 101100-111111.
+  - The Rice partition order in a `Rice-coded residual section` (see [section on `Rice-coded residual section`](#residualcodingmethodpartitionedrice)) must be less than or equal to 8.
 
 The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 
 ## STREAM
 - `u(32)` "fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43
-- [*METADATA_BLOCK*](#metadatablockstreaminfo) This is the mandatory STREAMINFO metadata block that has the basic properties of the stream
+- `METADATA_BLOCK`: see [section on METADATA_BLOCK](#metadatablockstreaminfo). This is the mandatory STREAMINFO metadata block that has the basic properties of the stream
 - `METADATA_BLOCK`* Zero or more metadata blocks
 - `FRAME`+ One or more audio frames
 
