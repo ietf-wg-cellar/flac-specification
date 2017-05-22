@@ -5,3 +5,5 @@ This document defines FLAC, which stands for Free Lossless Audio Codec, a free, 
 This is currently a work in progress and welcomes [contributions and feedback](CONTRIBUTING.md).
 
 Discussion of the plans for standardization should be regulated to the [CELLAR listserv](https://datatracker.ietf.org/wg/cellar/charter/).
+
+The [IETF Guidelines for Conduct](https://tools.ietf.org/html/rfc7154) gives the guidance for acting.
