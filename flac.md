@@ -193,7 +193,9 @@ Data     | Description
 `u(n)`   | Application data (n must be a multiple of 8)
 
 ## METADATA_BLOCK_SEEKTABLE
-- `SEEKPOINT`+ One or more seek points.
+Data         | Description
+:------------|:-----------
+`SEEKPOINT`+ | One or more seek points.
 
 NOTE
 - The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18.
