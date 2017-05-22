@@ -248,41 +248,46 @@ Data      | Description
 `u(3\*8)` | Reserved. All bits must be set to zero.
 
 ## METADATA_BLOCK_PICTURE
-- `u(32)` The picture type according to the ID3v2 APIC frame:
-  - 0 - Other
-  - 1 - 32x32 pixels 'file icon' (PNG only)
-  - 2 - Other file icon
-  - 3 - Cover (front)
-  - 4 - Cover (back)
-  - 5 - Leaflet page
-  - 6 - Media (e.g. label side of CD)
-  - 7 - Lead artist/lead performer/soloist
-  - 8 - Artist/performer
-  - 9 - Conductor
-  - 10 - Band/Orchestra
-  - 11 - Composer
-  - 12 - Lyricist/text writer
-  - 13 - Recording Location
-  - 14 - During recording
-  - 15 - During performance
-  - 16 - Movie/video screen capture
-  - 17 - A bright colored fish
-  - 18 - Illustration
-  - 19 - Band/artist logotype
-  - 20 - Publisher/Studio logotype
+Data      | Description
+:---------|:-----------
+`u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame:
+`u(32)`   | The length of the MIME type string in bytes.
+`u(n\*8)` | The MIME type string, in printable ASCII characters 0x20-0x7e. The MIME type may also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
+`u(32)`   | The length of the description string in bytes.
+`u(n\*8)` | The description of the picture, in UTF-8.
+`u(32)`   | The width of the picture in pixels.
+`u(32)`   | The height of the picture in pixels.
+`u(32)`   | The color depth of the picture in bits-per-pixel.
+`u(32)`   | For indexed-color pictures (e.g. GIF), the number of colors used, or `0` for non-indexed pictures.
+`u(32)`   | The length of the picture data in bytes.
+`u(n\*8)` | The binary picture data.
 
-Others are reserved and should not be used. There may only be one each of picture type 1 and 2 in a file.
+## PICTURE_TYPE
+Value | Description
+-----:|:-----------
+   0 | Other
+   1 | 32x32 pixels 'file icon' (PNG only)
+   2 | Other file icon
+   3 | Cover (front)
+   4 | Cover (back)
+   5 | Leaflet page
+   6 | Media (e.g. label side of CD)
+   7 | Lead artist/lead performer/soloist
+   8 | Artist/performer
+   9 | Conductor
+  10 | Band/Orchestra
+  11 | Composer
+  12 | Lyricist/text writer
+  13 | Recording Location
+  14 | During recording
+  15 | During performance
+  16 | Movie/video screen capture
+  17 | A bright colored fish
+  18 | Illustration
+  19 | Band/artist logotype
+  20 | Publisher/Studio logotype
 
-- `u(32)` The length of the MIME type string in bytes.
-- `u(n\*8)` The MIME type string, in printable ASCII characters 0x20-0x7e. The MIME type may also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
-- `u(32)` The length of the description string in bytes.
-- `u(n\*8)` The description of the picture, in UTF-8.
-- `u(32)` The width of the picture in pixels.
-- `u(32)` The height of the picture in pixels.
-- `u(32)` The color depth of the picture in bits-per-pixel.
-- `u(32)` For indexed-color pictures (e.g. GIF), the number of colors used, or `0` for non-indexed pictures.
-- `u(32)` The length of the picture data in bytes.
-- `u(n\*8)` The binary picture data.
+Other values are reserved and should not be used. There may only be one each of picture type 1 and 2 in a file.
 
 ## FRAME
 - `FRAME_HEADER`
