@@ -495,39 +495,5 @@ Data      | Description
 `u(n\*i)` | Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
 
 ## RESIDUAL
-- `u(2)` Residual coding method:
-  - 00 : partitioned Rice coding with 4-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE follows
-  - 01 : partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
-  - 10-11 : reserved
-
-- `RESIDUAL_CODING_METHOD_PARTITIONED_RICE` || `RESIDUAL_CODING_METHOD_PARTITIONED_RICE2`
- 
-## RESIDUAL_CODING_METHOD_PARTITIONED_RICE
-- `u(4)` Partition order.
-- `RICE_PARTITION`+ There will be 2\^order partitions.
-
-## RICE_PARTITION
-- `u(4(+5))` Encoding parameter:
-  - 0000-1110 : Rice parameter.
-  - 1111 : Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
-- `u(?)` Encoded residual. The number of samples (n) in the partition is determined as follows:
-  - if the partition order is zero, n = frame's blocksize - predictor order
-  - else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
-  - else n = (frame's blocksize / (2\^partition order)) - predictor order
-
-## RESIDUAL_CODING_METHOD_PARTITIONED_RICE2
-- `u(4)` Partition order.
-- `RICE2_PARTITION`+ There will be 2\^order partitions.
-
-
-## RICE2_PARTITION
-- `u(5(+5))` Encoding parameter:
-  - 00000-11110 : Rice parameter.
-  - 11111 : Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
-
-- `u(?)` Encoded residual. The number of samples (n) in the partition is determined as follows:
-  - if the partition order is zero, n = frame's blocksize - predictor order
-  - else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
-  - else n = (frame's blocksize / (2\^partition order)) - predictor order
 
 Copyright (c) 2000-2009 Josh Coalson, 2011-2014 Xiph.Org Foundation
