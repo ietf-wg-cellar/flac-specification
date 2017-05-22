@@ -470,7 +470,9 @@ Value | Description
 1     | k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 001 follows, k=7 => 0000001 follows.
 
 ## SUBFRAME_CONSTANT
-- `u(n)` Unencoded constant value of the subblock, n = frame's bits-per-sample.
+Data      | Description
+:---------|:-----------
+`u(n)`    | Unencoded constant value of the subblock, n = frame's bits-per-sample.
 
 ## SUBFRAME_FIXED
 - `u(n)` Unencoded warm-up samples (n = frame's bits-per-sample \* predictor order).
