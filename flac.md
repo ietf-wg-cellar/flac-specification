@@ -445,19 +445,29 @@ Data              | Description
 `SUBFRAME_CONSTANT` \|\| `SUBFRAME_FIXED` \|\| `SUBFRAME_LPC` \|\| `SUBFRAME_VERBATIM` | The SUBFRAME_HEADER specifies which one.
 
 ## SUBFRAME_HEADER
-- `u(1)` Zero bit padding, to prevent sync-fooling string of 1s
-- `u(6)` Subframe type:
-  - 000000 : `SUBFRAME_CONSTANT`
-  - 000001 : `SUBFRAME_VERBATIM`
-  - 00001x : reserved
-  - 0001xx : reserved
-  - 001xxx : if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order ; else reserved
-  - 01xxxx : reserved
-  - 1xxxxx : `SUBFRAME_LPC`, xxxxx=order-1
+Data     | Description
+:--------|:-----------
+`u(1)`   | Zero bit padding, to prevent sync-fooling string of 1s
+`u(6)`   | `SUBFRAME TYPE` (see [section on `SUBFRAME TYPE`](#subframe-type))
+`u(1+k)` | `WASTED BITS PER SAMPLE FLAG` (see [section on `WASTED BITS PER SAMPLE FLAG`](#wasted-bits-per-sample-flag))
 
-- `u(1+k)` 'Wasted bits-per-sample' flag:
-  - 0 : no wasted bits-per-sample in source subblock, k=0
-  - 1 : k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 001 follows, k=7 => 0000001 follows.
+
+### SUBFRAME TYPE
+Value  | Description
+------:|:-----------
+000000 | `SUBFRAME_CONSTANT`
+000001 | `SUBFRAME_VERBATIM`
+00001x | reserved
+0001xx | reserved
+001xxx | if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order ; else reserved
+01xxxx | reserved
+1xxxxx | `SUBFRAME_LPC`, xxxxx=order-1
+
+### WASTED BITS PER SAMPLE FLAG
+Value | Description
+-----:|:-----------
+0     | no wasted bits-per-sample in source subblock, k=0
+1     | k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 001 follows, k=7 => 0000001 follows.
 
 ## SUBFRAME_CONSTANT
 - `u(n)` Unencoded constant value of the subblock, n = frame's bits-per-sample.
