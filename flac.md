@@ -495,5 +495,59 @@ Data      | Description
 `u(n\*i)` | Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
 
 ## RESIDUAL
+Data       | Description
+:----------|:-----------
+`u(2)`     | `RESIDUAL_CODING_METHOD`
+`RESIDUAL_CODING_METHOD_PARTITIONED_RICE` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_RICE2` |
+
+### RESIDUAL_CODING_METHOD
+Value | Description
+-----:|:-----------
+00    | partitioned Rice coding with 4-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE follows
+01    | partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
+10-11 | reserved
+
+### RESIDUAL_CODING_METHOD_PARTITIONED_RICE
+Data              | Description
+:-----------------|:-----------
+`u(4)`            | Partition order.
+`RICE_PARTITION`+ | There will be 2\^order partitions.
+
+#### RICE_PARTITION
+Data       | Description
+:----------|:-----------
+`u(4(+5))` | `RICE PARTITION ENCODING PARAMETER` (see [section on `RICE PARTITION ENCODING PARAMETER`](#rice-partition-encoding-parameter))
+`u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
+
+#### RICE PARTITION ENCODING PARAMETER
+Value     | Description
+---------:|:-----------
+0000-1110 | Rice parameter.
+1111      | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
+
+### RESIDUAL_CODING_METHOD_PARTITIONED_RICE2
+Data               | Description
+:------------------|:-----------
+`u(4)`             | Partition order.
+`RICE2_PARTITION`+ | There will be 2\^order partitions.
+
+#### RICE2_PARTITION
+Data       | Description
+:----------|:-----------
+`u(5(+5))` | `RICE2 PARTITION ENCODING PARAMETER` (see [section on `RICE2 PARTITION ENCODING PARAMETER`](#rice2-partition-encoding-parameter))
+`u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
+
+#### RICE2 PARTITION ENCODING PARAMETER
+Value       | Description
+-----------:|:-----------
+00000-11110 | Rice parameter.
+11111       | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
+
+### ENCODED RESIDUAL
+The number of samples (n) in the partition is determined as follows:
+
+- if the partition order is zero, n = frame's blocksize - predictor order
+- else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
+- else n = (frame's blocksize / (2\^partition order)) - predictor order
 
 Copyright (c) 2000-2009 Josh Coalson, 2011-2014 Xiph.Org Foundation
