@@ -475,8 +475,10 @@ Data      | Description
 `u(n)`    | Unencoded constant value of the subblock, n = frame's bits-per-sample.
 
 ## SUBFRAME_FIXED
-- `u(n)` Unencoded warm-up samples (n = frame's bits-per-sample \* predictor order).
-- `RESIDUAL` Encoded residual
+Data       | Description
+:----------|:-----------
+`u(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* predictor order).
+`RESIDUAL` | Encoded residual
 
 ## SUBFRAME_LPC
 - `u(n)` Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
