@@ -119,72 +119,93 @@ Before the formal description of the stream, an overview might be helpful.
   - If the sample rate is <= 48000 Hz, the filter order in [LPC subframes](#subframelpc) must be less than or equal to 12, i.e. the subframe type bits in the [subframe header](#subframeheader) may not be 101100-111111.
    - The Rice partition order in a [Rice-coded residual section](#residualcodingmethodpartitionedrice) must be less than or equal to 8.
 
-The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
+## Conventions
+
+The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. `n` may be expressed as an equation using `*` (multiplication), `/` (divisopm), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign (+) indicates one or more occurrences of the value.
 
 ## STREAM
-- `u(32)` "fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43
-- [*METADATA_BLOCK*](#metadatablockstreaminfo) This is the mandatory STREAMINFO metadata block that has the basic properties of the stream
-- `METADATA_BLOCK`* Zero or more metadata blocks
-- `FRAME`+ One or more audio frames
+
+Data                        | Description
+:---------------------------|:------------------------------------------
+`u(32)`                     | "fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43
+`METADATA_BLOCK_STREAMINFO` | This is the mandatory STREAMINFO metadata block that has the basic properties of the stream.
+`METADATA_BLOCK`*           | Zero or more metadata blocks
+`FRAME`+                    | One or more audio frames
 
 ## METADATA_BLOCK
-- `METADATA_BLOCK_HEADER` A block header that specifies the type and size of the metadata block data.
-- `METADATA_BLOCK_DATA`
+Data                    | Description
+:-----------------------|:----------------------------------------------
+`METADATA_BLOCK_HEADER` | A block header that specifies the type and size of the metadata block data.
+`METADATA_BLOCK_DATA`   | 
 
 ## METADATA_BLOCK_HEADER
-- `u(1)` Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
-- `u(7)` BLOCK\_TYPE
-  - 0 : STREAMINFO
-  - 1 : PADDING
-  - 2 : APPLICATION
-  - 3 : SEEKTABLE
-  - 4 : VORBIS\_COMMENT
-  - 5 : CUESHEET
-  - 6 : PICTURE
-  - 7-126 : reserved
-  - 127 : invalid, to avoid confusion with a frame sync code
-- `u(24)` Length (in bytes) of metadata to follow (does not include the size of the METADATA_BLOCK_HEADER)
+Data    | Description
+:-------|:-----------
+`u(1)`  | Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
+`u(7)`  | `BLOCK_TYPE`
+`u(24)` | Length (in bytes) of metadata to follow (does not include the size of the `METADATA_BLOCK_HEADER`)
+
+
+## BLOCK_TYPE
+Value | Description
+:-----|:-----------
+0     | STREAMINFO
+1     | PADDING
+2     | APPLICATION
+3     | SEEKTABLE
+4     | VORBIS_COMMENT
+5     | CUESHEET
+6     | PICTURE
+7-126 | reserved
+127   | invalid, to avoid confusion with a frame sync code
 
 ## METADATA_BLOCK_DATA
-- `METADATA_BLOCK_STREAMINFO`
-- ||`METADATA_BLOCK_PADDING`
-- ||`METADATA_BLOCK_APPLICATION`
-- ||`METADATA_BLOCK_SEEKTABLE`
-- ||`METADATA_BLOCK_VORBIS_COMMENT`
-- ||`METADATA_BLOCK_CUESHEET`
-- ||`METADATA_BLOCK_PICTURE` The block data must match the block type in the block header.
+Data    | Description
+:-------|:-----------
+`METADATA_BLOCK_STREAMINFO` \|\| `METADATA_BLOCK_PADDING` \|\| `METADATA_BLOCK_APPLICATION` \|\| `METADATA_BLOCK_SEEKTABLE` \|\| `METADATA_BLOCK_VORBIS_COMMENT` \|\| `METADATA_BLOCK_CUESHEET` \|\| `METADATA_BLOCK_PICTURE` | The block data must match the block type in the block header.
 
 ## METADATA_BLOCK_STREAMINFO
-- `u(16)` The minimum block size (in samples) used in the stream.
-- `u(16)` The maximum block size (in samples) used in the stream. (Minimum blocksize == maximum blocksize) implies a fixed-blocksize stream.
-- `u(24)` The minimum frame size (in bytes) used in the stream. May be 0 to imply the value is not known.
-- `u(24)` The maximum frame size (in bytes) used in the stream. May be 0 to imply the value is not known.
-- `u(20)` Sample rate in Hz. Though 20 bits are available, the maximum sample rate is limited by the structure of frame headers to 655350 Hz. Also, a value of 0 is invalid.
-- `u(3)` (number of channels)-1. FLAC supports from 1 to 8 channels
-- `u(5)` (bits per sample)-1. FLAC supports from 4 to 32 bits per sample. Currently the reference encoder and decoders only support up to 24 bits per sample.
-- `u(36)` Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1 kHz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
-- `u(128)` MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream.
+Data     | Description
+:--------|:-----------
+`u(16)`  | The minimum block size (in samples) used in the stream.
+`u(16)`  | The maximum block size (in samples) used in the stream. (Minimum blocksize == maximum blocksize) implies a fixed-blocksize stream.
+`u(24)`  | The minimum frame size (in bytes) used in the stream. May be 0 to imply the value is not known.
+`u(24)`  | The maximum frame size (in bytes) used in the stream. May be 0 to imply the value is not known.
+`u(20)`  | Sample rate in Hz. Though 20 bits are available, the maximum sample rate is limited by the structure of frame headers to 655350 Hz. Also, a value of 0 is invalid.
+`u(3)`   | (number of channels)-1. FLAC supports from 1 to 8 channels
+`u(5)`   | (bits per sample)-1. FLAC supports from 4 to 32 bits per sample. Currently the reference encoder and decoders only support up to 24 bits per sample.
+`u(36)`  | Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1 kHz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
+`u(128)` | MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream.
 
-NOTES
+NOTE
+
 - FLAC specifies a minimum block size of 16 and a maximum block size of 65535, meaning the bit patterns corresponding to the numbers 0-15 in the minimum blocksize and maximum blocksize fields are invalid.
 
 ## METADATA_BLOCK_PADDING
-- `u(n)` n '0' bits (n must be a multiple of 8)
+Data     | Description
+:--------|:-----------
+`u(n)`   | n '0' bits (n must be a multiple of 8)
 
 ## METADATA_BLOCK_APPLICATION
-- `u(32)` Registered application ID. (Visit the [registration page](id.html) to register an ID with FLAC.)
-- `u(n)` Application data (n must be a multiple of 8)
+Data     | Description
+:--------|:-----------
+`u(32)`  | Registered application ID. (Visit the [registration page](id.html) to register an ID with FLAC.)
+`u(n)`   | Application data (n must be a multiple of 8)
 
 ## METADATA_BLOCK_SEEKTABLE
-- `SEEKPOINT`+ One or more seek points.
+Data         | Description
+:------------|:-----------
+`SEEKPOINT`+ | One or more seek points.
 
 NOTE
 - The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18.
 
 ## SEEKPOINT
-- `u(64)` Sample number of first sample in the target frame, or 0xFFFFFFFFFFFFFFFF for a placeholder point.
-- `u(64)` Offset (in bytes) from the first byte of the first frame header to the first byte of the target frame's header.
-- `u(16)` Number of samples in the target frame.
+Data     | Description
+:--------|:-----------
+`u(64)`  | Sample number of first sample in the target frame, or `0xFFFFFFFFFFFFFFFF` for a placeholder point.
+`u(64)`  | Offset (in bytes) from the first byte of the first frame header to the first byte of the target frame's header.
+`u(16)`  | Number of samples in the target frame.
 
 NOTES
 - For placeholder points, the second and third field values are undefined.
@@ -193,227 +214,286 @@ NOTES
 - The previous two notes imply that there may be any number of placeholder points, but they must all occur at the end of the table.
 
 ## METADATA_BLOCK_VORBIS_COMMENT
-- `u(n)` Also known as FLAC tags, the contents of a vorbis comment packet as specified [here](http://www.xiph.org/vorbis/doc/v-comment.html) (without the framing bit). Note that the vorbis comment spec allows for on the order of 2 \^ 64 bytes of data where as the FLAC metadata block is limited to 2 \^ 24 bytes. Given the stated purpose of vorbis comments, i.e. human-readable textual information, this limit is unlikely to be restrictive. Also note that the 32-bit field lengths are little-endian coded according to the vorbis spec, as opposed to the usual big-endian coding of fixed-length integers in the rest of FLAC.
+Data     | Description
+:--------|:-----------
+`u(n)`   | Also known as FLAC tags, the contents of a vorbis comment packet as specified [here](http://www.xiph.org/vorbis/doc/v-comment.html) (without the framing bit). Note that the vorbis comment spec allows for on the order of 2 \^ 64 bytes of data where as the FLAC metadata block is limited to 2 \^ 24 bytes. Given the stated purpose of vorbis comments, i.e. human-readable textual information, this limit is unlikely to be restrictive. Also note that the 32-bit field lengths are little-endian coded according to the vorbis spec, as opposed to the usual big-endian coding of fixed-length integers in the rest of FLAC.
 
 ## METADATA_BLOCK_CUESHEET
-- `u(128\*8)` Media catalog number, in ASCII printable characters 0x20-0x7e. In general, the media catalog number may be 0 to 128 bytes long; any unused characters should be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
-- `u(64)` The number of lead-in samples. This field has meaning only for CD-DA cuesheets; for other uses it should be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to the Red Book, the lead-in must be silence and CD grabbing software does not usually store it; additionally, the lead-in must be at least two seconds but may be longer. For these reasons the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track may have INDEX 00 data.
-- `u(1)` `1` if the CUESHEET corresponds to a Compact Disc, else `0`.
-- `u(7+258\*8)` Reserved. All bits must be set to zero.
-- `u(8)` The number of tracks. Must be at least 1 (because of the requisite lead-out track). For CD-DA, this number must be no more than 100 (99 regular tracks and one lead-out track).
-- `CUESHEET_TRACK`+ One or more tracks. A CUESHEET block is required to have a lead-out track; it is always the last track in the CUESHEET. For CD-DA, the lead-out track number must be 170 as specified by the Red Book, otherwise is must be 255.
+Data              | Description
+:-----------------|:-----------
+`u(128\*8)`       | Media catalog number, in ASCII printable characters 0x20-0x7e. In general, the media catalog number may be 0 to 128 bytes long; any unused characters should be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
+`u(64)`           | The number of lead-in samples. This field has meaning only for CD-DA cuesheets; for other uses it should be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to the Red Book, the lead-in must be silence and CD grabbing software does not usually store it; additionally, the lead-in must be at least two seconds but may be longer. For these reasons the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track may have INDEX 00 data.
+`u(1)`            | `1` if the CUESHEET corresponds to a Compact Disc, else `0`.
+`u(7+258\*8)`     | Reserved. All bits must be set to zero.
+`u(8)`            | The number of tracks. Must be at least 1 (because of the requisite lead-out track). For CD-DA, this number must be no more than 100 (99 regular tracks and one lead-out track).
+`CUESHEET_TRACK`+ | One or more tracks. A CUESHEET block is required to have a lead-out track; it is always the last track in the CUESHEET. For CD-DA, the lead-out track number must be 170 as specified by the Red Book, otherwise is must be 255.
 
 ## CUESHEET_TRACK
-- `u(64)` Track offset in samples, relative to the beginning of the FLAC audio stream. It is the offset to the first index point of the track. (Note how this differs from CD-DA, where the track's offset in the TOC is that of the track's INDEX 01 even if there is an INDEX 00.) For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75th of a sec).
-- `u(8)` Track number. A track number of 0 is not allowed to avoid conflicting with the CD-DA spec, which reserves this for the lead-in. For CD-DA the number must be 1-99, or 170 for the lead-out; for non-CD-DA, the track number must for 255 for the lead-out. It is not required but encouraged to start with track 1 and increase sequentially. Track numbers must be unique within a CUESHEET.
-- `u(12\*8)` Track ISRC. This is a 12-digit alphanumeric code; see [here](http://isrc.ifpi.org/) and [here](http://www.disctronics.co.uk/technology/cdaudio/cdaud_isrc.htm). A value of 12 ASCII NUL characters may be used to denote absence of an ISRC.
-- `u(1)` The track type: 0 for audio, 1 for non-audio. This corresponds to the CD-DA Q-channel control bit 3.
-- `u(1)` The pre-emphasis flag: 0 for no pre-emphasis, 1 for pre-emphasis. This corresponds to the CD-DA Q-channel control bit 5; see [here](http://www.chipchapin.com/CDMedia/cdda9.php3).
-- `u(6+13\*8)` Reserved. All bits must be set to zero.
-- `u(8)` The number of track index points. There must be at least one index in every track in a CUESHEET except for the lead-out track, which must have zero. For CD-DA, this number may be no more than 100.
-- `CUESHEET_TRACK_INDEX`+ For all tracks except the lead-out track, one or more track index points.
+Data                    | Description
+:-----------------------|:-----------
+`u(64)`                 | Track offset in samples, relative to the beginning of the FLAC audio stream. It is the offset to the first index point of the track. (Note how this differs from CD-DA, where the track's offset in the TOC is that of the track's INDEX 01 even if there is an INDEX 00.) For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75th of a sec).
+`u(8)`                  | Track number. A track number of 0 is not allowed to avoid conflicting with the CD-DA spec, which reserves this for the lead-in. For CD-DA the number must be 1-99, or 170 for the lead-out; for non-CD-DA, the track number must for 255 for the lead-out. It is not required but encouraged to start with track 1 and increase sequentially. Track numbers must be unique within a CUESHEET.
+`u(12\*8)`              | Track ISRC. This is a 12-digit alphanumeric code; see [here](http://isrc.ifpi.org/) and [here](http://www.disctronics.co.uk/technology/cdaudio/cdaud_isrc.htm). A value of 12 ASCII NUL characters may be used to denote absence of an ISRC.
+`u(1)`                  | The track type: 0 for audio, 1 for non-audio. This corresponds to the CD-DA Q-channel control bit 3.
+`u(1)`                  | The pre-emphasis flag: 0 for no pre-emphasis, 1 for pre-emphasis. This corresponds to the CD-DA Q-channel control bit 5; see [here](http://www.chipchapin.com/CDMedia/cdda9.php3).
+`u(6+13\*8)`            | Reserved. All bits must be set to zero.
+`u(8)`                  | The number of track index points. There must be at least one index in every track in a CUESHEET except for the lead-out track, which must have zero. For CD-DA, this number may be no more than 100.
+`CUESHEET_TRACK_INDEX`+ | For all tracks except the lead-out track, one or more track index points.
 
 ## CUESHEET_TRACK_INDEX
-- `u(64)` Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75 sec). Note that the offset is from the beginning of the track, not the beginning of the audio data.
-- `u(8)` The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track must have a number of 0 or 1, and subsequently, index numbers must increase by 1. Index numbers must be unique within a track.
-- `u(3\*8)` Reserved. All bits must be set to zero.
+Data      | Description
+:---------|:-----------
+`u(64)`   | Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75 sec). Note that the offset is from the beginning of the track, not the beginning of the audio data.
+`u(8)`    | The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track must have a number of 0 or 1, and subsequently, index numbers must increase by 1. Index numbers must be unique within a track.
+`u(3\*8)` | Reserved. All bits must be set to zero.
 
 ## METADATA_BLOCK_PICTURE
-- `u(32)` The picture type according to the ID3v2 APIC frame:
-  - 0 - Other
-  - 1 - 32x32 pixels 'file icon' (PNG only)
-  - 2 - Other file icon
-  - 3 - Cover (front)
-  - 4 - Cover (back)
-  - 5 - Leaflet page
-  - 6 - Media (e.g. label side of CD)
-  - 7 - Lead artist/lead performer/soloist
-  - 8 - Artist/performer
-  - 9 - Conductor
-  - 10 - Band/Orchestra
-  - 11 - Composer
-  - 12 - Lyricist/text writer
-  - 13 - Recording Location
-  - 14 - During recording
-  - 15 - During performance
-  - 16 - Movie/video screen capture
-  - 17 - A bright colored fish
-  - 18 - Illustration
-  - 19 - Band/artist logotype
-  - 20 - Publisher/Studio logotype
+Data      | Description
+:---------|:-----------
+`u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame:
+`u(32)`   | The length of the MIME type string in bytes.
+`u(n\*8)` | The MIME type string, in printable ASCII characters 0x20-0x7e. The MIME type may also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
+`u(32)`   | The length of the description string in bytes.
+`u(n\*8)` | The description of the picture, in UTF-8.
+`u(32)`   | The width of the picture in pixels.
+`u(32)`   | The height of the picture in pixels.
+`u(32)`   | The color depth of the picture in bits-per-pixel.
+`u(32)`   | For indexed-color pictures (e.g. GIF), the number of colors used, or `0` for non-indexed pictures.
+`u(32)`   | The length of the picture data in bytes.
+`u(n\*8)` | The binary picture data.
 
-Others are reserved and should not be used. There may only be one each of picture type 1 and 2 in a file.
+## PICTURE_TYPE
+Value | Description
+-----:|:-----------
+   0 | Other
+   1 | 32x32 pixels 'file icon' (PNG only)
+   2 | Other file icon
+   3 | Cover (front)
+   4 | Cover (back)
+   5 | Leaflet page
+   6 | Media (e.g. label side of CD)
+   7 | Lead artist/lead performer/soloist
+   8 | Artist/performer
+   9 | Conductor
+  10 | Band/Orchestra
+  11 | Composer
+  12 | Lyricist/text writer
+  13 | Recording Location
+  14 | During recording
+  15 | During performance
+  16 | Movie/video screen capture
+  17 | A bright colored fish
+  18 | Illustration
+  19 | Band/artist logotype
+  20 | Publisher/Studio logotype
 
-- `u(32)` The length of the MIME type string in bytes.
-- `u(n\*8)` The MIME type string, in printable ASCII characters 0x20-0x7e. The MIME type may also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
-- `u(32)` The length of the description string in bytes.
-- `u(n\*8)` The description of the picture, in UTF-8.
-- `u(32)` The width of the picture in pixels.
-- `u(32)` The height of the picture in pixels.
-- `u(32)` The color depth of the picture in bits-per-pixel.
-- `u(32)` For indexed-color pictures (e.g. GIF), the number of colors used, or `0` for non-indexed pictures.
-- `u(32)` The length of the picture data in bytes.
-- `u(n\*8)` The binary picture data.
+Other values are reserved and should not be used. There may only be one each of picture type 1 and 2 in a file.
 
 ## FRAME
-- `FRAME_HEADER`
- 
-- `SUBFRAME`+ One SUBFRAME per channel.
-- `u(?)` Zero-padding to byte alignment.
-- `FRAME_FOOTER`
+Data           | Description
+:--------------|:-----------
+`FRAME_HEADER` |
+`SUBFRAME`+    | One SUBFRAME per channel.
+`u(?)`         | Zero-padding to byte alignment.
+`FRAME_FOOTER` | 
 
 ## FRAME_HEADER
-- `u(14)` Sync code '11111111111110'
-- `u(1)` Reserved: [\[1\]](#frame-header-notes)
-   - 0 : mandatory value
-   - 1 : reserved for future use
+Data      | Description
+:---------|:-----------
+`u(14)`   | Sync code '11111111111110'
+`u(1)`    | `FRAME HEADER RESERVED`
+`u(1)`    | `BLOCKING STRATEGY`
+`u(4)`    | `INTERCHANNEL SAMPLE BLOCK SIZE`
+`u(4)`    | `SAMPLE RATE`
+`u(4)`    | `CHANNEL ASSIGNMENT`
+`u(3)`    | `SAMPLE SIZE`
+`u(1)`    | `FRAME HEADER RESERVED2`
+`u(?)`    | `CODED NUMBER`
+`u(?)`    | `BLOCK SIZE INT`
+`u(?)`    | `SAMPLE RATE INT`
+`u(8)`    | `FRAME CRC`
 
-- `u(1)` Blocking strategy: [\[2\]](#frame-header-notes) [\[3\]](#frame-header-notes)
-  - 0 : fixed-blocksize stream; frame header encodes the frame number
-  - 1 : variable-blocksize stream; frame header encodes the sample number
+### FRAME HEADER RESERVED
+Value | Description
+-----:|:-----------
+0     | mandatory value
+1     | reserved for future use
 
-- `u(4)` Block size in inter-channel samples:
-  - 0000 : reserved
-  - 0001 : 192 samples
-  - 0010-0101 : 576 \* (2\^(n-2)) samples, i.e. 576/1152/2304/4608
-  - 0110 : get 8 bit (blocksize-1) from end of header
-  - 0111 : get 16 bit (blocksize-1) from end of header
-  - 1000-1111 : 256 \* (2\^(n-8)) samples, i.e. 256/512/1024/2048/4096/8192/16384/32768
-- `u(4)` Sample rate:
-  - 0000 : get from STREAMINFO metadata block
-  - 0001 : 88.2 kHz
-  - 0010 : 176.4 kHz
-  - 0011 : 192 kHz
-  - 0100 : 8 kHz
-  - 0101 : 16 kHz
-  - 0110 : 22.05 kHz
-  - 0111 : 24 kHz
-  - 1000 : 32 kHz
-  - 1001 : 44.1 kHz
-  - 1010 : 48 kHz
-  - 1011 : 96 kHz
-  - 1100 : get 8 bit sample rate (in kHz) from end of header
-  - 1101 : get 16 bit sample rate (in Hz) from end of header
-  - 1110 : get 16 bit sample rate (in tens of Hz) from end of header
-  - 1111 : invalid, to prevent sync-fooling string of 1s
-- `u(4)` Channel assignment
-  - 0000-0111 : (number of independent channels)-1. Where defined, the channel order follows SMPTE/ITU-R recommendations. The assignments are as follows:
-    - 1 channel: mono
-    - 2 channels: left, right
-    - 3 channels: left, right, center
-    - 4 channels: front left, front right, back left, back right
-    - 5 channels: front left, front right, front center, back/surround left, back/surround right
-    - 6 channels: front left, front right, front center, LFE, back/surround left, back/surround right
-    - 7 channels: front left, front right, front center, LFE, back center, side left, side right
-    - 8 channels: front left, front right, front center, LFE, back left, back right, side left, side right
-  - 1000 : left/side stereo: channel 0 is the left channel, channel 1 is the side(difference) channel
-  - 1001 : right/side stereo: channel 0 is the side(difference) channel, channel 1 is the right channel
-  - 1010 : mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
-  - 1011-1111 : reserved
+FRAME HEADER RESERVED must remain reserved for `0` in order for a FLAC frame's initial 15 bits to be distinguishable from the start of an MPEG audio frame ([see also](http://lists.xiph.org/pipermail/flac-dev/2008-December/002607.html)).
 
-- `u(3)` Sample size in bits:
-  - 000 : get from STREAMINFO metadata block
-  - 001 : 8 bits per sample
-  - 010 : 12 bits per sample
-  - 011 : reserved
-  - 100 : 16 bits per sample
-  - 101 : 20 bits per sample
-  - 110 : 24 bits per sample
-  - 111 : reserved
+### BLOCKING STRATEGY
+Value | Description
+-----:|:-----------
+0     | fixed-blocksize stream; frame header encodes the frame number
+1     | variable-blocksize stream; frame header encodes the sample number
 
-- `u(1)` Reserved:
-  - 0 : mandatory value
-  - 1 : reserved for future use
+The `BLOCKING STRATEGY` bit must be the same throughout the entire stream.
 
-- `u(?)` if(variable blocksize)
-  - (8-56):"UTF-8" coded sample number (decoded number is 36 bits) [\[4\]](#frame-header-notes)
+The `BLOCKING STRATEGY` bit determines how to calculate the sample number of the first sample in the frame. If the bit is `0` (fixed-blocksize), the frame header encodes the frame number as above, and the frame's starting sample number will be the frame number times the blocksize. If it is `1` (variable-blocksize), the frame header encodes the frame's starting sample number itself. (In the case of a fixed-blocksize stream, only the last block may be shorter than the stream blocksize; its starting sample number will be calculated as the frame number times the previous frame's blocksize, or zero if it is the first frame).
 
-- else
+###  INTERCHANNEL SAMPLE BLOCK SIZE
+Value     | Description
+---------:|:-----------
+0000      | reserved
+0001      | 192 samples
+0010-0101 | 576 \* (2\^(n-2)) samples, i.e. 576/1152/2304/4608
+0110      | get 8 bit (blocksize-1) from end of header
+0111      | get 16 bit (blocksize-1) from end of header
+1000-1111 | 256 \* (2\^(n-8)) samples, i.e. 256/512/1024/2048/4096/8192/16384/32768
 
-  - `u(8-48)`:"UTF-8" coded frame number (decoded number is 31 bits) [\[4\]](#frame-header-notes)
-- `u(?)` if(blocksize bits == 011x) 8/16 bit (blocksize-1)
-- `u(?)` if(sample rate bits == 11xx) 8/16 bit sample rate
-- `u(8)` CRC-8 (polynomial = x\^8 + x\^2 + x\^1 + x\^0, initialized with 0) of everything before the CRC, including the sync code
+### SAMPLE RATE
+Value | Description
+-----:|:-----------
+0000  | get from STREAMINFO metadata block
+0001  | 88.2 kHz
+0010  | 176.4 kHz
+0011  | 192 kHz
+0100  | 8 kHz
+0101  | 16 kHz
+0110  | 22.05 kHz
+0111  | 24 kHz
+1000  | 32 kHz
+1001  | 44.1 kHz
+1010  | 48 kHz
+1011  | 96 kHz
+1100  | get 8 bit sample rate (in kHz) from end of header
+1101  | get 16 bit sample rate (in Hz) from end of header
+1110  | get 16 bit sample rate (in tens of Hz) from end of header
+1111  | invalid, to prevent sync-fooling string of 1s
 
-### Frame Header Notes
-1. This bit must remain reserved for `0` in order for a FLAC frame's initial 15 bits to be distinguishable from the start of an MPEG audio frame ([see also](http://lists.xiph.org/pipermail/flac-dev/2008-December/002607.html)).
-2. The "blocking strategy" bit must be the same throughout the entire stream.
-3. The "blocking strategy" bit determines how to calculate the sample number of the first sample in the frame. If the bit is `0` (fixed-blocksize), the frame header encodes the frame number as above, and the frame's starting sample number will be the frame number times the blocksize. If it is `1` (variable-blocksize), the frame header encodes the frame's starting sample number itself. (In the case of a fixed-blocksize stream, only the last block may be shorter than the stream blocksize; its starting sample number will be calculated as the frame number times the previous frame's blocksize, or zero if it is the first frame).
-4. The "UTF-8" coding used for the sample/frame number is the same variable length code used to store compressed UCS-2, extended to handle larger input.
+### CHANNEL ASSIGNMENT
+
+For values 0000-0111, the value represents the (number of independent channels)-1. Where defined, the channel order follows SMPTE/ITU-R recommendations.
+
+Value     | Description
+---------:|:-----------
+0000      | 1 channel: mono
+0001      | 2 channels: left, right
+0010      | 3 channels: left, right, center
+0011      | 4 channels: front left, front right, back left, back right
+0100      | 5 channels: front left, front right, front center, back/surround left, back/surround right
+0101      | 6 channels: front left, front right, front center, LFE, back/surround left, back/surround right
+0110      | 7 channels: front left, front right, front center, LFE, back center, side left, side right
+0111      | 8 channels: front left, front right, front center, LFE, back left, back right, side left, side right
+1000      | left/side stereo: channel 0 is the left channel, channel 1 is the side(difference) channel
+1001      | right/side stereo: channel 0 is the side(difference) channel, channel 1 is the right channel
+1010      | mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
+1011-1111 | reserved
+
+### SAMPLE SIZE
+Value | Description
+-----:|:-----------
+000   | get from STREAMINFO metadata block
+001   | 8 bits per sample
+010   | 12 bits per sample
+011   | reserved
+100   | 16 bits per sample
+101   | 20 bits per sample
+110   | 24 bits per sample
+111   | reserved
+
+### FRAME HEADER RESERVED2
+Value | Description
+-----:|:-----------
+0     | mandatory value
+1     | reserved for future use
+
+### CODED NUMBER
+
+The "UTF-8" coding used for the sample/frame number is the same variable length code used to store compressed UCS-2, extended to handle larger input.
+
+~~~
+if(variable blocksize)
+  `u(8...56)`: "UTF-8" coded sample number (decoded number is 36 bits)
+else
+  `u(8...48)`:"UTF-8" coded frame number (decoded number is 31 bits)
+~~~
+
+### BLOCK SIZE INT
+
+~~~
+if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0110)
+  8 bit (blocksize-1)
+else if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0111)
+  16 bit (blocksize-1)
+~~~
+
+### SAMPLE RATE INT
+
+~~~
+if(`SAMPLE RATE` == 1100)
+  8 bit sample rate (in kHz)
+else if(`SAMPLE RATE` == 1101)
+  16 bit sample rate (in Hz)
+else if(`SAMPLE RATE` == 1110)
+  16 bit sample rate in tens of Hz)
+~~~
+
+### FRAME CRC
+
+CRC-8 (polynomial = x\^8 + x\^2 + x\^1 + x\^0, initialized with 0) of everything before the CRC, including the sync code
 
 ## FRAME_FOOTER
-- `u(16)` CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the CRC, back to and including the frame header sync code
+Data      | Description
+:---------|:-----------
+`u(16)`   | CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the CRC, back to and including the frame header sync code
 
 ## SUBFRAME
-- `SUBFRAME_HEADER`
-- `SUBFRAME_CONSTANT` || `SUBFRAME_FIXED` || `SUBFRAME_LPC` || `SUBFRAME_VERBATIM` The SUBFRAME_HEADER specifies which one.
+Data              | Description
+:-----------------|:-----------
+`SUBFRAME_HEADER` |
+`SUBFRAME_CONSTANT` \|\| `SUBFRAME_FIXED` \|\| `SUBFRAME_LPC` \|\| `SUBFRAME_VERBATIM` | The SUBFRAME_HEADER specifies which one.
 
 ## SUBFRAME_HEADER
-- `u(1)` Zero bit padding, to prevent sync-fooling string of 1s
-- `u(6)` Subframe type:
-  - 000000 : `SUBFRAME_CONSTANT`
-  - 000001 : `SUBFRAME_VERBATIM`
-  - 00001x : reserved
-  - 0001xx : reserved
-  - 001xxx : if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order ; else reserved
-  - 01xxxx : reserved
-  - 1xxxxx : `SUBFRAME_LPC`, xxxxx=order-1
+Data     | Description
+:--------|:-----------
+`u(1)`   | Zero bit padding, to prevent sync-fooling string of 1s
+`u(6)`   | `SUBFRAME TYPE` (see [section on `SUBFRAME TYPE`](#subframe-type))
+`u(1+k)` | `WASTED BITS PER SAMPLE FLAG` (see [section on `WASTED BITS PER SAMPLE FLAG`](#wasted-bits-per-sample-flag))
 
-- `u(1+k)` 'Wasted bits-per-sample' flag:
-  - 0 : no wasted bits-per-sample in source subblock, k=0
-  - 1 : k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 001 follows, k=7 => 0000001 follows.
+
+### SUBFRAME TYPE
+Value  | Description
+------:|:-----------
+000000 | `SUBFRAME_CONSTANT`
+000001 | `SUBFRAME_VERBATIM`
+00001x | reserved
+0001xx | reserved
+001xxx | if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order ; else reserved
+01xxxx | reserved
+1xxxxx | `SUBFRAME_LPC`, xxxxx=order-1
+
+### WASTED BITS PER SAMPLE FLAG
+Value | Description
+-----:|:-----------
+0     | no wasted bits-per-sample in source subblock, k=0
+1     | k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 001 follows, k=7 => 0000001 follows.
 
 ## SUBFRAME_CONSTANT
-- `u(n)` Unencoded constant value of the subblock, n = frame's bits-per-sample.
+Data      | Description
+:---------|:-----------
+`u(n)`    | Unencoded constant value of the subblock, n = frame's bits-per-sample.
 
 ## SUBFRAME_FIXED
-- `u(n)` Unencoded warm-up samples (n = frame's bits-per-sample \* predictor order).
-- `RESIDUAL` Encoded residual
+Data       | Description
+:----------|:-----------
+`u(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* predictor order).
+`RESIDUAL` | Encoded residual
 
 ## SUBFRAME_LPC
-- `u(n)` Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
-- `u(4)` (Quantized linear predictor coefficients' precision in bits)-1 (1111 = invalid).
-- `u(5)` Quantized linear predictor coefficient shift needed in bits (NOTE: this number is signed two's-complement).
-- `u(n)` Unencoded predictor coefficients (n = qlp coeff precision \* lpc order) (NOTE: the coefficients are signed two's-complement).
-- `RESIDUAL` Encoded residual
+Data       | Description
+:----------|:-----------
+`u(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
+`u(4)`     | (Quantized linear predictor coefficients' precision in bits)-1 (1111 = invalid).
+`u(5)`     | Quantized linear predictor coefficient shift needed in bits (NOTE: this number is signed two's-complement).
+`u(n)`     | Unencoded predictor coefficients (n = qlp coeff precision \* lpc order) (NOTE: the coefficients are signed two's-complement).
+`RESIDUAL` | Encoded residual
 
 ## SUBFRAME_VERBATIM
-- `u(n\*i)` Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
+Data      | Description
+:---------|:-----------
+`u(n\*i)` | Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
 
 ## RESIDUAL
-- `u(2)` Residual coding method:
-  - 00 : partitioned Rice coding with 4-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE follows
-  - 01 : partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
-  - 10-11 : reserved
-
-- `RESIDUAL_CODING_METHOD_PARTITIONED_RICE` || `RESIDUAL_CODING_METHOD_PARTITIONED_RICE2`
- 
-## RESIDUAL_CODING_METHOD_PARTITIONED_RICE
-- `u(4)` Partition order.
-- `RICE_PARTITION`+ There will be 2\^order partitions.
-
-## RICE_PARTITION
-- `u(4(+5))` Encoding parameter:
-  - 0000-1110 : Rice parameter.
-  - 1111 : Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
-- `u(?)` Encoded residual. The number of samples (n) in the partition is determined as follows:
-  - if the partition order is zero, n = frame's blocksize - predictor order
-  - else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
-  - else n = (frame's blocksize / (2\^partition order)) - predictor order
-
-## RESIDUAL_CODING_METHOD_PARTITIONED_RICE2
-- `u(4)` Partition order.
-- `RICE2_PARTITION`+ There will be 2\^order partitions.
-
-
-## RICE2_PARTITION
-- `u(5(+5))` Encoding parameter:
-  - 00000-11110 : Rice parameter.
-  - 11111 : Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
-
-- `u(?)` Encoded residual. The number of samples (n) in the partition is determined as follows:
-  - if the partition order is zero, n = frame's blocksize - predictor order
-  - else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
-  - else n = (frame's blocksize / (2\^partition order)) - predictor order
 
 Copyright (c) 2000-2009 Josh Coalson, 2011-2014 Xiph.Org Foundation
