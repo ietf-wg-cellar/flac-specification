@@ -298,83 +298,134 @@ Data           | Description
 `FRAME_FOOTER` | 
 
 ## FRAME_HEADER
-- `u(14)` Sync code '11111111111110'
-- `u(1)` Reserved: [\[1\]](#frame-header-notes)
-   - 0 : mandatory value
-   - 1 : reserved for future use
+Data      | Description
+:---------|:-----------
+`u(14)`   | Sync code '11111111111110'
+`u(1)`    | `FRAME HEADER RESERVED`
+`u(1)`    | `BLOCKING STRATEGY`
+`u(4)`    | `INTERCHANNEL SAMPLE BLOCK SIZE`
+`u(4)`    | `SAMPLE RATE`
+`u(4)`    | `CHANNEL ASSIGNMENT`
+`u(3)`    | `SAMPLE SIZE`
+`u(1)`    | `FRAME HEADER RESERVED2`
+`u(?)`    | `CODED NUMBER`
+`u(?)`    | `BLOCK SIZE INT`
+`u(?)`    | `SAMPLE RATE INT`
+`u(8)`    | `FRAME CRC`
 
-- `u(1)` Blocking strategy: [\[2\]](#frame-header-notes) [\[3\]](#frame-header-notes)
-  - 0 : fixed-blocksize stream; frame header encodes the frame number
-  - 1 : variable-blocksize stream; frame header encodes the sample number
+### FRAME HEADER RESERVED
+Value | Description
+-----:|:-----------
+0     | mandatory value
+1     | reserved for future use
 
-- `u(4)` Block size in inter-channel samples:
-  - 0000 : reserved
-  - 0001 : 192 samples
-  - 0010-0101 : 576 \* (2\^(n-2)) samples, i.e. 576/1152/2304/4608
-  - 0110 : get 8 bit (blocksize-1) from end of header
-  - 0111 : get 16 bit (blocksize-1) from end of header
-  - 1000-1111 : 256 \* (2\^(n-8)) samples, i.e. 256/512/1024/2048/4096/8192/16384/32768
-- `u(4)` Sample rate:
-  - 0000 : get from STREAMINFO metadata block
-  - 0001 : 88.2 kHz
-  - 0010 : 176.4 kHz
-  - 0011 : 192 kHz
-  - 0100 : 8 kHz
-  - 0101 : 16 kHz
-  - 0110 : 22.05 kHz
-  - 0111 : 24 kHz
-  - 1000 : 32 kHz
-  - 1001 : 44.1 kHz
-  - 1010 : 48 kHz
-  - 1011 : 96 kHz
-  - 1100 : get 8 bit sample rate (in kHz) from end of header
-  - 1101 : get 16 bit sample rate (in Hz) from end of header
-  - 1110 : get 16 bit sample rate (in tens of Hz) from end of header
-  - 1111 : invalid, to prevent sync-fooling string of 1s
-- `u(4)` Channel assignment
-  - 0000-0111 : (number of independent channels)-1. Where defined, the channel order follows SMPTE/ITU-R recommendations. The assignments are as follows:
-    - 1 channel: mono
-    - 2 channels: left, right
-    - 3 channels: left, right, center
-    - 4 channels: front left, front right, back left, back right
-    - 5 channels: front left, front right, front center, back/surround left, back/surround right
-    - 6 channels: front left, front right, front center, LFE, back/surround left, back/surround right
-    - 7 channels: front left, front right, front center, LFE, back center, side left, side right
-    - 8 channels: front left, front right, front center, LFE, back left, back right, side left, side right
-  - 1000 : left/side stereo: channel 0 is the left channel, channel 1 is the side(difference) channel
-  - 1001 : right/side stereo: channel 0 is the side(difference) channel, channel 1 is the right channel
-  - 1010 : mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
-  - 1011-1111 : reserved
+FRAME HEADER RESERVED must remain reserved for `0` in order for a FLAC frame's initial 15 bits to be distinguishable from the start of an MPEG audio frame ([see also](http://lists.xiph.org/pipermail/flac-dev/2008-December/002607.html)).
 
-- `u(3)` Sample size in bits:
-  - 000 : get from STREAMINFO metadata block
-  - 001 : 8 bits per sample
-  - 010 : 12 bits per sample
-  - 011 : reserved
-  - 100 : 16 bits per sample
-  - 101 : 20 bits per sample
-  - 110 : 24 bits per sample
-  - 111 : reserved
+### BLOCKING STRATEGY
+Value | Description
+-----:|:-----------
+0     | fixed-blocksize stream; frame header encodes the frame number
+1     | variable-blocksize stream; frame header encodes the sample number
 
-- `u(1)` Reserved:
-  - 0 : mandatory value
-  - 1 : reserved for future use
+The `BLOCKING STRATEGY` bit must be the same throughout the entire stream.
 
-- `u(?)` if(variable blocksize)
-  - (8-56):"UTF-8" coded sample number (decoded number is 36 bits) [\[4\]](#frame-header-notes)
+The `BLOCKING STRATEGY` bit determines how to calculate the sample number of the first sample in the frame. If the bit is `0` (fixed-blocksize), the frame header encodes the frame number as above, and the frame's starting sample number will be the frame number times the blocksize. If it is `1` (variable-blocksize), the frame header encodes the frame's starting sample number itself. (In the case of a fixed-blocksize stream, only the last block may be shorter than the stream blocksize; its starting sample number will be calculated as the frame number times the previous frame's blocksize, or zero if it is the first frame).
 
-- else
+###  INTERCHANNEL SAMPLE BLOCK SIZE
+Value     | Description
+---------:|:-----------
+0000      | reserved
+0001      | 192 samples
+0010-0101 | 576 \* (2\^(n-2)) samples, i.e. 576/1152/2304/4608
+0110      | get 8 bit (blocksize-1) from end of header
+0111      | get 16 bit (blocksize-1) from end of header
+1000-1111 | 256 \* (2\^(n-8)) samples, i.e. 256/512/1024/2048/4096/8192/16384/32768
 
-  - `u(8-48)`:"UTF-8" coded frame number (decoded number is 31 bits) [\[4\]](#frame-header-notes)
-- `u(?)` if(blocksize bits == 011x) 8/16 bit (blocksize-1)
-- `u(?)` if(sample rate bits == 11xx) 8/16 bit sample rate
-- `u(8)` CRC-8 (polynomial = x\^8 + x\^2 + x\^1 + x\^0, initialized with 0) of everything before the CRC, including the sync code
+### SAMPLE RATE
+Value | Description
+-----:|:-----------
+0000  | get from STREAMINFO metadata block
+0001  | 88.2 kHz
+0010  | 176.4 kHz
+0011  | 192 kHz
+0100  | 8 kHz
+0101  | 16 kHz
+0110  | 22.05 kHz
+0111  | 24 kHz
+1000  | 32 kHz
+1001  | 44.1 kHz
+1010  | 48 kHz
+1011  | 96 kHz
+1100  | get 8 bit sample rate (in kHz) from end of header
+1101  | get 16 bit sample rate (in Hz) from end of header
+1110  | get 16 bit sample rate (in tens of Hz) from end of header
+1111  | invalid, to prevent sync-fooling string of 1s
 
-### Frame Header Notes
-1. This bit must remain reserved for `0` in order for a FLAC frame's initial 15 bits to be distinguishable from the start of an MPEG audio frame ([see also](http://lists.xiph.org/pipermail/flac-dev/2008-December/002607.html)).
-2. The "blocking strategy" bit must be the same throughout the entire stream.
-3. The "blocking strategy" bit determines how to calculate the sample number of the first sample in the frame. If the bit is `0` (fixed-blocksize), the frame header encodes the frame number as above, and the frame's starting sample number will be the frame number times the blocksize. If it is `1` (variable-blocksize), the frame header encodes the frame's starting sample number itself. (In the case of a fixed-blocksize stream, only the last block may be shorter than the stream blocksize; its starting sample number will be calculated as the frame number times the previous frame's blocksize, or zero if it is the first frame).
-4. The "UTF-8" coding used for the sample/frame number is the same variable length code used to store compressed UCS-2, extended to handle larger input.
+### CHANNEL ASSIGNMENT
+
+For values 0000-0111, the value represents the (number of independent channels)-1. Where defined, the channel order follows SMPTE/ITU-R recommendations.
+
+Value     | Description
+---------:|:-----------
+0000      | 1 channel: mono
+0001      | 2 channels: left, right
+0010      | 3 channels: left, right, center
+0011      | 4 channels: front left, front right, back left, back right
+0100      | 5 channels: front left, front right, front center, back/surround left, back/surround right
+0101      | 6 channels: front left, front right, front center, LFE, back/surround left, back/surround right
+0110      | 7 channels: front left, front right, front center, LFE, back center, side left, side right
+0111      | 8 channels: front left, front right, front center, LFE, back left, back right, side left, side right
+1000      | left/side stereo: channel 0 is the left channel, channel 1 is the side(difference) channel
+1001      | right/side stereo: channel 0 is the side(difference) channel, channel 1 is the right channel
+1010      | mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
+1011-1111 | reserved
+
+### SAMPLE SIZE
+Value | Description
+-----:|:-----------
+000   | get from STREAMINFO metadata block
+001   | 8 bits per sample
+010   | 12 bits per sample
+011   | reserved
+100   | 16 bits per sample
+101   | 20 bits per sample
+110   | 24 bits per sample
+111   | reserved
+
+### FRAME HEADER RESERVED2
+Value | Description
+-----:|:-----------
+0     | mandatory value
+1     | reserved for future use
+
+### CODED NUMBER
+
+The "UTF-8" coding used for the sample/frame number is the same variable length code used to store compressed UCS-2, extended to handle larger input.
+
+~~~
+if(variable blocksize)
+  `u(8...56)`: "UTF-8" coded sample number (decoded number is 36 bits)
+else
+  `u(8...48)`:"UTF-8" coded frame number (decoded number is 31 bits)
+~~~
+
+### BLOCK SIZE INT
+
+~~~
+if(blocksize bits == 011x)
+  8/16 bit (blocksize-1)
+~~~
+
+### SAMPLE RATE INT
+
+~~~
+if(sample rate bits == 11xx)
+  8/16 bit sample rate
+~~~
+
+### FRAME CRC
+
+CRC-8 (polynomial = x\^8 + x\^2 + x\^1 + x\^0, initialized with 0) of everything before the CRC, including the sync code
 
 ## FRAME_FOOTER
 - `u(16)` CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the CRC, back to and including the frame header sync code
