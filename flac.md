@@ -160,13 +160,9 @@ Value | Description
 127   | invalid, to avoid confusion with a frame sync code
 
 ## METADATA_BLOCK_DATA
-- `METADATA_BLOCK_STREAMINFO`
-- ||`METADATA_BLOCK_PADDING`
-- ||`METADATA_BLOCK_APPLICATION`
-- ||`METADATA_BLOCK_SEEKTABLE`
-- ||`METADATA_BLOCK_VORBIS_COMMENT`
-- ||`METADATA_BLOCK_CUESHEET`
-- ||`METADATA_BLOCK_PICTURE` The block data must match the block type in the block header.
+Data    | Description
+:-------|:-----------
+`METADATA_BLOCK_STREAMINFO` \|\| `METADATA_BLOCK_PADDING` \|\| `METADATA_BLOCK_APPLICATION` \|\| `METADATA_BLOCK_SEEKTABLE` \|\| `METADATA_BLOCK_VORBIS_COMMENT` \|\| `METADATA_BLOCK_CUESHEET` \|\| `METADATA_BLOCK_PICTURE` | The block data must match the block type in the block header.
 
 ## METADATA_BLOCK_STREAMINFO
 - `u(16)` The minimum block size (in samples) used in the stream.
