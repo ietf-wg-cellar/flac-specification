@@ -113,10 +113,10 @@ Before the formal description of the stream, an overview might be helpful.
 - Again, since a decoder may start decoding at an arbitrary frame in the stream, each frame header must contain some basic information about the stream because the decoder may not have access to the STREAMINFO metadata block at the start of the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is pure overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame parameters. For instance, the sample rate part of the frame header is specified using 4 bits. Eight of the bit patterns correspond to the commonly used sample rates of 8/16/22.05/24/32/44.1/48/96 kHz. However, odd sample rates can be specified by using one of the 'hint' bit patterns, directing the decoder to find the exact sample rate at the end of the frame header. The same method is used for specifying the block size and bits per sample. In this way, the frame header size stays small for all of the most common forms of audio data.
 - Individual subframes (one for each channel) are coded separately within a frame, and appear serially in the stream. In other words, the encoded audio data is NOT channel-interleaved. This reduces decoder complexity at the cost of requiring larger decode buffers. Each subframe has its own header specifying the attributes of the subframe, like prediction method and order, residual coding parameters, etc. The header is followed by the encoded audio data for that channel.
 - `FLAC` specifies a subset of itself as the Subset format. The purpose of this is to ensure that any streams encoded according to the Subset are truly "streamable", meaning that a decoder that cannot seek within the stream can still pick up in the middle of the stream and start decoding. It also makes hardware decoder implementations more practical by limiting the encoding parameters such that decoder buffer sizes and other resource requirements can be easily determined. __flac__ generates Subset streams by default unless the "--lax" command-line option is used. The Subset makes the following limitations on what may be used in the stream:
-  - The blocksize bits in the [frame header](#frameheader) must be 0001-1110. The blocksize must be <= 16384; if the sample rate is <= 48000 Hz, the blocksize must be <= 4608.
-  - The sample rate bits in the [frame header](#frameheader) must be 0001-1110.
-  - The bits-per-sample bits in the [frame header](#frameheader) must be 001-111.
-  - If the sample rate is <= 48000 Hz, the filter order in [LPC subframes](#subframelpc) must be less than or equal to 12, i.e. the subframe type bits in the [subframe header](#subframeheader) may not be 101100-111111.
+  - The blocksize bits in the [frame header](#frameheader) must be 0b0001 - 0b1110. The blocksize must be <= 16384; if the sample rate is <= 48000 Hz, the blocksize must be <= 4608.
+  - The sample rate bits in the [frame header](#frameheader) must be 0b0001 - 0b1110.
+  - The bits-per-sample bits in the [frame header](#frameheader) must be 0b001 - 0b111.
+  - If the sample rate is <= 48000 Hz, the filter order in [LPC subframes](#subframelpc) must be less than or equal to 12, i.e. the subframe type bits in the [subframe header](#subframeheader) may not be 0b101100 - 0b111111.
    - The Rice partition order in a [Rice-coded residual section](#residualcodingmethodpartitionedrice) must be less than or equal to 8.
 
 ## Conventions
@@ -147,17 +147,17 @@ Data    | Description
 
 
 ## BLOCK_TYPE
-Value | Description
-:-----|:-----------
-0     | STREAMINFO
-1     | PADDING
-2     | APPLICATION
-3     | SEEKTABLE
-4     | VORBIS_COMMENT
-5     | CUESHEET
-6     | PICTURE
-7-126 | reserved
-127   | invalid, to avoid confusion with a frame sync code
+Value   | Description
+:-------|:-----------
+0       | STREAMINFO
+1       | PADDING
+2       | APPLICATION
+3       | SEEKTABLE
+4       | VORBIS_COMMENT
+5       | CUESHEET
+6       | PICTURE
+7 - 126 | reserved
+127     | invalid, to avoid confusion with a frame sync code
 
 ## METADATA_BLOCK_DATA
 Data    | Description
@@ -332,65 +332,65 @@ The `BLOCKING STRATEGY` bit must be the same throughout the entire stream.
 The `BLOCKING STRATEGY` bit determines how to calculate the sample number of the first sample in the frame. If the bit is `0` (fixed-blocksize), the frame header encodes the frame number as above, and the frame's starting sample number will be the frame number times the blocksize. If it is `1` (variable-blocksize), the frame header encodes the frame's starting sample number itself. (In the case of a fixed-blocksize stream, only the last block may be shorter than the stream blocksize; its starting sample number will be calculated as the frame number times the previous frame's blocksize, or zero if it is the first frame).
 
 ###  INTERCHANNEL SAMPLE BLOCK SIZE
-Value     | Description
----------:|:-----------
-0000      | reserved
-0001      | 192 samples
-0010-0101 | 576 \* (2\^(n-2)) samples, i.e. 576/1152/2304/4608
-0110      | get 8 bit (blocksize-1) from end of header
-0111      | get 16 bit (blocksize-1) from end of header
-1000-1111 | 256 \* (2\^(n-8)) samples, i.e. 256/512/1024/2048/4096/8192/16384/32768
+Value           | Description
+---------------:|:-----------
+0b0000          | reserved
+0b0001          | 192 samples
+0b0010 - 0b0101 | 576 \* (2\^(n-2)) samples, i.e. 576/1152/2304/4608
+0b0110          | get 8 bit (blocksize-1) from end of header
+0b0111          | get 16 bit (blocksize-1) from end of header
+0b1000 - 0b1111 | 256 \* (2\^(n-8)) samples, i.e. 256/512/1024/2048/4096/8192/16384/32768
 
 ### SAMPLE RATE
-Value | Description
------:|:-----------
-0000  | get from STREAMINFO metadata block
-0001  | 88.2 kHz
-0010  | 176.4 kHz
-0011  | 192 kHz
-0100  | 8 kHz
-0101  | 16 kHz
-0110  | 22.05 kHz
-0111  | 24 kHz
-1000  | 32 kHz
-1001  | 44.1 kHz
-1010  | 48 kHz
-1011  | 96 kHz
-1100  | get 8 bit sample rate (in kHz) from end of header
-1101  | get 16 bit sample rate (in Hz) from end of header
-1110  | get 16 bit sample rate (in tens of Hz) from end of header
-1111  | invalid, to prevent sync-fooling string of 1s
+Value   | Description
+-------:|:-----------
+0b0000  | get from STREAMINFO metadata block
+0b0001  | 88.2 kHz
+0b0010  | 176.4 kHz
+0b0011  | 192 kHz
+0b0100  | 8 kHz
+0b0101  | 16 kHz
+0b0110  | 22.05 kHz
+0b0111  | 24 kHz
+0b1000  | 32 kHz
+0b1001  | 44.1 kHz
+0b1010  | 48 kHz
+0b1011  | 96 kHz
+0b1100  | get 8 bit sample rate (in kHz) from end of header
+0b1101  | get 16 bit sample rate (in Hz) from end of header
+0b1110  | get 16 bit sample rate (in tens of Hz) from end of header
+0b1111  | invalid, to prevent sync-fooling string of 1s
 
 ### CHANNEL ASSIGNMENT
 
 For values 0000-0111, the value represents the (number of independent channels)-1. Where defined, the channel order follows SMPTE/ITU-R recommendations.
 
-Value     | Description
----------:|:-----------
-0000      | 1 channel: mono
-0001      | 2 channels: left, right
-0010      | 3 channels: left, right, center
-0011      | 4 channels: front left, front right, back left, back right
-0100      | 5 channels: front left, front right, front center, back/surround left, back/surround right
-0101      | 6 channels: front left, front right, front center, LFE, back/surround left, back/surround right
-0110      | 7 channels: front left, front right, front center, LFE, back center, side left, side right
-0111      | 8 channels: front left, front right, front center, LFE, back left, back right, side left, side right
-1000      | left/side stereo: channel 0 is the left channel, channel 1 is the side(difference) channel
-1001      | right/side stereo: channel 0 is the side(difference) channel, channel 1 is the right channel
-1010      | mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
-1011-1111 | reserved
+Value           | Description
+---------------:|:-----------
+0b0000          | 1 channel: mono
+0b0001          | 2 channels: left, right
+0b0010          | 3 channels: left, right, center
+0b0011          | 4 channels: front left, front right, back left, back right
+0b0100          | 5 channels: front left, front right, front center, back/surround left, back/surround right
+0b0101          | 6 channels: front left, front right, front center, LFE, back/surround left, back/surround right
+0b0110          | 7 channels: front left, front right, front center, LFE, back center, side left, side right
+0b0111          | 8 channels: front left, front right, front center, LFE, back left, back right, side left, side right
+0b1000          | left/side stereo: channel 0 is the left channel, channel 1 is the side(difference) channel
+0b1001          | right/side stereo: channel 0 is the side(difference) channel, channel 1 is the right channel
+0b1010          | mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
+0b1011 - 0b1111 | reserved
 
 ### SAMPLE SIZE
-Value | Description
------:|:-----------
-000   | get from STREAMINFO metadata block
-001   | 8 bits per sample
-010   | 12 bits per sample
-011   | reserved
-100   | 16 bits per sample
-101   | 20 bits per sample
-110   | 24 bits per sample
-111   | reserved
+Value   | Description
+-------:|:-----------
+0b000   | get from STREAMINFO metadata block
+0b001   | 8 bits per sample
+0b010   | 12 bits per sample
+0b011   | reserved
+0b100   | 16 bits per sample
+0b101   | 20 bits per sample
+0b110   | 24 bits per sample
+0b111   | reserved
 
 ### FRAME HEADER RESERVED2
 Value | Description
@@ -412,20 +412,20 @@ else
 ### BLOCK SIZE INT
 
 ~~~
-if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0110)
+if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0b0110)
   8 bit (blocksize-1)
-else if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0111)
+else if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0b0111)
   16 bit (blocksize-1)
 ~~~
 
 ### SAMPLE RATE INT
 
 ~~~
-if(`SAMPLE RATE` == 1100)
+if(`SAMPLE RATE` == 0b1100)
   8 bit sample rate (in kHz)
-else if(`SAMPLE RATE` == 1101)
+else if(`SAMPLE RATE` == 0b1101)
   16 bit sample rate (in Hz)
-else if(`SAMPLE RATE` == 1110)
+else if(`SAMPLE RATE` == 0b1110)
   16 bit sample rate in tens of Hz)
 ~~~
 
@@ -453,15 +453,15 @@ Data     | Description
 
 
 ### SUBFRAME TYPE
-Value  | Description
-------:|:-----------
-000000 | `SUBFRAME_CONSTANT`
-000001 | `SUBFRAME_VERBATIM`
-00001x | reserved
-0001xx | reserved
-001xxx | if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order ; else reserved
-01xxxx | reserved
-1xxxxx | `SUBFRAME_LPC`, xxxxx=order-1
+Value    | Description
+--------:|:-----------
+0b000000 | `SUBFRAME_CONSTANT`
+0b000001 | `SUBFRAME_VERBATIM`
+0b00001x | reserved
+0b0001xx | reserved
+0b001xxx | if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order ; else reserved
+0b01xxxx | reserved
+0b1xxxxx | `SUBFRAME_LPC`, xxxxx=order-1
 
 ### WASTED BITS PER SAMPLE FLAG
 Value | Description
@@ -484,7 +484,7 @@ Data       | Description
 Data       | Description
 :----------|:-----------
 `u(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
-`u(4)`     | (Quantized linear predictor coefficients' precision in bits)-1 (1111 = invalid).
+`u(4)`     | (Quantized linear predictor coefficients' precision in bits)-1 (0b1111 = invalid).
 `u(5)`     | Quantized linear predictor coefficient shift needed in bits (NOTE: this number is signed two's-complement).
 `u(n)`     | Unencoded predictor coefficients (n = qlp coeff precision \* lpc order) (NOTE: the coefficients are signed two's-complement).
 `RESIDUAL` | Encoded residual
@@ -501,11 +501,11 @@ Data       | Description
 `RESIDUAL_CODING_METHOD_PARTITIONED_RICE` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_RICE2` |
 
 ### RESIDUAL_CODING_METHOD
-Value | Description
------:|:-----------
-00    | partitioned Rice coding with 4-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE follows
-01    | partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
-10-11 | reserved
+Value       | Description
+-----------:|:-----------
+0b00        | partitioned Rice coding with 4-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE follows
+0b01        | partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
+0b10 - 0b11 | reserved
 
 ### RESIDUAL_CODING_METHOD_PARTITIONED_RICE
 Data              | Description
@@ -520,10 +520,10 @@ Data       | Description
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
 #### RICE PARTITION ENCODING PARAMETER
-Value     | Description
----------:|:-----------
-0000-1110 | Rice parameter.
-1111      | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
+Value           | Description
+---------------:|:-----------
+0b0000 - 0b1110 | Rice parameter.
+0b1111          | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
 ### RESIDUAL_CODING_METHOD_PARTITIONED_RICE2
 Data               | Description
@@ -538,10 +538,10 @@ Data       | Description
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
 #### RICE2 PARTITION ENCODING PARAMETER
-Value       | Description
------------:|:-----------
-00000-11110 | Rice parameter.
-11111       | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
+Value             | Description
+-----------------:|:-----------
+0b00000 - 0b11110 | Rice parameter.
+0b11111           | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
 ### ENCODED RESIDUAL
 The number of samples (n) in the partition is determined as follows:
