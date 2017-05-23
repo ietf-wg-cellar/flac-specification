@@ -46,7 +46,7 @@ Many terms like "block" and "frame" are used to mean different things in differe
 
 - **Subframe**: A subframe header plus one or more encoded samples from a given channel. All subframes within a frame will contain the same number of samples.
 
-- ##Exponential-Golomb coding##: One of Robert Rice's universal coding schemes, FLAC's residual coder, compresses data by writing the number of bits to be read minus 1, before writing the actual value
+- **Exponential-Golomb coding**: One of Robert Rice's universal coding schemes, FLAC's residual coder, compresses data by writing the number of bits to be read minus 1, before writing the actual value.
 
 # Blocking
 
@@ -84,7 +84,7 @@ FLAC uses four methods for modeling the input signal:
 
 # Residual Coding
 
-FLAC uses Exponential-Golomb (a variant of Rice) coding as it's residual encoder. [You can learn more about Exp-Golomb coding on Wikipedia](https://en.wikipedia.org/wiki/Exponential-Golomb_coding)
+FLAC uses Exponential-Golomb (a variant of Rice) coding as it's residual encoder. [You can learn more about exp-golomb coding on Wikipedia](https://en.wikipedia.org/wiki/Exponential-Golomb_coding)
 
 FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Exponential-Golomb codes in one of two ways:
 
@@ -515,9 +515,9 @@ Value | Description
 Data              | Description
 :-----------------|:-----------
 `u(4)`            | Partition order.
-`Exponential-Golomb_PARTITION`+ | There will be 2\^order partitions.
+`EXP_GOLOMB_PARTITION`+ | There will be 2\^order partitions.
 
-#### EXPGOLOMB_PARTITION
+#### EXP_GOLOMB_PARTITION
 Data       | Description
 :----------|:-----------
 `u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB PARTITION ENCODING PARAMETER`](#Exponential-Golomb-partition-encoding-parameter))
@@ -535,7 +535,7 @@ Data               | Description
 `u(4)`             | Partition order.
 `EXP-GOLOMB2_PARTITION`+ | There will be 2\^order partitions.
 
-#### EXPGOLOMB2_PARTITION
+#### EXP_GOLOMB2_PARTITION
 Data       | Description
 :----------|:-----------
 `u(5(+5))` | `EXPGOLOMB2 PARTITION ENCODING PARAMETER` (see [section on `EXPGOLOMB2 PARTITION ENCODING PARAMETER`](#expgolomb2-partition-encoding-parameter))
