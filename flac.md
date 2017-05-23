@@ -46,6 +46,8 @@ Many terms like "block" and "frame" are used to mean different things in differe
 
 - **Subframe**: A subframe header plus one or more encoded samples from a given channel. All subframes within a frame will contain the same number of samples.
 
+- ##Exponential-Golomb coding##: One of Robert Rice's universal coding schemes, FLAC's residual coder, compresses data by writing the number of bits to be read minus 1, before writing the actual value
+
 # Blocking
 
 The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that excess bits will be wasted on frame headers. If the block size is too large, the characteristics of the signal may vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, and a maximum block size of 65535 samples. This range covers the optimal size for all of the audio data FLAC supports.
@@ -81,6 +83,8 @@ FLAC uses four methods for modeling the input signal:
 - **FIR Linear prediction**. For more accurate modelling (at a cost of slower encoding), FLAC supports up to 32nd order FIR linear prediction (again, for information on linear prediction, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). The reference encoder uses the Levinson-Durbin method for calculating the LPC coefficients from the autocorrelation coefficients, and the coefficients are quantized before computing the residual. Whereas encoders such as Shorten used a fixed quantization for the entire input, FLAC allows the quantized coefficient precision to vary from subframe to subframe. The FLAC reference encoder estimates the optimal precision to use based on the block size and dynamic range of the original signal.
 
 # Residual Coding
+
+FLAC uses Exponential-Golomb (a variant of Rice) coding as it's residual encoder. [You can learn more about Exp-Golomb coding on Wikipedia](https://en.wikipedia.org/wiki/Exponential-Golomb_coding)
 
 FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Exponential-Golomb codes in one of two ways:
 
