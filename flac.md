@@ -7,7 +7,7 @@ For a user-oriented overview, see [About the FLAC Format](documentation_format_o
 # Acknowledgments
 
 FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
-- [A. J. Robinson](http://svr-www.eng.cam.ac.uk/~ajr/) for his work on [Shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html); his paper is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
+- [A. J. Robinson](http://svr-www.eng.cam.ac.uk/~ajr/) for his work on [Shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html); his paper is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Exponential-Golomb coding used in Shorten.
 - [S. W. Golomb](https://web.archive.org/web/20040215005354/http://csi.usc.edu/faculty/golomb.html) and Robert F. Rice; their universal codes are used by FLAC's entropy coder.
 - N. Levinson and J. Durbin; the reference encoder uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients.
 - And of course, [Claude Shannon](http://en.wikipedia.org/wiki/Claude_Shannon)
@@ -82,13 +82,13 @@ FLAC uses four methods for modeling the input signal:
 
 # Residual Coding
 
-FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Rice codes in one of two ways:
+FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Exponential-Golomb codes in one of two ways:
 
-1. the encoder estimates a single Rice parameter based on the variance of the residual and Rice codes the entire residual using this parameter;
+1. the encoder estimates a single Exponential-Golomb parameter based on the variance of the residual and Exponential-Golomb codes the entire residual using this parameter;
 
-2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own Rice parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the Rice parameter is based on the residual variance instead of the mean.)
+2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own Exponential-Golomb parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the Exponential-Golomb parameter is based on the residual variance instead of the mean.)
 
-The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the Rice parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
+The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the Exponential-Golomb parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
 
 # Format
 
@@ -117,7 +117,7 @@ Before the formal description of the stream, an overview might be helpful.
   - The sample rate bits in the [frame header](#frameheader) must be 0001-1110.
   - The bits-per-sample bits in the [frame header](#frameheader) must be 001-111.
   - If the sample rate is <= 48000 Hz, the filter order in [LPC subframes](#subframelpc) must be less than or equal to 12, i.e. the subframe type bits in the [subframe header](#subframeheader) may not be 101100-111111.
-   - The Rice partition order in a [Rice-coded residual section](#residualcodingmethodpartitionedrice) must be less than or equal to 8.
+   - The Exponential-Golomb partition order in a [Exponential-Golomb-coded residual section](#residualcodingmethodpartitionedExponential-Golomb) must be less than or equal to 8.
 
 ## Conventions
 
@@ -498,49 +498,49 @@ Data      | Description
 Data       | Description
 :----------|:-----------
 `u(2)`     | `RESIDUAL_CODING_METHOD`
-`RESIDUAL_CODING_METHOD_PARTITIONED_RICE` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_RICE2` |
+`RESIDUAL_CODING_METHOD_PARTITIONED_Exponential-Golomb` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_Exponential-Golomb2` |
 
 ### RESIDUAL_CODING_METHOD
 Value | Description
 -----:|:-----------
-00    | partitioned Rice coding with 4-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE follows
-01    | partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
+00    | partitioned Exponential-Golomb coding with 4-bit Exponential-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_Exponential-Golomb follows
+01    | partitioned Exponential-Golomb coding with 5-bit Exponential-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_Exponential-Golomb2 follows
 10-11 | reserved
 
-### RESIDUAL_CODING_METHOD_PARTITIONED_RICE
+### RESIDUAL_CODING_METHOD_PARTITIONED_Exponential-Golomb
 Data              | Description
 :-----------------|:-----------
 `u(4)`            | Partition order.
-`RICE_PARTITION`+ | There will be 2\^order partitions.
+`Exponential-Golomb_PARTITION`+ | There will be 2\^order partitions.
 
-#### RICE_PARTITION
+#### Exponential-Golomb_PARTITION
 Data       | Description
 :----------|:-----------
-`u(4(+5))` | `RICE PARTITION ENCODING PARAMETER` (see [section on `RICE PARTITION ENCODING PARAMETER`](#rice-partition-encoding-parameter))
+`u(4(+5))` | `Exponential-Golomb PARTITION ENCODING PARAMETER` (see [section on `Exponential-Golomb PARTITION ENCODING PARAMETER`](#Exponential-Golomb-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
-#### RICE PARTITION ENCODING PARAMETER
+#### Exponential-Golomb PARTITION ENCODING PARAMETER
 Value     | Description
 ---------:|:-----------
-0000-1110 | Rice parameter.
+0000-1110 | Exponential-Golomb parameter.
 1111      | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
-### RESIDUAL_CODING_METHOD_PARTITIONED_RICE2
+### RESIDUAL_CODING_METHOD_PARTITIONED_Exponential-Golomb2
 Data               | Description
 :------------------|:-----------
 `u(4)`             | Partition order.
-`RICE2_PARTITION`+ | There will be 2\^order partitions.
+`Exponential-Golomb2_PARTITION`+ | There will be 2\^order partitions.
 
-#### RICE2_PARTITION
+#### Exponential-Golomb2_PARTITION
 Data       | Description
 :----------|:-----------
-`u(5(+5))` | `RICE2 PARTITION ENCODING PARAMETER` (see [section on `RICE2 PARTITION ENCODING PARAMETER`](#rice2-partition-encoding-parameter))
+`u(5(+5))` | `Exponential-Golomb2 PARTITION ENCODING PARAMETER` (see [section on `Exponential-Golomb2 PARTITION ENCODING PARAMETER`](#Exponential-Golomb2-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
-#### RICE2 PARTITION ENCODING PARAMETER
+#### Exponential-Golomb2 PARTITION ENCODING PARAMETER
 Value       | Description
 -----------:|:-----------
-00000-11110 | Rice parameter.
+00000-11110 | Exponential-Golomb parameter.
 11111       | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
 ### ENCODED RESIDUAL
