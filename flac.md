@@ -1,4 +1,4 @@
-# format
+# Introduction
 
 This is a detailed description of the FLAC format. There is also a companion document that describes [FLAC-to-Ogg mapping](ogg_mapping.html).
 
