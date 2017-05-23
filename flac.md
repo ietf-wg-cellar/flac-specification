@@ -136,7 +136,7 @@ Data                        | Description
 Data                    | Description
 :-----------------------|:----------------------------------------------
 `METADATA_BLOCK_HEADER` | A block header that specifies the type and size of the metadata block data.
-`METADATA_BLOCK_DATA`   | 
+`METADATA_BLOCK_DATA`   |
 
 ## METADATA_BLOCK_HEADER
 Data    | Description
@@ -295,7 +295,7 @@ Data           | Description
 `FRAME_HEADER` |
 `SUBFRAME`+    | One SUBFRAME per channel.
 `u(?)`         | Zero-padding to byte alignment.
-`FRAME_FOOTER` | 
+`FRAME_FOOTER` |
 
 ## FRAME_HEADER
 Data      | Description
