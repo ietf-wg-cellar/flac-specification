@@ -119,11 +119,11 @@ Before the formal description of the stream, an overview might be helpful.
   - If the sample rate is <= 48000 Hz, the filter order in [LPC subframes](#subframelpc) must be less than or equal to 12, i.e. the subframe type bits in the [subframe header](#subframeheader) may not be 101100-111111.
    - The Rice partition order in a [Rice-coded residual section](#residualcodingmethodpartitionedrice) must be less than or equal to 8.
 
-## Conventions
+# Conventions
 
 The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. `n` may be expressed as an equation using `*` (multiplication), `/` (divisopm), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign (+) indicates one or more occurrences of the value.
 
-## STREAM
+# STREAM
 
 Data                        | Description
 :---------------------------|:------------------------------------------
@@ -138,7 +138,7 @@ Data                    | Description
 `METADATA_BLOCK_HEADER` | A block header that specifies the type and size of the metadata block data.
 `METADATA_BLOCK_DATA`   | 
 
-## METADATA_BLOCK_HEADER
+### METADATA_BLOCK_HEADER
 Data    | Description
 :-------|:-----------
 `u(1)`  | Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
@@ -146,7 +146,7 @@ Data    | Description
 `u(24)` | Length (in bytes) of metadata to follow (does not include the size of the `METADATA_BLOCK_HEADER`)
 
 
-## BLOCK_TYPE
+#### BLOCK_TYPE
 Value | Description
 :-----|:-----------
 0     | STREAMINFO
@@ -159,12 +159,12 @@ Value | Description
 7-126 | reserved
 127   | invalid, to avoid confusion with a frame sync code
 
-## METADATA_BLOCK_DATA
+### METADATA_BLOCK_DATA
 Data    | Description
 :-------|:-----------
 `METADATA_BLOCK_STREAMINFO` \|\| `METADATA_BLOCK_PADDING` \|\| `METADATA_BLOCK_APPLICATION` \|\| `METADATA_BLOCK_SEEKTABLE` \|\| `METADATA_BLOCK_VORBIS_COMMENT` \|\| `METADATA_BLOCK_CUESHEET` \|\| `METADATA_BLOCK_PICTURE` | The block data must match the block type in the block header.
 
-## METADATA_BLOCK_STREAMINFO
+#### METADATA_BLOCK_STREAMINFO
 Data     | Description
 :--------|:-----------
 `u(16)`  | The minimum block size (in samples) used in the stream.
@@ -181,18 +181,18 @@ NOTE
 
 - FLAC specifies a minimum block size of 16 and a maximum block size of 65535, meaning the bit patterns corresponding to the numbers 0-15 in the minimum blocksize and maximum blocksize fields are invalid.
 
-## METADATA_BLOCK_PADDING
+#### METADATA_BLOCK_PADDING
 Data     | Description
 :--------|:-----------
 `u(n)`   | n '0' bits (n must be a multiple of 8)
 
-## METADATA_BLOCK_APPLICATION
+#### METADATA_BLOCK_APPLICATION
 Data     | Description
 :--------|:-----------
 `u(32)`  | Registered application ID. (Visit the [registration page](id.html) to register an ID with FLAC.)
 `u(n)`   | Application data (n must be a multiple of 8)
 
-## METADATA_BLOCK_SEEKTABLE
+#### METADATA_BLOCK_SEEKTABLE
 Data         | Description
 :------------|:-----------
 `SEEKPOINT`+ | One or more seek points.
@@ -200,7 +200,7 @@ Data         | Description
 NOTE
 - The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18.
 
-## SEEKPOINT
+##### SEEKPOINT
 Data     | Description
 :--------|:-----------
 `u(64)`  | Sample number of first sample in the target frame, or `0xFFFFFFFFFFFFFFFF` for a placeholder point.
@@ -213,12 +213,12 @@ NOTES
 - Seek points within a table must be unique by sample number, with the exception of placeholder points.
 - The previous two notes imply that there may be any number of placeholder points, but they must all occur at the end of the table.
 
-## METADATA_BLOCK_VORBIS_COMMENT
+#### METADATA_BLOCK_VORBIS_COMMENT
 Data     | Description
 :--------|:-----------
 `u(n)`   | Also known as FLAC tags, the contents of a vorbis comment packet as specified [here](http://www.xiph.org/vorbis/doc/v-comment.html) (without the framing bit). Note that the vorbis comment spec allows for on the order of 2 \^ 64 bytes of data where as the FLAC metadata block is limited to 2 \^ 24 bytes. Given the stated purpose of vorbis comments, i.e. human-readable textual information, this limit is unlikely to be restrictive. Also note that the 32-bit field lengths are little-endian coded according to the vorbis spec, as opposed to the usual big-endian coding of fixed-length integers in the rest of FLAC.
 
-## METADATA_BLOCK_CUESHEET
+#### METADATA_BLOCK_CUESHEET
 Data              | Description
 :-----------------|:-----------
 `u(128\*8)`       | Media catalog number, in ASCII printable characters 0x20-0x7e. In general, the media catalog number may be 0 to 128 bytes long; any unused characters should be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
@@ -228,7 +228,7 @@ Data              | Description
 `u(8)`            | The number of tracks. Must be at least 1 (because of the requisite lead-out track). For CD-DA, this number must be no more than 100 (99 regular tracks and one lead-out track).
 `CUESHEET_TRACK`+ | One or more tracks. A CUESHEET block is required to have a lead-out track; it is always the last track in the CUESHEET. For CD-DA, the lead-out track number must be 170 as specified by the Red Book, otherwise is must be 255.
 
-## CUESHEET_TRACK
+##### CUESHEET_TRACK
 Data                    | Description
 :-----------------------|:-----------
 `u(64)`                 | Track offset in samples, relative to the beginning of the FLAC audio stream. It is the offset to the first index point of the track. (Note how this differs from CD-DA, where the track's offset in the TOC is that of the track's INDEX 01 even if there is an INDEX 00.) For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75th of a sec).
@@ -240,14 +240,14 @@ Data                    | Description
 `u(8)`                  | The number of track index points. There must be at least one index in every track in a CUESHEET except for the lead-out track, which must have zero. For CD-DA, this number may be no more than 100.
 `CUESHEET_TRACK_INDEX`+ | For all tracks except the lead-out track, one or more track index points.
 
-## CUESHEET_TRACK_INDEX
+###### CUESHEET_TRACK_INDEX
 Data      | Description
 :---------|:-----------
 `u(64)`   | Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75 sec). Note that the offset is from the beginning of the track, not the beginning of the audio data.
 `u(8)`    | The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track must have a number of 0 or 1, and subsequently, index numbers must increase by 1. Index numbers must be unique within a track.
 `u(3\*8)` | Reserved. All bits must be set to zero.
 
-## METADATA_BLOCK_PICTURE
+#### METADATA_BLOCK_PICTURE
 Data      | Description
 :---------|:-----------
 `u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame:
@@ -262,7 +262,7 @@ Data      | Description
 `u(32)`   | The length of the picture data in bytes.
 `u(n\*8)` | The binary picture data.
 
-## PICTURE_TYPE
+##### PICTURE_TYPE
 Value | Description
 -----:|:-----------
    0 | Other
@@ -289,7 +289,7 @@ Value | Description
 
 Other values are reserved and should not be used. There may only be one each of picture type 1 and 2 in a file.
 
-## FRAME
+# FRAME
 Data           | Description
 :--------------|:-----------
 `FRAME_HEADER` |
@@ -444,7 +444,7 @@ Data              | Description
 `SUBFRAME_HEADER` |
 `SUBFRAME_CONSTANT` \|\| `SUBFRAME_FIXED` \|\| `SUBFRAME_LPC` \|\| `SUBFRAME_VERBATIM` | The SUBFRAME_HEADER specifies which one.
 
-## SUBFRAME_HEADER
+### SUBFRAME_HEADER
 Data     | Description
 :--------|:-----------
 `u(1)`   | Zero bit padding, to prevent sync-fooling string of 1s
@@ -452,7 +452,7 @@ Data     | Description
 `u(1+k)` | `WASTED BITS PER SAMPLE FLAG` (see [section on `WASTED BITS PER SAMPLE FLAG`](#wasted-bits-per-sample-flag))
 
 
-### SUBFRAME TYPE
+#### SUBFRAME TYPE
 Value  | Description
 ------:|:-----------
 000000 | `SUBFRAME_CONSTANT`
@@ -463,24 +463,24 @@ Value  | Description
 01xxxx | reserved
 1xxxxx | `SUBFRAME_LPC`, xxxxx=order-1
 
-### WASTED BITS PER SAMPLE FLAG
+#### WASTED BITS PER SAMPLE FLAG
 Value | Description
 -----:|:-----------
 0     | no wasted bits-per-sample in source subblock, k=0
 1     | k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 001 follows, k=7 => 0000001 follows.
 
-## SUBFRAME_CONSTANT
+### SUBFRAME_CONSTANT
 Data      | Description
 :---------|:-----------
 `u(n)`    | Unencoded constant value of the subblock, n = frame's bits-per-sample.
 
-## SUBFRAME_FIXED
+### SUBFRAME_FIXED
 Data       | Description
 :----------|:-----------
 `u(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* predictor order).
 `RESIDUAL` | Encoded residual
 
-## SUBFRAME_LPC
+### SUBFRAME_LPC
 Data       | Description
 :----------|:-----------
 `u(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
@@ -489,61 +489,61 @@ Data       | Description
 `u(n)`     | Unencoded predictor coefficients (n = qlp coeff precision \* lpc order) (NOTE: the coefficients are signed two's-complement).
 `RESIDUAL` | Encoded residual
 
-## SUBFRAME_VERBATIM
+### SUBFRAME_VERBATIM
 Data      | Description
 :---------|:-----------
 `u(n\*i)` | Unencoded subblock; n = frame's bits-per-sample, i = frame's blocksize.
 
-## RESIDUAL
+### RESIDUAL
 Data       | Description
 :----------|:-----------
 `u(2)`     | `RESIDUAL_CODING_METHOD`
 `RESIDUAL_CODING_METHOD_PARTITIONED_RICE` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_RICE2` |
 
-### RESIDUAL_CODING_METHOD
+#### RESIDUAL_CODING_METHOD
 Value | Description
 -----:|:-----------
 00    | partitioned Rice coding with 4-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE follows
 01    | partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
 10-11 | reserved
 
-### RESIDUAL_CODING_METHOD_PARTITIONED_RICE
+#### RESIDUAL_CODING_METHOD_PARTITIONED_RICE
 Data              | Description
 :-----------------|:-----------
 `u(4)`            | Partition order.
 `RICE_PARTITION`+ | There will be 2\^order partitions.
 
-#### RICE_PARTITION
+##### RICE_PARTITION
 Data       | Description
 :----------|:-----------
 `u(4(+5))` | `RICE PARTITION ENCODING PARAMETER` (see [section on `RICE PARTITION ENCODING PARAMETER`](#rice-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
-#### RICE PARTITION ENCODING PARAMETER
+###### RICE PARTITION ENCODING PARAMETER
 Value     | Description
 ---------:|:-----------
 0000-1110 | Rice parameter.
 1111      | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
-### RESIDUAL_CODING_METHOD_PARTITIONED_RICE2
+#### RESIDUAL_CODING_METHOD_PARTITIONED_RICE2
 Data               | Description
 :------------------|:-----------
 `u(4)`             | Partition order.
 `RICE2_PARTITION`+ | There will be 2\^order partitions.
 
-#### RICE2_PARTITION
+##### RICE2_PARTITION
 Data       | Description
 :----------|:-----------
 `u(5(+5))` | `RICE2 PARTITION ENCODING PARAMETER` (see [section on `RICE2 PARTITION ENCODING PARAMETER`](#rice2-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
-#### RICE2 PARTITION ENCODING PARAMETER
+###### RICE2 PARTITION ENCODING PARAMETER
 Value       | Description
 -----------:|:-----------
 00000-11110 | Rice parameter.
 11111       | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
-### ENCODED RESIDUAL
+#### ENCODED RESIDUAL
 The number of samples (n) in the partition is determined as follows:
 
 - if the partition order is zero, n = frame's blocksize - predictor order
