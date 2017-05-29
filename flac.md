@@ -117,11 +117,11 @@ Before the formal description of the stream, an overview might be helpful.
 - Again, since a decoder may start decoding at an arbitrary frame in the stream, each frame header must contain some basic information about the stream because the decoder may not have access to the STREAMINFO metadata block at the start of the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is pure overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame parameters. For instance, the sample rate part of the frame header is specified using 4 bits. Eight of the bit patterns correspond to the commonly used sample rates of 8/16/22.05/24/32/44.1/48/96 kHz. However, odd sample rates can be specified by using one of the 'hint' bit patterns, directing the decoder to find the exact sample rate at the end of the frame header. The same method is used for specifying the block size and bits per sample. In this way, the frame header size stays small for all of the most common forms of audio data.
 - Individual subframes (one for each channel) are coded separately within a frame, and appear serially in the stream. In other words, the encoded audio data is NOT channel-interleaved. This reduces decoder complexity at the cost of requiring larger decode buffers. Each subframe has its own header specifying the attributes of the subframe, like prediction method and order, residual coding parameters, etc. The header is followed by the encoded audio data for that channel.
 - `FLAC` specifies a subset of itself as the Subset format. The purpose of this is to ensure that any streams encoded according to the Subset are truly "streamable", meaning that a decoder that cannot seek within the stream can still pick up in the middle of the stream and start decoding. It also makes hardware decoder implementations more practical by limiting the encoding parameters such that decoder buffer sizes and other resource requirements can be easily determined. __flac__ generates Subset streams by default unless the "--lax" command-line option is used. The Subset makes the following limitations on what may be used in the stream:
-  - The blocksize bits in the [frame header](#frameheader) must be 0001-1110. The blocksize must be <= 16384; if the sample rate is <= 48000 Hz, the blocksize must be <= 4608.
-  - The sample rate bits in the [frame header](#frameheader) must be 0001-1110.
-  - The bits-per-sample bits in the [frame header](#frameheader) must be 001-111.
-  - If the sample rate is <= 48000 Hz, the filter order in [LPC subframes](#subframelpc) must be less than or equal to 12, i.e. the subframe type bits in the [subframe header](#subframeheader) may not be 101100-111111.
-   - The exp-golomb partition order in a [exp-golomb coded residual section](#residualcodingmethodpartitionedexpgolomb) must be less than or equal to 8.
+  - The blocksize bits in the [frame header](#frameheader) must be 0b0001 - 0b1110. The blocksize must be <= 16384; if the sample rate is <= 48000 Hz, the blocksize must be <= 4608.
+  - The sample rate bits in the [frame header](#frameheader) must be 0b0001 - 0b1110.
+  - The bits-per-sample bits in the [frame header](#frameheader) must be 0b001 - 0b111.
+  - If the sample rate is <= 48000 Hz, the filter order in [LPC subframes](#subframelpc) must be less than or equal to 12, i.e. the subframe type bits in the [subframe header](#subframeheader) may not be 0b101100 - 0b111111.
+  - The exp-golomb partition order in a [exp-golomb coded residual section](#residualcodingmethodpartitionedexpgolomb) must be less than or equal to 8.
 
 ## Conventions
 
@@ -505,11 +505,11 @@ Data       | Description
 `RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB2` |
 
 ### RESIDUAL_CODING_METHOD
-Value | Description
------:|:-----------
-00    | partitioned Exponential-Golomb coding with 4-bit Exponential-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB follows
-01    | partitioned Exponential-Golomb coding with 5-bit Exponential-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB2 follows
-10-11 | reserved
+Value       | Description
+-----------:|:-----------
+0b00        | partitioned Exp-Golomb coding with 4-bit Exp-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB follows
+0b01        | partitioned Exp-Golomb coding with 5-bit Exp-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB2 follows
+0b10 - 0b11 | reserved
 
 ### RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB
 Data              | Description
@@ -524,10 +524,10 @@ Data       | Description
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
 #### EXPGOLOMB PARTITION ENCODING PARAMETER
-Value     | Description
----------:|:-----------
-0000-1110 | Exp-golomb parameter.
-1111      | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
+Value           | Description
+---------------:|:-----------
+0b0000 - 0b1110 | Exp-golomb parameter.
+0b1111          | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
 ### RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB2
 Data               | Description
@@ -542,10 +542,10 @@ Data       | Description
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
 #### EXPGOLOMB2 PARTITION ENCODING PARAMETER
-Value       | Description
------------:|:-----------
-00000-11110 | Exp-golomb parameter.
-11111       | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
+Value             | Description
+-----------------:|:-----------
+0b00000 - 0b11110 | Exp-golomb parameter.
+0b11111           | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
 ### ENCODED RESIDUAL
 The number of samples (n) in the partition is determined as follows:
