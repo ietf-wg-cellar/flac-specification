@@ -22,13 +22,13 @@ Within the audio domain, there are many possible subdomains. For example: low bi
 
 Similar to many audio coders, a FLAC encoder has the following stages:
 
-- [Blocking](#blocking). The input is broken up into many contiguous blocks. With FLAC, the blocks may vary in size. The optimal size of the block is usually affected by many factors, including the sample rate, spectral characteristics over time, etc. Though FLAC allows the block size to vary within a stream, the reference encoder uses a fixed block size.
+- `Blocking` (see [section on `Blocking`](#blocking)). The input is broken up into many contiguous blocks. With FLAC, the blocks may vary in size. The optimal size of the block is usually affected by many factors, including the sample rate, spectral characteristics over time, etc. Though FLAC allows the block size to vary within a stream, the reference encoder uses a fixed block size.
 
-- [Interchannel Decorrelation](#interchannel-decorrelation). In the case of stereo streams, the encoder will create mid and side signals based on the average and difference (respectively) of the left and right channels. The encoder will then pass the best form of the signal to the next stage.
+- `Interchannel Decorrelation` (see [section on `Interchannel Decorrelation`](#interchannel-decorrelation)). In the case of stereo streams, the encoder will create mid and side signals based on the average and difference (respectively) of the left and right channels. The encoder will then pass the best form of the signal to the next stage.
 
-- [Prediction](#prediction). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors (described in the [prediction](#prediction) section), but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even within the channels of a block.
+- `Prediction` (see [section on `Prediction`](#prediction)). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors, but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even within the channels of a block.
 
-- [Residual coding](#residual-coding). If the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) must be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC currently uses only one method for encoding the residual (see the [Residual coding](#residual-coding) section), but the format has reserved space for additional methods. FLAC allows the residual coding method to change from block to block, or even within the channels of a block.
+- `Residual Coding` (See [section on `Residual Coding`](#residual-coding)). If the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) must be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC currently uses only one method for encoding the residual, but the format has reserved space for additional methods. FLAC allows the residual coding method to change from block to block, or even within the channels of a block.
 
 In addition, FLAC specifies a metadata system, which allows arbitrary information about the stream to be included at the beginning of the stream.
 
@@ -106,7 +106,7 @@ Before the formal description of the stream, an overview might be helpful.
 - FLAC supports up to 128 kinds of metadata blocks; currently the following are defined:
 
   - `STREAMINFO`: This block has information about the whole stream, like sample rate, number of channels, total number of samples, etc. It must be present as the first metadata block in the stream. Other metadata blocks may follow, and ones that the decoder doesn't understand, it will skip.
-  - `APPLICATION`: This block is for use by third-party applications. The only mandatory field is a 32-bit identifier. This ID is granted upon request to an application by the FLAC maintainers. The remainder is of the block is defined by the registered application. Visit the [registration page](id.html) if you would like to register an ID for your application with FLAC.
+  - `APPLICATION`: This block is for use by third-party applications. The only mandatory field is a 32-bit identifier. This ID is granted upon request to an application by the FLAC maintainers. The remainder is of the block is defined by the registered application. Visit the [registration page](https://xiph.org/flac/id.html) if you would like to register an ID for your application with FLAC.
   - `PADDING`: This block allows for an arbitrary amount of padding. The contents of a PADDING block have no meaning. This block is useful when it is known that metadata will be edited after encoding; the user can instruct the encoder to reserve a PADDING block of sufficient size so that when metadata is added, it will simply overwrite the padding (which is relatively quick) instead of having to insert it into the right place in the existing file (which would normally require rewriting the entire file).
   - `SEEKTABLE`: This is an optional block for storing seek points. It is possible to seek to any given sample in a FLAC stream without a seek table, but the delay can be unpredictable since the bitrate may vary widely within a stream. By adding seek points to a stream, this delay can be significantly reduced. Each seek point takes 18 bytes, so 1% resolution within a stream adds less than 2K. There can be only one SEEKTABLE in a stream, but the table can have any number of seek points. There is also a special 'placeholder' seekpoint which will be ignored by decoders but which can be used to reserve space for future seek point insertion.
   - `VORBIS_COMMENT`: This block is for storing a list of human-readable name/value pairs. Values are encoded using UTF-8. It is an implementation of the [Vorbis comment specification](http://xiph.org/vorbis/doc/v-comment.html) (without the framing bit). This is the only officially supported tagging mechanism in FLAC. There may be only one VORBIS\_COMMENT block in a stream. In some external documentation, Vorbis comments are called FLAC tags to lessen confusion.
@@ -117,11 +117,11 @@ Before the formal description of the stream, an overview might be helpful.
 - Again, since a decoder may start decoding at an arbitrary frame in the stream, each frame header must contain some basic information about the stream because the decoder may not have access to the STREAMINFO metadata block at the start of the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is pure overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame parameters. For instance, the sample rate part of the frame header is specified using 4 bits. Eight of the bit patterns correspond to the commonly used sample rates of 8/16/22.05/24/32/44.1/48/96 kHz. However, odd sample rates can be specified by using one of the 'hint' bit patterns, directing the decoder to find the exact sample rate at the end of the frame header. The same method is used for specifying the block size and bits per sample. In this way, the frame header size stays small for all of the most common forms of audio data.
 - Individual subframes (one for each channel) are coded separately within a frame, and appear serially in the stream. In other words, the encoded audio data is NOT channel-interleaved. This reduces decoder complexity at the cost of requiring larger decode buffers. Each subframe has its own header specifying the attributes of the subframe, like prediction method and order, residual coding parameters, etc. The header is followed by the encoded audio data for that channel.
 - `FLAC` specifies a subset of itself as the Subset format. The purpose of this is to ensure that any streams encoded according to the Subset are truly "streamable", meaning that a decoder that cannot seek within the stream can still pick up in the middle of the stream and start decoding. It also makes hardware decoder implementations more practical by limiting the encoding parameters such that decoder buffer sizes and other resource requirements can be easily determined. __flac__ generates Subset streams by default unless the "--lax" command-line option is used. The Subset makes the following limitations on what may be used in the stream:
-  - The blocksize bits in the [frame header](#frameheader) must be 0b0001 - 0b1110. The blocksize must be <= 16384; if the sample rate is <= 48000 Hz, the blocksize must be <= 4608.
-  - The sample rate bits in the [frame header](#frameheader) must be 0b0001 - 0b1110.
-  - The bits-per-sample bits in the [frame header](#frameheader) must be 0b001 - 0b111.
-  - If the sample rate is <= 48000 Hz, the filter order in [LPC subframes](#subframelpc) must be less than or equal to 12, i.e. the subframe type bits in the [subframe header](#subframeheader) may not be 0b101100 - 0b111111.
-  - The exp-golomb partition order in a [exp-golomb coded residual section](#residualcodingmethodpartitionedexpgolomb) must be less than or equal to 8.
+  - The blocksize bits in the `FRAME_HEADER` (see [`FRAME_HEADER` section](#frameheader)) must be 0001-1110. The blocksize must be <= 16384; if the sample rate is <= 48000 Hz, the blocksize must be <= 4608.
+  - The sample rate bits in the `FRAME_HEADER` must be 0001-1110.
+  - The bits-per-sample bits in the `FRAME_HEADER` must be 001-111.
+  - If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [`SUBFRAME_LPC` section](#subframelpc)) must be less than or equal to 12, i.e. the subframe type bits in the `SUBFRAME_HEADER` (see [`SUBFRAME_HEADER` section](#subframeheader)) may not be 101100-111111.
+  - The Rice partition order in an `exp-golomb coded residual section` (see [`RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB` section](#residualcodingmethodpartitionedexpgolomb)) must be less than or equal to 8.
 
 ## Conventions
 
@@ -140,7 +140,7 @@ Data                        | Description
 Data                    | Description
 :-----------------------|:----------------------------------------------
 `METADATA_BLOCK_HEADER` | A block header that specifies the type and size of the metadata block data.
-`METADATA_BLOCK_DATA`   | 
+`METADATA_BLOCK_DATA`   |
 
 ## METADATA_BLOCK_HEADER
 Data    | Description
@@ -299,7 +299,7 @@ Data           | Description
 `FRAME_HEADER` |
 `SUBFRAME`+    | One SUBFRAME per channel.
 `u(?)`         | Zero-padding to byte alignment.
-`FRAME_FOOTER` | 
+`FRAME_FOOTER` |
 
 ## FRAME_HEADER
 Data      | Description
