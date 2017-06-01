@@ -502,16 +502,16 @@ Data      | Description
 Data       | Description
 :----------|:-----------
 `u(2)`     | `RESIDUAL_CODING_METHOD`
-`RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB2` |
+`RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB2` |
 
 ### RESIDUAL_CODING_METHOD
 Value       | Description
 -----------:|:-----------
-0b00        | partitioned Exp-Golomb coding with 4-bit Exp-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB follows
-0b01        | partitioned Exp-Golomb coding with 5-bit Exp-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB2 follows
+0b00        | partitioned Exp-Golomb coding with 4-bit Exp-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB follows
+0b01        | partitioned Exp-Golomb coding with 5-bit Exp-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB2 follows
 0b10 - 0b11 | reserved
 
-### RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB
+### RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB
 Data              | Description
 :-----------------|:-----------
 `u(4)`            | Partition order.
@@ -523,13 +523,13 @@ Data       | Description
 `u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB PARTITION ENCODING PARAMETER`](#Exponential-Golomb-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
-#### EXPGOLOMB PARTITION ENCODING PARAMETER
+#### EXP-GOLOMB PARTITION ENCODING PARAMETER
 Value           | Description
 ---------------:|:-----------
 0b0000 - 0b1110 | Exp-golomb parameter.
 0b1111          | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
-### RESIDUAL_CODING_METHOD_PARTITIONED_EXPGOLOMB2
+### RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB2
 Data               | Description
 :------------------|:-----------
 `u(4)`             | Partition order.
@@ -538,10 +538,10 @@ Data               | Description
 #### EXP_GOLOMB2_PARTITION
 Data       | Description
 :----------|:-----------
-`u(5(+5))` | `EXPGOLOMB2 PARTITION ENCODING PARAMETER` (see [section on `EXPGOLOMB2 PARTITION ENCODING PARAMETER`](#expgolomb2-partition-encoding-parameter))
+`u(5(+5))` | `EXP-GOLOMB2 PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB2 PARTITION ENCODING PARAMETER`](#expgolomb2-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
-#### EXPGOLOMB2 PARTITION ENCODING PARAMETER
+#### EXP-GOLOMB2 PARTITION ENCODING PARAMETER
 Value             | Description
 -----------------:|:-----------
 0b00000 - 0b11110 | Exp-golomb parameter.
