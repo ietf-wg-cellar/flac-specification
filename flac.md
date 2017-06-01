@@ -1,4 +1,4 @@
-# format
+# Introduction
 
 This is a detailed description of the FLAC format. There is also a companion document that describes [FLAC-to-Ogg mapping](ogg_mapping.html).
 
@@ -7,7 +7,7 @@ For a user-oriented overview, see [About the FLAC Format](documentation_format_o
 # Acknowledgments
 
 FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
-- [A. J. Robinson](http://svr-www.eng.cam.ac.uk/~ajr/) for his work on [Shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html); his paper is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
+- [A. J. Robinson](http://svr-www.eng.cam.ac.uk/~ajr/) for his work on [Shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html); his paper is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Exponential-Golomb coding used in Shorten.
 - [S. W. Golomb](https://web.archive.org/web/20040215005354/http://csi.usc.edu/faculty/golomb.html) and Robert F. Rice; their universal codes are used by FLAC's entropy coder.
 - N. Levinson and J. Durbin; the reference encoder uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients.
 - And of course, [Claude Shannon](http://en.wikipedia.org/wiki/Claude_Shannon)
@@ -46,6 +46,8 @@ Many terms like "block" and "frame" are used to mean different things in differe
 
 - **Subframe**: A subframe header plus one or more encoded samples from a given channel. All subframes within a frame will contain the same number of samples.
 
+- **Exponential-Golomb coding**: One of Robert Rice's universal coding schemes, FLAC's residual coder, compresses data by writing the number of bits to be read minus 1, before writing the actual value.
+
 # Blocking
 
 The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that excess bits will be wasted on frame headers. If the block size is too large, the characteristics of the signal may vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, and a maximum block size of 65535 samples. This range covers the optimal size for all of the audio data FLAC supports.
@@ -82,13 +84,15 @@ FLAC uses four methods for modeling the input signal:
 
 # Residual Coding
 
-FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Rice codes in one of two ways:
+FLAC uses Exponential-Golomb (a variant of Rice) coding as it's residual encoder. [You can learn more about exp-golomb coding on Wikipedia](https://en.wikipedia.org/wiki/Exponential-Golomb_coding)
 
-1. the encoder estimates a single Rice parameter based on the variance of the residual and Rice codes the entire residual using this parameter;
+FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Exponential-Golomb codes in one of two ways:
 
-2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own Rice parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the Rice parameter is based on the residual variance instead of the mean.)
+1. the encoder estimates a single exp-golomb parameter based on the variance of the residual and exp-golomb codes the entire residual using this parameter;
 
-The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the Rice parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
+2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own exp-golomb parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the exp-golomb parameter is based on the residual variance instead of the mean.)
+
+The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the exp-golomb parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
 
 # Format
 
@@ -117,11 +121,11 @@ Before the formal description of the stream, an overview might be helpful.
   - The sample rate bits in the `FRAME_HEADER` must be 0001-1110.
   - The bits-per-sample bits in the `FRAME_HEADER` must be 001-111.
   - If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [`SUBFRAME_LPC` section](#subframelpc)) must be less than or equal to 12, i.e. the subframe type bits in the `SUBFRAME_HEADER` (see [`SUBFRAME_HEADER` section](#subframeheader)) may not be 101100-111111.
-  - The Rice partition order in a `Rice-coded residual section` (see [`RESIDUAL_CODING_METHOD_PARTITIONED_RICE` section](#residualcodingmethodpartitionedrice)) must be less than or equal to 8.
+  - The Rice partition order in an `exp-golomb coded residual section` (see [`RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB` section](#residualcodingmethodpartitionedexpgolomb)) must be less than or equal to 8.
 
 ## Conventions
 
-The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. `n` may be expressed as an equation using `*` (multiplication), `/` (divisopm), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign (+) indicates one or more occurrences of the value.
+The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. `n` may be expressed as an equation using `*` (multiplication), `/` (divisopm), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
 
 ## STREAM
 
@@ -147,17 +151,17 @@ Data    | Description
 
 
 ## BLOCK_TYPE
-Value | Description
-:-----|:-----------
-0     | STREAMINFO
-1     | PADDING
-2     | APPLICATION
-3     | SEEKTABLE
-4     | VORBIS_COMMENT
-5     | CUESHEET
-6     | PICTURE
-7-126 | reserved
-127   | invalid, to avoid confusion with a frame sync code
+Value   | Description
+:-------|:-----------
+0       | STREAMINFO
+1       | PADDING
+2       | APPLICATION
+3       | SEEKTABLE
+4       | VORBIS_COMMENT
+5       | CUESHEET
+6       | PICTURE
+7 - 126 | reserved
+127     | invalid, to avoid confusion with a frame sync code
 
 ## METADATA_BLOCK_DATA
 Data    | Description
@@ -332,65 +336,65 @@ The `BLOCKING STRATEGY` bit must be the same throughout the entire stream.
 The `BLOCKING STRATEGY` bit determines how to calculate the sample number of the first sample in the frame. If the bit is `0` (fixed-blocksize), the frame header encodes the frame number as above, and the frame's starting sample number will be the frame number times the blocksize. If it is `1` (variable-blocksize), the frame header encodes the frame's starting sample number itself. (In the case of a fixed-blocksize stream, only the last block may be shorter than the stream blocksize; its starting sample number will be calculated as the frame number times the previous frame's blocksize, or zero if it is the first frame).
 
 ###  INTERCHANNEL SAMPLE BLOCK SIZE
-Value     | Description
----------:|:-----------
-0000      | reserved
-0001      | 192 samples
-0010-0101 | 576 \* (2\^(n-2)) samples, i.e. 576/1152/2304/4608
-0110      | get 8 bit (blocksize-1) from end of header
-0111      | get 16 bit (blocksize-1) from end of header
-1000-1111 | 256 \* (2\^(n-8)) samples, i.e. 256/512/1024/2048/4096/8192/16384/32768
+Value           | Description
+---------------:|:-----------
+0b0000          | reserved
+0b0001          | 192 samples
+0b0010 - 0b0101 | 576 \* (2\^(n-2)) samples, i.e. 576/1152/2304/4608
+0b0110          | get 8 bit (blocksize-1) from end of header
+0b0111          | get 16 bit (blocksize-1) from end of header
+0b1000 - 0b1111 | 256 \* (2\^(n-8)) samples, i.e. 256/512/1024/2048/4096/8192/16384/32768
 
 ### SAMPLE RATE
-Value | Description
------:|:-----------
-0000  | get from STREAMINFO metadata block
-0001  | 88.2 kHz
-0010  | 176.4 kHz
-0011  | 192 kHz
-0100  | 8 kHz
-0101  | 16 kHz
-0110  | 22.05 kHz
-0111  | 24 kHz
-1000  | 32 kHz
-1001  | 44.1 kHz
-1010  | 48 kHz
-1011  | 96 kHz
-1100  | get 8 bit sample rate (in kHz) from end of header
-1101  | get 16 bit sample rate (in Hz) from end of header
-1110  | get 16 bit sample rate (in tens of Hz) from end of header
-1111  | invalid, to prevent sync-fooling string of 1s
+Value   | Description
+-------:|:-----------
+0b0000  | get from STREAMINFO metadata block
+0b0001  | 88.2 kHz
+0b0010  | 176.4 kHz
+0b0011  | 192 kHz
+0b0100  | 8 kHz
+0b0101  | 16 kHz
+0b0110  | 22.05 kHz
+0b0111  | 24 kHz
+0b1000  | 32 kHz
+0b1001  | 44.1 kHz
+0b1010  | 48 kHz
+0b1011  | 96 kHz
+0b1100  | get 8 bit sample rate (in kHz) from end of header
+0b1101  | get 16 bit sample rate (in Hz) from end of header
+0b1110  | get 16 bit sample rate (in tens of Hz) from end of header
+0b1111  | invalid, to prevent sync-fooling string of 1s
 
 ### CHANNEL ASSIGNMENT
 
 For values 0000-0111, the value represents the (number of independent channels)-1. Where defined, the channel order follows SMPTE/ITU-R recommendations.
 
-Value     | Description
----------:|:-----------
-0000      | 1 channel: mono
-0001      | 2 channels: left, right
-0010      | 3 channels: left, right, center
-0011      | 4 channels: front left, front right, back left, back right
-0100      | 5 channels: front left, front right, front center, back/surround left, back/surround right
-0101      | 6 channels: front left, front right, front center, LFE, back/surround left, back/surround right
-0110      | 7 channels: front left, front right, front center, LFE, back center, side left, side right
-0111      | 8 channels: front left, front right, front center, LFE, back left, back right, side left, side right
-1000      | left/side stereo: channel 0 is the left channel, channel 1 is the side(difference) channel
-1001      | right/side stereo: channel 0 is the side(difference) channel, channel 1 is the right channel
-1010      | mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
-1011-1111 | reserved
+Value           | Description
+---------------:|:-----------
+0b0000          | 1 channel: mono
+0b0001          | 2 channels: left, right
+0b0010          | 3 channels: left, right, center
+0b0011          | 4 channels: front left, front right, back left, back right
+0b0100          | 5 channels: front left, front right, front center, back/surround left, back/surround right
+0b0101          | 6 channels: front left, front right, front center, LFE, back/surround left, back/surround right
+0b0110          | 7 channels: front left, front right, front center, LFE, back center, side left, side right
+0b0111          | 8 channels: front left, front right, front center, LFE, back left, back right, side left, side right
+0b1000          | left/side stereo: channel 0 is the left channel, channel 1 is the side(difference) channel
+0b1001          | right/side stereo: channel 0 is the side(difference) channel, channel 1 is the right channel
+0b1010          | mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
+0b1011 - 0b1111 | reserved
 
 ### SAMPLE SIZE
-Value | Description
------:|:-----------
-000   | get from STREAMINFO metadata block
-001   | 8 bits per sample
-010   | 12 bits per sample
-011   | reserved
-100   | 16 bits per sample
-101   | 20 bits per sample
-110   | 24 bits per sample
-111   | reserved
+Value   | Description
+-------:|:-----------
+0b000   | get from STREAMINFO metadata block
+0b001   | 8 bits per sample
+0b010   | 12 bits per sample
+0b011   | reserved
+0b100   | 16 bits per sample
+0b101   | 20 bits per sample
+0b110   | 24 bits per sample
+0b111   | reserved
 
 ### FRAME HEADER RESERVED2
 Value | Description
@@ -412,20 +416,20 @@ else
 ### BLOCK SIZE INT
 
 ~~~
-if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0110)
+if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0b0110)
   8 bit (blocksize-1)
-else if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0111)
+else if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0b0111)
   16 bit (blocksize-1)
 ~~~
 
 ### SAMPLE RATE INT
 
 ~~~
-if(`SAMPLE RATE` == 1100)
+if(`SAMPLE RATE` == 0b1100)
   8 bit sample rate (in kHz)
-else if(`SAMPLE RATE` == 1101)
+else if(`SAMPLE RATE` == 0b1101)
   16 bit sample rate (in Hz)
-else if(`SAMPLE RATE` == 1110)
+else if(`SAMPLE RATE` == 0b1110)
   16 bit sample rate in tens of Hz)
 ~~~
 
@@ -453,15 +457,15 @@ Data     | Description
 
 
 ### SUBFRAME TYPE
-Value  | Description
-------:|:-----------
-000000 | `SUBFRAME_CONSTANT`
-000001 | `SUBFRAME_VERBATIM`
-00001x | reserved
-0001xx | reserved
-001xxx | if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order ; else reserved
-01xxxx | reserved
-1xxxxx | `SUBFRAME_LPC`, xxxxx=order-1
+Value    | Description
+--------:|:-----------
+0b000000 | `SUBFRAME_CONSTANT`
+0b000001 | `SUBFRAME_VERBATIM`
+0b00001x | reserved
+0b0001xx | reserved
+0b001xxx | if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order ; else reserved
+0b01xxxx | reserved
+0b1xxxxx | `SUBFRAME_LPC`, xxxxx=order-1
 
 ### WASTED BITS PER SAMPLE FLAG
 Value | Description
@@ -484,7 +488,7 @@ Data       | Description
 Data       | Description
 :----------|:-----------
 `u(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
-`u(4)`     | (Quantized linear predictor coefficients' precision in bits)-1 (1111 = invalid).
+`u(4)`     | (Quantized linear predictor coefficients' precision in bits)-1 (0b1111 = invalid).
 `u(5)`     | Quantized linear predictor coefficient shift needed in bits (NOTE: this number is signed two's-complement).
 `u(n)`     | Unencoded predictor coefficients (n = qlp coeff precision \* lpc order) (NOTE: the coefficients are signed two's-complement).
 `RESIDUAL` | Encoded residual
@@ -498,50 +502,50 @@ Data      | Description
 Data       | Description
 :----------|:-----------
 `u(2)`     | `RESIDUAL_CODING_METHOD`
-`RESIDUAL_CODING_METHOD_PARTITIONED_RICE` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_RICE2` |
+`RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB2` |
 
 ### RESIDUAL_CODING_METHOD
-Value | Description
------:|:-----------
-00    | partitioned Rice coding with 4-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE follows
-01    | partitioned Rice coding with 5-bit Rice parameter; RESIDUAL_CODING_METHOD_PARTITIONED_RICE2 follows
-10-11 | reserved
+Value       | Description
+-----------:|:-----------
+0b00        | partitioned Exp-Golomb coding with 4-bit Exp-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB follows
+0b01        | partitioned Exp-Golomb coding with 5-bit Exp-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB2 follows
+0b10 - 0b11 | reserved
 
-### RESIDUAL_CODING_METHOD_PARTITIONED_RICE
+### RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB
 Data              | Description
 :-----------------|:-----------
 `u(4)`            | Partition order.
-`RICE_PARTITION`+ | There will be 2\^order partitions.
+`EXP_GOLOMB_PARTITION`+ | There will be 2\^order partitions.
 
-#### RICE_PARTITION
+#### EXP_GOLOMB_PARTITION
 Data       | Description
 :----------|:-----------
-`u(4(+5))` | `RICE PARTITION ENCODING PARAMETER` (see [section on `RICE PARTITION ENCODING PARAMETER`](#rice-partition-encoding-parameter))
+`u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB PARTITION ENCODING PARAMETER`](#Exponential-Golomb-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
-#### RICE PARTITION ENCODING PARAMETER
-Value     | Description
----------:|:-----------
-0000-1110 | Rice parameter.
-1111      | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
+#### EXP-GOLOMB PARTITION ENCODING PARAMETER
+Value           | Description
+---------------:|:-----------
+0b0000 - 0b1110 | Exp-golomb parameter.
+0b1111          | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
-### RESIDUAL_CODING_METHOD_PARTITIONED_RICE2
+### RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB2
 Data               | Description
 :------------------|:-----------
 `u(4)`             | Partition order.
-`RICE2_PARTITION`+ | There will be 2\^order partitions.
+`EXP-GOLOMB2_PARTITION`+ | There will be 2\^order partitions.
 
-#### RICE2_PARTITION
+#### EXP_GOLOMB2_PARTITION
 Data       | Description
 :----------|:-----------
-`u(5(+5))` | `RICE2 PARTITION ENCODING PARAMETER` (see [section on `RICE2 PARTITION ENCODING PARAMETER`](#rice2-partition-encoding-parameter))
+`u(5(+5))` | `EXP-GOLOMB2 PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB2 PARTITION ENCODING PARAMETER`](#expgolomb2-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
-#### RICE2 PARTITION ENCODING PARAMETER
-Value       | Description
------------:|:-----------
-00000-11110 | Rice parameter.
-11111       | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
+#### EXP-GOLOMB2 PARTITION ENCODING PARAMETER
+Value             | Description
+-----------------:|:-----------
+0b00000 - 0b11110 | Exp-golomb parameter.
+0b11111           | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
 
 ### ENCODED RESIDUAL
 The number of samples (n) in the partition is determined as follows:
