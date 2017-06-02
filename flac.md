@@ -520,7 +520,7 @@ Data              | Description
 #### EXP_GOLOMB_PARTITION
 Data       | Description
 :----------|:-----------
-`u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB PARTITION ENCODING PARAMETER`](#exp-golomb-partition-encoding-parameter))
+`u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB PARTITION ENCODING PARAMETER`](#expgolomb-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
 #### EXP GOLOMB PARTITION ENCODING PARAMETER
