@@ -4,6 +4,10 @@ This is a detailed description of the FLAC format. There is also a companion doc
 
 For a user-oriented overview, see [About the FLAC Format](documentation_format_overview.html).
 
+# Notation and Conventions
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [@!RFC2119].
+
 # Acknowledgments
 
 FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
