@@ -305,7 +305,7 @@ Data           | Description
 ## FRAME_HEADER
 Data      | Description
 :---------|:-----------
-`u(14)`   | Sync code '11111111111110'
+`u(14)`   | Sync code '0b11111111111110'
 `u(1)`    | `FRAME HEADER RESERVED`
 `u(1)`    | `BLOCKING STRATEGY`
 `u(4)`    | `INTERCHANNEL SAMPLE BLOCK SIZE`
