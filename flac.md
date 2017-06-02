@@ -48,6 +48,8 @@ Many terms like "block" and "frame" are used to mean different things in differe
 
 - **Exponential-Golomb coding**: One of Robert Rice's universal coding schemes, FLAC's residual coder, compresses data by writing the number of bits to be read minus 1, before writing the actual value.
 
+- **LPC**: [Linear predictive coding](https://en.wikipedia.org/wiki/Linear_predictive_coding).
+
 # Blocking
 
 The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that excess bits will be wasted on frame headers. If the block size is too large, the characteristics of the signal may vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, and a maximum block size of 65535 samples. This range covers the optimal size for all of the audio data FLAC supports.
