@@ -225,10 +225,10 @@ Data     | Description
 ## METADATA_BLOCK_CUESHEET
 Data              | Description
 :-----------------|:-----------
-`u(128\*8)`       | Media catalog number, in ASCII printable characters 0x20-0x7e. In general, the media catalog number may be 0 to 128 bytes long; any unused characters should be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
+`u(128*8)`        | Media catalog number, in ASCII printable characters 0x20-0x7e. In general, the media catalog number may be 0 to 128 bytes long; any unused characters should be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
 `u(64)`           | The number of lead-in samples. This field has meaning only for CD-DA cuesheets; for other uses it should be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to the Red Book, the lead-in must be silence and CD grabbing software does not usually store it; additionally, the lead-in must be at least two seconds but may be longer. For these reasons the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track may have INDEX 00 data.
 `u(1)`            | `1` if the CUESHEET corresponds to a Compact Disc, else `0`.
-`u(7+258\*8)`     | Reserved. All bits must be set to zero.
+`u(7+258*8)`      | Reserved. All bits must be set to zero.
 `u(8)`            | The number of tracks. Must be at least 1 (because of the requisite lead-out track). For CD-DA, this number must be no more than 100 (99 regular tracks and one lead-out track).
 `CUESHEET_TRACK`+ | One or more tracks. A CUESHEET block is required to have a lead-out track; it is always the last track in the CUESHEET. For CD-DA, the lead-out track number must be 170 as specified by the Red Book, otherwise is must be 255.
 
@@ -240,7 +240,7 @@ Data                    | Description
 `u(12\*8)`              | Track ISRC. This is a 12-digit alphanumeric code; see [here](http://isrc.ifpi.org/) and [here](http://www.disctronics.co.uk/technology/cdaudio/cdaud_isrc.htm). A value of 12 ASCII NUL characters may be used to denote absence of an ISRC.
 `u(1)`                  | The track type: 0 for audio, 1 for non-audio. This corresponds to the CD-DA Q-channel control bit 3.
 `u(1)`                  | The pre-emphasis flag: 0 for no pre-emphasis, 1 for pre-emphasis. This corresponds to the CD-DA Q-channel control bit 5; see [here](http://www.chipchapin.com/CDMedia/cdda9.php3).
-`u(6+13\*8)`            | Reserved. All bits must be set to zero.
+`u(6+13*8)`             | Reserved. All bits must be set to zero.
 `u(8)`                  | The number of track index points. There must be at least one index in every track in a CUESHEET except for the lead-out track, which must have zero. For CD-DA, this number may be no more than 100.
 `CUESHEET_TRACK_INDEX`+ | For all tracks except the lead-out track, one or more track index points.
 
@@ -249,22 +249,22 @@ Data      | Description
 :---------|:-----------
 `u(64)`   | Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset must be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75 sec). Note that the offset is from the beginning of the track, not the beginning of the audio data.
 `u(8)`    | The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track must have a number of 0 or 1, and subsequently, index numbers must increase by 1. Index numbers must be unique within a track.
-`u(3\*8)` | Reserved. All bits must be set to zero.
+`u(3*8)`  | Reserved. All bits must be set to zero.
 
 ## METADATA_BLOCK_PICTURE
 Data      | Description
 :---------|:-----------
 `u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame:
 `u(32)`   | The length of the MIME type string in bytes.
-`u(n\*8)` | The MIME type string, in printable ASCII characters 0x20-0x7e. The MIME type may also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
+`u(n*8)`  | The MIME type string, in printable ASCII characters 0x20-0x7e. The MIME type may also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
 `u(32)`   | The length of the description string in bytes.
-`u(n\*8)` | The description of the picture, in UTF-8.
+`u(n*8)`  | The description of the picture, in UTF-8.
 `u(32)`   | The width of the picture in pixels.
 `u(32)`   | The height of the picture in pixels.
 `u(32)`   | The color depth of the picture in bits-per-pixel.
 `u(32)`   | For indexed-color pictures (e.g. GIF), the number of colors used, or `0` for non-indexed pictures.
 `u(32)`   | The length of the picture data in bytes.
-`u(n\*8)` | The binary picture data.
+`u(n*8)`  | The binary picture data.
 
 ## PICTURE_TYPE
 Value | Description
