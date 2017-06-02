@@ -212,6 +212,7 @@ Data     | Description
 `u(16)`  | Number of samples in the target frame.
 
 NOTES
+
 - For placeholder points, the second and third field values are undefined.
 - Seek points within a table must be sorted in ascending order by sample number.
 - Seek points within a table must be unique by sample number, with the exception of placeholder points.
