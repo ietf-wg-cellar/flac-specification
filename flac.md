@@ -48,6 +48,8 @@ Many terms like "block" and "frame" are used to mean different things in differe
 
 - **Exponential-Golomb coding**: One of Robert Rice's universal coding schemes, FLAC's residual coder, compresses data by writing the number of bits to be read minus 1, before writing the actual value.
 
+- **LPC**: [Linear predictive coding](https://en.wikipedia.org/wiki/Linear_predictive_coding).
+
 # Blocking
 
 The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that excess bits will be wasted on frame headers. If the block size is too large, the characteristics of the signal may vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, and a maximum block size of 65535 samples. This range covers the optimal size for all of the audio data FLAC supports.
@@ -80,7 +82,7 @@ FLAC uses four methods for modeling the input signal:
 
 - **Fixed linear predictor**. FLAC uses a class of computationally-efficient fixed linear predictors (for a good description, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). FLAC adds a fourth-order predictor to the zero-to-third-order predictors used by Shorten. Since the predictors are fixed, the predictor order is the only parameter that needs to be stored in the compressed stream. The error signal is then passed to the residual coder.
 
-- **FIR Linear prediction**. For more accurate modelling (at a cost of slower encoding), FLAC supports up to 32nd order FIR linear prediction (again, for information on linear prediction, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). The reference encoder uses the Levinson-Durbin method for calculating the LPC coefficients from the autocorrelation coefficients, and the coefficients are quantized before computing the residual. Whereas encoders such as Shorten used a fixed quantization for the entire input, FLAC allows the quantized coefficient precision to vary from subframe to subframe. The FLAC reference encoder estimates the optimal precision to use based on the block size and dynamic range of the original signal.
+- **FIR Linear prediction**. For more accurate modeling (at a cost of slower encoding), FLAC supports up to 32nd order FIR linear prediction (again, for information on linear prediction, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). The reference encoder uses the Levinson-Durbin method for calculating the LPC coefficients from the autocorrelation coefficients, and the coefficients are quantized before computing the residual. Whereas encoders such as Shorten used a fixed quantization for the entire input, FLAC allows the quantized coefficient precision to vary from subframe to subframe. The FLAC reference encoder estimates the optimal precision to use based on the block size and dynamic range of the original signal.
 
 # Residual Coding
 
@@ -92,7 +94,7 @@ FLAC currently defines two similar methods for the coding of the error signal fr
 
 2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own exp-golomb parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the exp-golomb parameter is based on the residual variance instead of the mean.)
 
-The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the exp-golomb parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
+The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modeling of the exp-golomb parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
 
 # Format
 
@@ -125,7 +127,7 @@ Before the formal description of the stream, an overview might be helpful.
 
 # Conventions
 
-The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. `n` may be expressed as an equation using `*` (multiplication), `/` (divisopm), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
+The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. `n` may be expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
 
 # STREAM
 
@@ -519,10 +521,10 @@ Data              | Description
 #### EXP_GOLOMB_PARTITION
 Data       | Description
 :----------|:-----------
-`u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB PARTITION ENCODING PARAMETER`](#exp-golomb-partition-encoding-parameter))
+`u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB PARTITION ENCODING PARAMETER`](#expgolomb-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
-##### EXP GOLOMB PARTITION ENCODING PARAMETER
+##### EXP-GOLOMB PARTITION ENCODING PARAMETER
 Value           | Description
 ---------------:|:-----------
 0b0000 - 0b1110 | Exp-golomb parameter.
