@@ -52,6 +52,8 @@ Many terms like "block" and "frame" are used to mean different things in differe
 
 - **Exponential-Golomb coding**: One of Robert Rice's universal coding schemes, FLAC's residual coder, compresses data by writing the number of bits to be read minus 1, before writing the actual value.
 
+- **LPC**: [Linear predictive coding](https://en.wikipedia.org/wiki/Linear_predictive_coding).
+
 # Blocking
 
 The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that excess bits will be wasted on frame headers. If the block size is too large, the characteristics of the signal MAY vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, and a maximum block size of 65535 samples. This range covers the optimal size for all of the audio data FLAC supports.
@@ -84,7 +86,7 @@ FLAC uses four methods for modeling the input signal:
 
 - **Fixed linear predictor**. FLAC uses a class of computationally-efficient fixed linear predictors (for a good description, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). FLAC adds a fourth-order predictor to the zero-to-third-order predictors used by Shorten. Since the predictors are fixed, the predictor order is the only parameter that needs to be stored in the compressed stream. The error signal is then passed to the residual coder.
 
-- **FIR Linear prediction**. For more accurate modelling (at a cost of slower encoding), FLAC supports up to 32nd order FIR linear prediction (again, for information on linear prediction, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). The reference encoder uses the Levinson-Durbin method for calculating the LPC coefficients from the autocorrelation coefficients, and the coefficients are quantized before computing the residual. Whereas encoders such as Shorten used a fixed quantization for the entire input, FLAC allows the quantized coefficient precision to vary from subframe to subframe. The FLAC reference encoder estimates the optimal precision to use based on the block size and dynamic range of the original signal.
+- **FIR Linear prediction**. For more accurate modeling (at a cost of slower encoding), FLAC supports up to 32nd order FIR linear prediction (again, for information on linear prediction, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). The reference encoder uses the Levinson-Durbin method for calculating the LPC coefficients from the autocorrelation coefficients, and the coefficients are quantized before computing the residual. Whereas encoders such as Shorten used a fixed quantization for the entire input, FLAC allows the quantized coefficient precision to vary from subframe to subframe. The FLAC reference encoder estimates the optimal precision to use based on the block size and dynamic range of the original signal.
 
 # Residual Coding
 
@@ -96,7 +98,7 @@ FLAC currently defines two similar methods for the coding of the error signal fr
 
 2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own exp-golomb parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the exp-golomb parameter is based on the residual variance instead of the mean.)
 
-The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modelling of the exp-golomb parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
+The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modeling of the exp-golomb parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
 
 # Format
 
@@ -129,7 +131,7 @@ Before the formal description of the stream, an overview might be helpful.
 
 ## Conventions
 
-The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. `n` MAY be expressed as an equation using `*` (multiplication), `/` (divisopm), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed MAY be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
+The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. `n` MAY be expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed MAY be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
 
 ## STREAM
 
@@ -216,6 +218,7 @@ Data     | Description
 `u(16)`  | Number of samples in the target frame.
 
 NOTES
+
 - For placeholder points, the second and third field values are undefined.
 - Seek points within a table MUST be sorted in ascending order by sample number.
 - Seek points within a table MUST be unique by sample number, with the exception of placeholder points.
@@ -229,10 +232,10 @@ Data     | Description
 ## METADATA_BLOCK_CUESHEET
 Data              | Description
 :-----------------|:-----------
-`u(128\*8)`       | Media catalog number, in ASCII printable characters 0x20-0x7e. In general, the media catalog number SHOULD be 0 to 128 bytes long; any unused characters SHOULD be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
+`u(128*8)`       | Media catalog number, in ASCII printable characters 0x20-0x7e. In general, the media catalog number SHOULD be 0 to 128 bytes long; any unused characters SHOULD be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
 `u(64)`           | The number of lead-in samples. This field has meaning only for CD-DA cuesheets; for other uses it SHOULD be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to the Red Book, the lead-in MUST be silence and CD grabbing software does not usually store it; additionally, the lead-in MUST be at least two seconds but MAY be longer. For these reasons the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track MAY have INDEX 00 data.
 `u(1)`            | `1` if the CUESHEET corresponds to a Compact Disc, else `0`.
-`u(7+258\*8)`     | Reserved. All bits MUST be set to zero.
+`u(7+258*8)`     | Reserved. All bits MUST be set to zero.
 `u(8)`            | The number of tracks. Must be at least 1 (because of the requisite lead-out track). For CD-DA, this number MUST be no more than 100 (99 regular tracks and one lead-out track).
 `CUESHEET_TRACK`+ | One or more tracks. A CUESHEET block is REQUIRED to have a lead-out track; it is always the last track in the CUESHEET. For CD-DA, the lead-out track number MUST be 170 as specified by the Red Book, otherwise it MUST be 255.
 
@@ -244,7 +247,7 @@ Data                    | Description
 `u(12\*8)`              | Track ISRC. This is a 12-digit alphanumeric code; see [here](http://isrc.ifpi.org/) and [here](http://www.disctronics.co.uk/technology/cdaudio/cdaud_isrc.htm). A value of 12 ASCII NUL characters MAY be used to denote absence of an ISRC.
 `u(1)`                  | The track type: 0 for audio, 1 for non-audio. This corresponds to the CD-DA Q-channel control bit 3.
 `u(1)`                  | The pre-emphasis flag: 0 for no pre-emphasis, 1 for pre-emphasis. This corresponds to the CD-DA Q-channel control bit 5; see [here](http://www.chipchapin.com/CDMedia/cdda9.php3).
-`u(6+13\*8)`            | Reserved. All bits MUST be set to zero.
+`u(6+13*8)`            | Reserved. All bits MUST be set to zero.
 `u(8)`                  | The number of track index points. There MUST be at least one index in every track in a CUESHEET except for the lead-out track, which MUST have zero. For CD-DA, this number SHOULD NOT be more than 100.
 `CUESHEET_TRACK_INDEX`+ | For all tracks except the lead-out track, one or more track index points.
 
@@ -253,22 +256,22 @@ Data      | Description
 :---------|:-----------
 `u(64)`   | Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/sec \* 1/75 sec). Note that the offset is from the beginning of the track, not the beginning of the audio data.
 `u(8)`    | The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track MUST have a number of 0 or 1, and subsequently, index numbers MUST increase by 1. Index numbers MUST be unique within a track.
-`u(3\*8)` | Reserved. All bits MUST be set to zero.
+`u(3*8)` | Reserved. All bits MUST be set to zero.
 
 ## METADATA_BLOCK_PICTURE
 Data      | Description
 :---------|:-----------
 `u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame:
 `u(32)`   | The length of the MIME type string in bytes.
-`u(n\*8)` | The MIME type string, in printable ASCII characters 0x20-0x7e. The MIME type MAY also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
+`u(n*8)` | The MIME type string, in printable ASCII characters 0x20-0x7e. The MIME type MAY also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
 `u(32)`   | The length of the description string in bytes.
-`u(n\*8)` | The description of the picture, in UTF-8.
+`u(n*8)`  | The description of the picture, in UTF-8.
 `u(32)`   | The width of the picture in pixels.
 `u(32)`   | The height of the picture in pixels.
 `u(32)`   | The color depth of the picture in bits-per-pixel.
 `u(32)`   | For indexed-color pictures (e.g. GIF), the number of colors used, or `0` for non-indexed pictures.
 `u(32)`   | The length of the picture data in bytes.
-`u(n\*8)` | The binary picture data.
+`u(n*8)`  | The binary picture data.
 
 ## PICTURE_TYPE
 Value | Description
@@ -308,7 +311,7 @@ Data           | Description
 ## FRAME_HEADER
 Data      | Description
 :---------|:-----------
-`u(14)`   | Sync code '11111111111110'
+`u(14)`   | Sync code '0b11111111111110'
 `u(1)`    | `FRAME HEADER RESERVED`
 `u(1)`    | `BLOCKING STRATEGY`
 `u(4)`    | `INTERCHANNEL SAMPLE BLOCK SIZE`
@@ -524,10 +527,10 @@ Data              | Description
 #### EXP_GOLOMB_PARTITION
 Data       | Description
 :----------|:-----------
-`u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB PARTITION ENCODING PARAMETER`](#exp-golomb-partition-encoding-parameter))
+`u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB PARTITION ENCODING PARAMETER`](#expgolomb-partition-encoding-parameter))
 `u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
 
-#### EXP GOLOMB PARTITION ENCODING PARAMETER
+#### EXP-GOLOMB PARTITION ENCODING PARAMETER
 Value           | Description
 ---------------:|:-----------
 0b0000 - 0b1110 | Exp-golomb parameter.
