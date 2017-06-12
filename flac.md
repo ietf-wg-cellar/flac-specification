@@ -403,6 +403,8 @@ Value   | Description
 0b110   | 24 bits per sample
 0b111   | reserved
 
+For subframes that encode a difference channel, the sample size is one bit larger than the sample size of the frame, in order to be able to encode the difference between extreme values.
+
 ### FRAME HEADER RESERVED2
 Value | Description
 -----:|:-----------
@@ -479,6 +481,8 @@ Value | Description
 -----:|:-----------
 0     | no wasted bits-per-sample in source subblock, k=0
 1     | k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 001 follows, k=7 => 0000001 follows.
+
+The size of the samples stored in the subframe is the subframe sample size reduced by k bits. Decoded samples must be shifted left by k bits.
 
 ## SUBFRAME_CONSTANT
 Data      | Description
