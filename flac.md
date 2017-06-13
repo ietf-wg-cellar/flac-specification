@@ -482,7 +482,7 @@ Value    | Description
 Value | Description
 -----:|:-----------
 0     | no wasted bits-per-sample in source subblock, k=0
-1     | k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 001 follows, k=7 => 0000001 follows.
+1     | k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 0b001 follows, k=7 => 0b0000001 follows.
 
 The size of the samples stored in the subframe is the subframe sample size reduced by k bits. Decoded samples must be shifted left by k bits.
 
