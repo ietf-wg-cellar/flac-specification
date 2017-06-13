@@ -1,8 +1,8 @@
 # Introduction
 
-This is a detailed description of the FLAC format. There is also a companion document that describes [FLAC-to-Ogg mapping](ogg_mapping.html).
+This is a detailed description of the FLAC format. There is also a companion document that describes [FLAC-to-Ogg mapping](https://xiph.org/flac/ogg_mapping.html).
 
-For a user-oriented overview, see [About the FLAC Format](documentation_format_overview.html).
+For a user-oriented overview, see [About the FLAC Format](https://xiph.org/flac/documentation_format_overview.html).
 
 # Notation and Conventions
 
