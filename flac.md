@@ -18,9 +18,9 @@ FLAC owes much to the many people who have advanced the audio compression field 
 
 # Scope
 
-It is a known fact that no algorithm can losslessly compress all possible input, so most compressors restrict themselves to a useful domain and try to work as well as possible within that domain. FLAC's domain is audio data. Though it can losslessly **code** any input, only certain kinds of input will get smaller. FLAC exploits the fact that audio data typically has a high degree of sample-to-sample correlation.
+It is a known fact that no algorithm can losslessly compress all possible input, so most compressors restrict themselves to a useful domain and try to work as well as possible within that domain. FLAC's domain is audio data. Though it can losslessly code any input, only certain kinds of input will get smaller. FLAC exploits the fact that audio data typically has a high degree of sample-to-sample correlation.
 
-Within the audio domain, there are many possible subdomains. For example: low bitrate speech, high-bitrate multi-channel music, etc. FLAC itself does not target a specific subdomain but many of the default parameters of the reference encoder are tuned to CD-quality music data (i.e. 44.1 kHz, 2 channel, 16 bits per sample). The effect of the encoding parameters on different kinds of audio data will be examined later.
+Within the audio domain, there are many possible subdomains. For example: low bitrate speech, high-bitrate multi-channel music, etc. FLAC itself does not target a specific subdomain, but many of the default parameters of the reference encoder are tuned to CD-quality music data (i.e. 44.1 kHz, 2 channel, 16 bits per sample). The effect of the encoding parameters on different kinds of audio data will be examined later.
 
 # Architecture
 
@@ -42,7 +42,7 @@ Many terms like "block" and "frame" are used to mean different things in differe
 
 - **Block**: One or more audio samples that span several channels.
 
-- **Subblock**: One or more audio samples within a channel. So a block contains one subblock for each channel, and all subblocks contain the same number of samples.
+- **Subblock**: One or more audio samples within a channel. A block contains one subblock for each channel, and all subblocks contain the same number of samples.
 
 - **Blocksize**: The number of samples in any of a block's subblocks. For example, a one second block sampled at 44.1 kHz has a blocksize of 44100, regardless of the number of channels.
 
@@ -60,7 +60,7 @@ The size used for blocking the audio data has a direct effect on the compression
 
 Currently the reference encoder uses a fixed block size, optimized on the sample rate of the input. Future versions MAY vary the block size depending on the characteristics of the signal.
 
-Blocked data is passed to the predictor stage one subblock (channel) at a time. Each subblock is independently coded into a subframe, and the subframes are concatenated into a frame. Because each channel is coded separately, it means that one channel of a stereo frame MAY be encoded as a constant subframe, and the other an LPC subframe.
+Blocked data is passed to the predictor stage one subblock (channel) at a time. Each subblock is independently coded into a subframe, and the subframes are concatenated into a frame. Because each channel is coded separately, one channel of a stereo frame MAY be encoded as a constant subframe, and the other an LPC subframe.
 
 # Interchannel Decorrelation
 
@@ -80,23 +80,25 @@ Surprisingly, the left-side and right-side forms can be the most efficient in ma
 
 FLAC uses four methods for modeling the input signal:
 
-- **Verbatim**. This is essentially a zero-order predictor of the signal. The predicted signal is zero, meaning the residual is the signal itself, and the compression is zero. This is the baseline against which the other predictors are measured. If you feed random data to the encoder, the verbatim predictor will probably be used for every subblock. Since the raw signal is not actually passed through the residual coding stage (it is added to the stream 'verbatim'), the encoding results will not be the same as a zero-order linear predictor.
+1. **Verbatim**. This is essentially a zero-order predictor of the signal. The predicted signal is zero, meaning the residual is the signal itself, and the compression is zero. This is the baseline against which the other predictors are measured. If you feed random data to the encoder, the verbatim predictor will probably be used for every subblock. Since the raw signal is not actually passed through the residual coding stage (it is added to the stream 'verbatim'), the encoding results will not be the same as a zero-order linear predictor.
 
-- **Constant**. This predictor is used whenever the subblock is pure DC ("digital silence"), i.e. a constant value throughout. The signal is run-length encoded and added to the stream.
+1. **Constant**. This predictor is used whenever the subblock is pure DC ("digital silence"), i.e. a constant value throughout. The signal is run-length encoded and added to the stream.
 
-- **Fixed linear predictor**. FLAC uses a class of computationally-efficient fixed linear predictors (for a good description, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). FLAC adds a fourth-order predictor to the zero-to-third-order predictors used by Shorten. Since the predictors are fixed, the predictor order is the only parameter that needs to be stored in the compressed stream. The error signal is then passed to the residual coder.
+1. **Fixed linear predictor**. FLAC uses a class of computationally-efficient fixed linear predictors (for a good description, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). FLAC adds a fourth-order predictor to the zero-to-third-order predictors used by Shorten. Since the predictors are fixed, the predictor order is the only parameter that needs to be stored in the compressed stream. The error signal is then passed to the residual coder.
 
-- **FIR Linear prediction**. For more accurate modeling (at a cost of slower encoding), FLAC supports up to 32nd order FIR linear prediction (again, for information on linear prediction, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). The reference encoder uses the Levinson-Durbin method for calculating the LPC coefficients from the autocorrelation coefficients, and the coefficients are quantized before computing the residual. Whereas encoders such as Shorten used a fixed quantization for the entire input, FLAC allows the quantized coefficient precision to vary from subframe to subframe. The FLAC reference encoder estimates the optimal precision to use based on the block size and dynamic range of the original signal.
+1. **FIR Linear prediction**. For more accurate modeling (at a cost of slower encoding), FLAC supports up to 32nd order FIR linear prediction (again, for information on linear prediction, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). The reference encoder uses the Levinson-Durbin method for calculating the LPC coefficients from the autocorrelation coefficients, and the coefficients are quantized before computing the residual. Whereas encoders such as Shorten used a fixed quantization for the entire input, FLAC allows the quantized coefficient precision to vary from subframe to subframe. The FLAC reference encoder estimates the optimal precision to use based on the block size and dynamic range of the original signal.
 
 # Residual Coding
 
-FLAC uses Exponential-Golomb (a variant of Rice) coding as it's residual encoder. [You can learn more about exp-golomb coding on Wikipedia](https://en.wikipedia.org/wiki/Exponential-Golomb_coding)
+FLAC uses Exponential-Golomb (a variant of Rice) coding as it's residual encoder. You can learn more about [exp-golomb coding](https://en.wikipedia.org/wiki/Exponential-Golomb_coding) on Wikipedia.
 
 FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Exponential-Golomb codes in one of two ways:
 
 1. the encoder estimates a single exp-golomb parameter based on the variance of the residual and exp-golomb codes the entire residual using this parameter;
 
-2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own exp-golomb parameter based on the region's mean. (Note that the first method is a special case of the second method with one partition, except the exp-golomb parameter is based on the residual variance instead of the mean.)
+2. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own exp-golomb parameter based on the region's mean.
+
+(Note that the first method is a special case of the second method with one partition, except the exp-golomb parameter is based on the residual variance instead of the mean.)
 
 The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modeling of the exp-golomb parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
 
