@@ -376,7 +376,7 @@ Value   | Description
 
 ### CHANNEL ASSIGNMENT
 
-For values 0000-0111, the value represents the (number of independent channels)-1. Where defined, the channel order follows SMPTE/ITU-R recommendations.
+For values 0b0000-0b0111, the value represents the (number of independent channels)-1. Where defined, the channel order follows SMPTE/ITU-R recommendations.
 
 Value           | Description
 ---------------:|:-----------
