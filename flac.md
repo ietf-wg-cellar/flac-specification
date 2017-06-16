@@ -110,7 +110,7 @@ All numbers used in a FLAC bitstream are integers; there are no floating-point r
 
 Before the formal description of the stream, an overview might be helpful.
 
-- A FLAC bitstream consists of the "fLaC" (i.e. 0x6C4C6143) marker at the beginning of the stream, followed by a mandatory metadata block (called the STREAMINFO block), any number of other metadata blocks, then the audio frames.
+- A FLAC bitstream consists of the "fLaC" (i.e. 0x664C6143) marker at the beginning of the stream, followed by a mandatory metadata block (called the STREAMINFO block), any number of other metadata blocks, then the audio frames.
 - FLAC supports up to 128 kinds of metadata blocks; currently the following are defined:
 
   - `STREAMINFO`: This block has information about the whole stream, like sample rate, number of channels, total number of samples, etc. It MUST be present as the first metadata block in the stream. Other metadata blocks MAY follow, and ones that the decoder doesn't understand, it will skip.
