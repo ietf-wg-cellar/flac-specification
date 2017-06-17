@@ -72,7 +72,7 @@ In stereo streams, many times there is an exploitable amount of correlation betw
 
 - **Left-side**. The left channel and side channel are coded.
 
-- **Right-side**. The right channel and side channel are coded
+- **Right-side**. The right channel and side channel are coded.
 
 Surprisingly, the left-side and right-side forms can be the most efficient in many frames, even though the raw number of bits per sample needed for the original signal is slightly more than that needed for independent or mid-side coding.
 
@@ -201,7 +201,7 @@ Data     | Description
 ## METADATA_BLOCK_APPLICATION
 Data     | Description
 :--------|:-----------
-`u(32)`  | Registered application ID. (Visit the [registration page](id.html) to register an ID with FLAC.)
+`u(32)`  | Registered application ID. (Visit the [registration page](https://xiph.org/flac/id.html) to register an ID with FLAC.)
 `u(n)`   | Application data (n MUST be a multiple of 8)
 
 ## METADATA_BLOCK_SEEKTABLE
