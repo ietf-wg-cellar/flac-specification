@@ -90,7 +90,7 @@ FLAC uses four methods for modeling the input signal:
 
 # Residual Coding
 
-FLAC uses Exponential-Golomb (a variant of Rice) coding as it's residual encoder. You can learn more about [exp-golomb coding](https://en.wikipedia.org/wiki/Exponential-Golomb_coding) on Wikipedia.
+FLAC uses Exponential-Golomb (a variant of Rice) coding as its residual encoder. You can learn more about [exp-golomb coding](https://en.wikipedia.org/wiki/Exponential-Golomb_coding) on Wikipedia.
 
 FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Exponential-Golomb codes in one of two ways:
 
