@@ -106,7 +106,7 @@ The FLAC format has reserved space for other coding methods. Some possibilities 
 
 This section specifies the FLAC bitstream format. FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding or skip data encoded with newer methods. Apart from reserved patterns, in places the format specifies invalid patterns, meaning that the patterns MAY never appear in any valid bitstream, in any prior, present, or future versions of the format. These invalid patterns are usually used to make the synchronization mechanism more robust.
 
-All numbers used in a FLAC bitstream are integers; there are no floating-point representations. All numbers are big-endian coded. All numbers are unsigned unless otherwise specified.
+All numbers used in a FLAC bitstream MUST be integers; there are no floating-point representations. All numbers MUST be big-endian coded. All numbers MUST be unsigned unless otherwise specified.
 
 Before the formal description of the stream, an overview might be helpful.
 
