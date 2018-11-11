@@ -415,7 +415,9 @@ Value | Description
 
 ### CODED NUMBER
 
-The "UTF-8" coding used for the sample/frame number is the same variable length code used to store compressed UCS-2, extended to handle larger input.
+Frame/Sample numbers are encoded using the UTF-8 format, from BEFORE it was limited to 4 bytes by RFC3629, this variant supports the original 7 byte maximum.
+
+Note to implementors: All Unicode compliant UTF-8 decoders and encoders are limited to 4 bytes, it's best to just write your own one off solution.
 
 ~~~
 if(variable blocksize)
