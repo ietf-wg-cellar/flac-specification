@@ -14,6 +14,13 @@
 %
 % [[author]]
 % organization="Xiph.Org Foundation"
+%
+% [[author]]
+% initials="A."
+% surname="Weaver"
+% fullname="Andrew Weaver"
+% [author.address]
+% email="theandrewjw@gmail.com"
 
 .# Abstract
 
