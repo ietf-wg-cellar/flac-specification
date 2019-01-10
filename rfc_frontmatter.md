@@ -1,7 +1,7 @@
 % Title = "Free Lossless Audio Codec"
 % abbrev = "FLAC"
 % category = "std"
-% docName = "draft-xiph-cellar-flac-01"
+% docName = "draft-weaver-cellar-flac-00"
 % ipr= "trust200902"
 % area = "art"
 % workgroup = "cellar"
@@ -14,6 +14,13 @@
 %
 % [[author]]
 % organization="Xiph.Org Foundation"
+%
+% [[author]]
+% initials="A."
+% surname="Weaver"
+% fullname="Andrew Weaver"
+% [author.address]
+% email="theandrewjw@gmail.com"
 
 .# Abstract
 
