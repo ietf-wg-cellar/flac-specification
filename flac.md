@@ -263,7 +263,7 @@ Data      | Description
 ## METADATA_BLOCK_PICTURE
 Data      | Description
 :---------|:-----------
-`u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame:
+`u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame.
 `u(32)`   | The length of the MIME type string in bytes.
 `u(n*8)`  | The MIME type string, in printable ASCII characters 0x20-0x7E. The MIME type MAY also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
 `u(32)`   | The length of the description string in bytes.
