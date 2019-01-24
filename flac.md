@@ -371,7 +371,7 @@ Value   | Description
 0b1011  | 96 kHz
 0b1100  | get 8 bit sample rate (in kHz) from end of header
 0b1101  | get 16 bit sample rate (in Hz) from end of header
-0b1110  | get 16 bit sample rate (daHz) from end of header
+0b1110  | get 16 bit sample rate (in daHz) from end of header
 0b1111  | invalid, to prevent sync-fooling string of 1s
 
 ### CHANNEL ASSIGNMENT
