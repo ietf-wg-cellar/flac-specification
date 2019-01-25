@@ -263,7 +263,7 @@ Data      | Description
 ## METADATA_BLOCK_PICTURE
 Data      | Description
 :---------|:-----------
-`u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame:
+`u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame.
 `u(32)`   | The length of the MIME type string in bytes.
 `u(n*8)`  | The MIME type string, in printable ASCII characters 0x20-0x7E. The MIME type MAY also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
 `u(32)`   | The length of the description string in bytes.
@@ -371,7 +371,7 @@ Value   | Description
 0b1011  | 96 kHz
 0b1100  | get 8 bit sample rate (in kHz) from end of header
 0b1101  | get 16 bit sample rate (in Hz) from end of header
-0b1110  | get 16 bit sample rate (in tens of Hz) from end of header
+0b1110  | get 16 bit sample rate (in daHz) from end of header
 0b1111  | invalid, to prevent sync-fooling string of 1s
 
 ### CHANNEL ASSIGNMENT
@@ -423,7 +423,7 @@ Note to implementors: All Unicode compliant UTF-8 decoders and encoders are limi
 if(variable blocksize)
   `u(8...56)`: "UTF-8" coded sample number (decoded number is 36 bits)
 else
-  `u(8...48)`:"UTF-8" coded frame number (decoded number is 31 bits)
+  `u(8...48)`: "UTF-8" coded frame number (decoded number is 31 bits)
 ~~~
 
 ### BLOCK SIZE INT
@@ -443,7 +443,7 @@ if(`SAMPLE RATE` == 0b1100)
 else if(`SAMPLE RATE` == 0b1101)
   16 bit sample rate (in Hz)
 else if(`SAMPLE RATE` == 0b1110)
-  16 bit sample rate in tens of Hz)
+  16 bit sample rate (in daHz)
 ~~~
 
 ### FRAME CRC
@@ -476,7 +476,7 @@ Value    | Description
 0b000001 | `SUBFRAME_VERBATIM`
 0b00001x | reserved
 0b0001xx | reserved
-0b001xxx | if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order ; else reserved
+0b001xxx | if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order; else reserved
 0b01xxxx | reserved
 0b1xxxxx | `SUBFRAME_LPC`, xxxxx=order-1
 
@@ -568,5 +568,3 @@ The number of samples (n) in the partition is determined as follows:
 - if the partition order is zero, n = frame's blocksize - predictor order
 - else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
 - else n = (frame's blocksize / (2\^partition order)) - predictor order
-
-Copyright (c) 2000-2009 Josh Coalson, 2011-2014 Xiph.Org Foundation
