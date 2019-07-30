@@ -1,7 +1,7 @@
 % Title = "Free Lossless Audio Codec"
 % abbrev = "FLAC"
 % category = "std"
-% docName = "draft-weaver-cellar-flac-00"
+% docName = "draft-ietf-cellar-flac-00"
 % ipr= "trust200902"
 % area = "art"
 % workgroup = "cellar"

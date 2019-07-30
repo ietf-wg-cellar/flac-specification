@@ -1,7 +1,7 @@
 SRC=flac.md
 PDF=$(SRC:.md=.pdf)
 HTML=$(SRC:.md=.html)
-AUTHOR=weaver
+AUTHOR=ietf
 VERSION=00
 
 $(info PDF and HTML rendering has been tested with pandoc version 1.13.2.1, some older versions are known to produce very poor output, please ensure your pandoc is recent enough.)
