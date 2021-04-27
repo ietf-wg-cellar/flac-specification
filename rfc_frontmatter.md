@@ -1,26 +1,32 @@
-% Title = "Free Lossless Audio Codec"
-% abbrev = "FLAC"
-% category = "std"
-% docName = "draft-ietf-cellar-flac-00"
-% ipr= "trust200902"
-% area = "art"
-% workgroup = "cellar"
-% keyword = ["free,lossless,audio,codec,encoder,decoder,compression,compressor,archival,archive,archiving,backup,music"]
-%
-% [[author]]
-% initials="J."
-% surname="Coalson"
-% fullname="Josh Coalson"
-%
-% [[author]]
-% organization="Xiph.Org Foundation"
-%
-% [[author]]
-% initials="A."
-% surname="Weaver"
-% fullname="Andrew Weaver"
-% [author.address]
-% email="theandrewjw@gmail.com"
+%%%
+title = "Free Lossless Audio Codec"
+abbrev = "FLAC"
+ipr= "trust200902"
+area = "art"
+submissiontype = "IETF"
+workgroup = "cellar"
+keyword = ["free,lossless,audio,codec,encoder,decoder,compression,compressor,archival,archive,archiving,backup,music"]
+
+[seriesInfo]
+name = "Internet-Draft"
+stream = "IETF"
+status = "informational"
+value = "draft-ietf-cellar-flac-01"
+
+[[author]]
+initials="M."
+surname="Sandelman"
+fullname="Michael Sandelman"
+  [author.address]
+  email="mcr@sandelman.ca"
+
+[[author]]
+initials="A."
+surname="Weaver"
+fullname="Andrew Weaver"
+  [author.address]
+  email="theandrewjw@gmail.com"
+%%%
 
 .# Abstract
 

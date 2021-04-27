@@ -6,7 +6,7 @@ For a user-oriented overview, see [About the FLAC Format](https://xiph.org/flac/
 
 # Notation and Conventions
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [@!RFC2119].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [@!RFC2119] [@!RFC8174] when, and only when, they appear in all capitals, as shown here.
 
 # Acknowledgments
 
@@ -26,13 +26,13 @@ Within the audio domain, there are many possible subdomains. For example: low bi
 
 Similar to many audio coders, a FLAC encoder has the following stages:
 
-- `Blocking` (see [section on `Blocking`](#blocking)). The input is broken up into many contiguous blocks. With FLAC, the blocks MAY vary in size. The optimal size of the block is usually affected by many factors, including the sample rate, spectral characteristics over time, etc. Though FLAC allows the block size to vary within a stream, the reference encoder uses a fixed block size.
+- `Blocking` (see [section on Blocking](#blocking)). The input is broken up into many contiguous blocks. With FLAC, the blocks MAY vary in size. The optimal size of the block is usually affected by many factors, including the sample rate, spectral characteristics over time, etc. Though FLAC allows the block size to vary within a stream, the reference encoder uses a fixed block size.
 
-- `Interchannel Decorrelation` (see [section on `Interchannel Decorrelation`](#interchannel-decorrelation)). In the case of stereo streams, the encoder will create mid and side signals based on the average and difference (respectively) of the left and right channels. The encoder will then pass the best form of the signal to the next stage.
+- `Interchannel Decorrelation` (see [section on Interchannel Decorrelation](#interchannel-decorrelation)). In the case of stereo streams, the encoder will create mid and side signals based on the average and difference (respectively) of the left and right channels. The encoder will then pass the best form of the signal to the next stage.
 
-- `Prediction` (see [section on `Prediction`](#prediction)). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors, but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even within the channels of a block.
+- `Prediction` (see [section on Prediction](#prediction)). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors, but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even within the channels of a block.
 
-- `Residual Coding` (See [section on `Residual Coding`](#residual-coding)). If the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) MUST be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC currently uses only one method for encoding the residual, but the format has reserved space for additional methods. FLAC allows the residual coding method to change from block to block, or even within the channels of a block.
+- `Residual Coding` (See [section on Residual Coding](#residual-coding)). If the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) MUST be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC currently uses only one method for encoding the residual, but the format has reserved space for additional methods. FLAC allows the residual coding method to change from block to block, or even within the channels of a block.
 
 In addition, FLAC specifies a metadata system, which allows arbitrary information about the stream to be included at the beginning of the stream.
 
@@ -125,11 +125,11 @@ Before the formal description of the stream, an overview might be helpful.
 - Again, since a decoder MAY start decoding at an arbitrary frame in the stream, each frame header MUST contain some basic information about the stream because the decoder MAY not have access to the STREAMINFO metadata block at the start of the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is pure overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame parameters. For instance, the sample rate part of the frame header is specified using 4 bits. Eight of the bit patterns correspond to the commonly used sample rates of 8, 16, 22.05, 24, 32, 44.1, 48 or 96 kHz. However, odd sample rates can be specified by using one of the 'hint' bit patterns, directing the decoder to find the exact sample rate at the end of the frame header. The same method is used for specifying the block size and bits per sample. In this way, the frame header size stays small for all of the most common forms of audio data.
 - Individual subframes (one for each channel) are coded separately within a frame, and appear serially in the stream. In other words, the encoded audio data is NOT channel-interleaved. This reduces decoder complexity at the cost of requiring larger decode buffers. Each subframe has its own header specifying the attributes of the subframe, like prediction method and order, residual coding parameters, etc. The header is followed by the encoded audio data for that channel.
 - `FLAC` specifies a subset of itself as the Subset format. The purpose of this is to ensure that any streams encoded according to the Subset are truly "streamable", meaning that a decoder that cannot seek within the stream can still pick up in the middle of the stream and start decoding. It also makes hardware decoder implementations more practical by limiting the encoding parameters such that decoder buffer sizes and other resource requirements can be easily determined. __flac__ generates Subset streams by default unless the "--lax" command-line option is used. The Subset makes the following limitations on what MAY be used in the stream:
-  - The blocksize bits in the `FRAME_HEADER` (see [`FRAME_HEADER` section](#frameheader)) MUST be 0b0001-0b1110. The blocksize MUST be <= 16384; if the sample rate is <= 48000 Hz, the blocksize MUST be <= 4608 = 2\^9 \* 3\^2.
-  - The sample rate bits in the `FRAME_HEADER` MUST be 0b0001-0b1110.
-  - The bits-per-sample bits in the `FRAME_HEADER` MUST be 0b001-0b111.
-  - If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [`SUBFRAME_LPC` section](#subframelpc)) MUST be less than or equal to 12, i.e. the subframe type bits in the `SUBFRAME_HEADER` (see [`SUBFRAME_HEADER` section](#subframeheader)) SHOULD NOT be 0b101100-0b111111.
-  - The Rice partition order in an `exp-golomb coded residual section` (see [`RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB` section](#residualcodingmethodpartitionedexpgolomb)) MUST be less than or equal to 8.
+* The blocksize bits in the `FRAME_HEADER` (see [FRAME_HEADER section](#frameheader)) MUST be 0b0001-0b1110. The blocksize MUST be <= 16384; if the sample rate is <= 48000 Hz, the blocksize MUST be <= 4608 = 2\^9 \* 3\^2.
+* The sample rate bits in the `FRAME_HEADER` MUST be 0b0001-0b1110.
+* The bits-per-sample bits in the `FRAME_HEADER` MUST be 0b001-0b111.
+* If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [SUBFRAME_LPC section](#subframelpc)) MUST be less than or equal to 12, i.e. the subframe type bits in the `SUBFRAME_HEADER` (see [SUBFRAME_HEADER section](#subframeheader)) SHOULD NOT be 0b101100-0b111111.
+* The Rice partition order in an `exp-golomb coded residual section` (see [RESIDUAL\_CODING\_METHOD\_PARTITIONE\_EXP\_GOLOMB section](#residualcodingmethodpartitionedexpgolomb)) MUST be less than or equal to 8.
 
 ## Conventions
 
@@ -465,8 +465,8 @@ Data              | Description
 Data     | Description
 :--------|:-----------
 `u(1)`   | Zero bit padding, to prevent sync-fooling string of 1s
-`u(6)`   | `SUBFRAME TYPE` (see [section on `SUBFRAME TYPE`](#subframe-type))
-`u(1+k)` | `WASTED BITS PER SAMPLE FLAG` (see [section on `WASTED BITS PER SAMPLE FLAG`](#wasted-bits-per-sample-flag))
+`u(6)`   | `SUBFRAME TYPE` (see [section on SUBFRAME TYPE](#subframe-type))
+`u(1+k)` | `WASTED BITS PER SAMPLE FLAG` (see [section on WASTED BITS PER SAMPLE FLAG](#wasted-bits-per-sample-flag))
 
 
 ### SUBFRAME TYPE
@@ -535,8 +535,8 @@ Data              | Description
 #### EXP_GOLOMB_PARTITION
 Data       | Description
 :----------|:-----------
-`u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB PARTITION ENCODING PARAMETER`](#exp-golomb-partition-encoding-parameter))
-`u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
+`u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on EXP-GOLOMB PARTITION ENCODING PARAMETER](#exp-golomb-partition-encoding-parameter))
+`u(?)`     | `ENCODED RESIDUAL` (see [section on ENCODED RESIDUAL](#encoded-residual))
 
 #### EXP GOLOMB PARTITION ENCODING PARAMETER
 Value           | Description
@@ -553,8 +553,8 @@ Data               | Description
 #### EXP_GOLOMB2_PARTITION
 Data       | Description
 :----------|:-----------
-`u(5(+5))` | `EXP-GOLOMB2 PARTITION ENCODING PARAMETER` (see [section on `EXP-GOLOMB2 PARTITION ENCODING PARAMETER`](#expgolomb2-partition-encoding-parameter))
-`u(?)`     | `ENCODED RESIDUAL` (see [section on `ENCODED RESIDUAL`](#encoded-residual))
+`u(5(+5))` | `EXP-GOLOMB2 PARTITION ENCODING PARAMETER` (see [section on EXP-GOLOMB2 PARTITION ENCODING PARAMETER](#expgolomb2-partition-encoding-parameter))
+`u(?)`     | `ENCODED RESIDUAL` (see [section on ENCODED RESIDUAL](#encoded-residual))
 
 #### EXP-GOLOMB2 PARTITION ENCODING PARAMETER
 Value             | Description
