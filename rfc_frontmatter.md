@@ -14,12 +14,11 @@ status = "informational"
 value = "draft-ietf-cellar-flac-01"
 
 [[author]]
-initials="J."
-surname="Coalson"
-fullname="Josh Coalson"
-
-[[author]]
-organization="Xiph.Org Foundation"
+initials="M."
+surname="Sandelman"
+fullname="Michael Sandelman"
+  [author.address]
+  email="mcr@sandelman.ca"
 
 [[author]]
 initials="A."
