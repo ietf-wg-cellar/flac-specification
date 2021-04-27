@@ -15,8 +15,8 @@ value = "draft-ietf-cellar-flac-01"
 
 [[author]]
 initials="M."
-surname="Sandelman"
-fullname="Michael Sandelman"
+surname="Richardson"
+fullname="Michael Richardson"
   [author.address]
   email="mcr@sandelman.ca"
 
