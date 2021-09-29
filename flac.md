@@ -481,12 +481,14 @@ Value    | Description
 0b1xxxxx | `SUBFRAME_LPC`, xxxxx=order-1
 
 ### WASTED BITS PER SAMPLE FLAG
-Value | Description
------:|:-----------
-0     | no wasted bits-per-sample in source subblock, k=0
-1     | k wasted bits-per-sample in source subblock, k-1 follows, unary coded; e.g. k=3 => 0b001 follows, k=7 => 0b0000001 follows.
 
-The size of the samples stored in the subframe is the subframe sample size reduced by k bits. Decoded samples must be shifted left by k bits.
+Certain file formats, like AIFF, can store audio samples with a bitdepth that is not an integer number of bytes by padding them with least significant zero bits to a bitdepth that is an integer number of bytes. For example, shifting a 14-bit sample right by 2 pads it to a 16-bit sample, which then has two zero least-significant bits. In this specification, these least-significant zero bits are referred to as wasted bits-per-sample or simply wasted bits. They are wasted in a sense that they contain no information, but are stored anyway.
+
+The wasted bits-per-sample flag in a subframe header is set to 1 if a certain number of least-significant bits of all samples in the current subframe are zero. If this is the case, the number of wasted bits-per-sample (k) minus 1 follows the flag in an unary encoding. For example, if k is 3, 0b001 follows. If k = 0, the wasted bits-per-sample flag is 0 and no unary coded k follows.
+
+In case k is not equal to 0, samples are coded ignoring k least-significant bits. For example, if the preceding frame header specified a sample size of 16 bits per sample and k is 3, samples in the subframe are coded as 13 bits per sample. A decoder MUST add k least-significant zero bits by shifting left (padding) after decoding a subframe sample. In case the frame has left/side, right/side or mid/side stereo, padding MUST happen to a sample before it is used to reconstruct a left or right sample.
+
+Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed, as to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like LossyWAV that enable users to improve compression of their files by a lossless audio codec in a non-lossless way. Because of this the number of wasted bits k MAY change between frames and MAY differ between subframes.
 
 ## SUBFRAME_CONSTANT
 Data      | Description
