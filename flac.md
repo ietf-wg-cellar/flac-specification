@@ -38,21 +38,23 @@ In addition, FLAC specifies a metadata system, which allows arbitrary informatio
 
 # Definitions
 
-Many terms like "block" and "frame" are used to mean different things in different encoding schemes. For example, a frame in MP3 corresponds to many samples across several channels, whereas an S/PDIF frame represents just one sample for each channel. The definitions we use for FLAC follow. Note that when we talk about blocks and subblocks we are referring to the raw unencoded audio data that is the input to the encoder, and when we talk about frames and subframes, we are referring to the FLAC-encoded data.
+- **Block**: A (short) section of linear pulse-code modulated audio, with one or more channels.
 
-- **Block**: One or more audio samples that span several channels.
+- **Subblock**: All samples within a corresponding block for 1 channel. One or more subblocks form a block, and all subblocks in a certain block contain the same number of samples.
 
-- **Subblock**: One or more audio samples within a channel. A block contains one subblock for each channel, and all subblocks contain the same number of samples.
+- **Frame**: A frame header plus one or more subframes. It encodes the contents of a corresponding block.
 
-- **Blocksize**: The number of samples in any of a block's subblocks. For example, a one second block sampled at 44.1 kHz has a blocksize of 44100, regardless of the number of channels.
+- **Subframe**: An encoded subblock. All subframes within a frame code for the same number of samples.
 
-- **Frame**: A frame header plus one or more subframes.
+- **Blocksize**: The total number of samples contained in a block or coded in a frame, divided by the number of channels. In other words, the number of samples in any subblock of a block, or any subframe of a frame. This is also called **inter-channel samples**.
 
-- **Subframe**: A subframe header plus one or more encoded samples from a given channel. All subframes within a frame will contain the same number of samples.
+- **LPC**: Linear predictive coding, a method to model an audio signal. FLAC uses LPC to remove redundancy in a signal, in order to be able to compress it
 
-- **Exponential-Golomb coding**: One of Robert Rice's universal coding schemes, FLAC's residual coder, compresses data by writing the number of bits to be read minus 1, before writing the actual value.
+- **Fixed predictor**: an LPC model in which the model parameters are the same across all FLAC files, and thus not need to be stored, saving space compared to a regular LPC model.
 
-- **LPC**: [Linear predictive coding](https://en.wikipedia.org/wiki/Linear_predictive_coding).
+- **Residual**: The audio signal that remains after an LPC model has been subtracted from a subblock. If the LPC model has been able to remove redundancy from the signal, the samples of the remaining signal (the **residual samples**) will have, on average, a smaller numerical value than the original signal.
+
+- **Rice code**: A [variable-length code](https://en.wikipedia.org/wiki/Variable-length_code) which compresses data by making use of the observation that most residual samples are closer to zero than the original samples, while still allowing for a small part of the samples to be much larger.
 
 # Blocking
 
