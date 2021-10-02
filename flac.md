@@ -50,11 +50,15 @@ In addition, FLAC specifies a metadata system, which allows arbitrary informatio
 
 - **LPC**: Linear predictive coding, a method to model an audio signal. FLAC uses LPC to remove redundancy in a signal, in order to be able to compress it
 
-- **Fixed predictor**: an LPC model in which the model parameters are the same across all FLAC files, and thus not need to be stored, saving space compared to a regular LPC model.
+- **Predictor**: an LPC model used predict samples in an audio signal.
 
-- **Residual**: The audio signal that remains after an LPC model has been subtracted from a subblock. If the LPC model has been able to remove redundancy from the signal, the samples of the remaining signal (the **residual samples**) will have, on average, a smaller numerical value than the original signal.
+- **Fixed predictor**: an predictor in which the model parameters are the same across all FLAC files, and thus not need to be stored.
 
-- **Rice code**: A [variable-length code](https://en.wikipedia.org/wiki/Variable-length_code) which compresses data by making use of the observation that most residual samples are closer to zero than the original samples, while still allowing for a small part of the samples to be much larger.
+- **Predictor order**: the number of past samples that a predictor uses. For example, a 4th order predictor uses the 4 samples directly preceding a certain sample to predict it. In FLAC, samples used in a predictor are always consecutive, and are always the samples directly before the sample that is being predicted
+
+- **Residual**: The audio signal that remains after a predictor has been subtracted from a subblock. If the predictor has been able to remove redundancy from the signal, the samples of the remaining signal (the **residual samples**) will have, on average, a smaller numerical value than the original signal.
+
+- **Rice code**: A [variable-length code](https://en.wikipedia.org/wiki/Variable-length_code) which compresses data by making use of the observation that, after using an effective predictor, most residual samples are closer to zero than the original samples, while still allowing for a small part of the samples to be much larger.
 
 # Blocking
 
