@@ -44,9 +44,11 @@ In addition, FLAC specifies a metadata system, which allows arbitrary informatio
 
 - **Frame**: A frame header plus one or more subframes. It encodes the contents of a corresponding block.
 
-- **Subframe**: An encoded subblock. All subframes within a frame code for the same number of samples.
+- **Subframe**: An encoded subblock. All subframes within a frame code for the same number of samples. A subframe MAY correspond to a subblock, else it corresponds to either the addition or subtraction of two subblocks, see [section on interchannel decorrelation](#interchannel-decorrelation).
 
 - **Blocksize**: The total number of samples contained in a block or coded in a frame, divided by the number of channels. In other words, the number of samples in any subblock of a block, or any subframe of a frame. This is also called **inter-channel samples**.
+
+- **Bit depth** or **bits per sample**: the number of bits used to contain each sample. This MUST be the same for all subblocks in a block but MAY be different for different subframes in a frame because of [interchannel decorrelation](#interchannel-decorrelation).
 
 - **LPC**: Linear predictive coding, a method to model an audio signal. FLAC uses LPC to remove redundancy in a signal, in order to be able to compress it
 
