@@ -64,17 +64,17 @@ Blocked data is passed to the predictor stage one subblock (channel) at a time. 
 
 # Interchannel Decorrelation
 
-In stereo streams, many times there is an exploitable amount of correlation between the left and right channels. FLAC allows the frames of stereo streams to have different channel assignments, and an encoder MAY choose to use the best representation on a frame-by-frame basis.
+In many audio files different channels have some form of correlation. The FLAC format can exploit this correlation in stereo files by not directly coding subblocks into subframes, but instead coding an average of all samples in both subblocks (a mid channel) or the difference between all samples in both subblocks (a side channel). The following combinations are possible:
 
-- **Independent**. The left and right channels are coded independently.
+- **Independent**. All channels are coded independently. All non-stereo files MUST be encoded this way.
 
-- **Mid-side**. The left and right channels are transformed into mid and side channels. The mid channel is the midpoint (average) of the left and right signals, and the side is the difference signal (left minus right).
+- **Mid-side**. A left and right subblock are converted to mid and side subframes. To calculate a sample for a mid subframe, the corresponding left and right samples are summed and the result is shifted right by 1 bit. To calculate a sample for a side subframe, the corresponding right sample is subtracted from the corresponding left sample. On decoding, the mid channel has to be shifted left by 1 bit. Also, if the side channel is uneven, 1 has to be added to the mid channel after the left shift. To reconstruct the left channel, the corresponding samples in the mid and side subframes are added and the result shifted right by 1 bit, while for the right channel the side channel has to be subtracted from the mid channel and the result shifted right by 1 bit.
 
-- **Left-side**. The left channel and side channel are coded.
+- **Left-side**. The left subblock is coded and the left and right subblock are used to code a side subframe. The side subframe is constructed in the same way as for mid-side. To decode, the right subblock is restored by subtracting the samples in the side subframe from the corresponding samples the left subframe.
 
-- **Right-side**. The right channel and side channel are coded.
+- **Right-side**. The right subblock is coded and the left and right subblock are used to code a side subframe. Note that the actual coded subframe order is side-right. The side subframe is constructed in the same way as for mid-side. To decode, the left subblock is restored by adding the samples in the side subframe to the corresponding samples in the left subframe.
 
-Surprisingly, the left-side and right-side forms can be the most efficient in many frames, even though the raw number of bits per sample needed for the original signal is slightly more than that needed for independent or mid-side coding.
+The side channel needs one extra bit of bitdepth as the subtraction can produce sample values twice as large as the maximum possible in any given bitdepth. The mid channel in mid-side stereo does not need one extra bit, as it is is shifted left one bit. The left shift of the mid channel does not lead to non-lossless behaviour, because an uneven sample in the mid subframe must always be accompanied by a corresponding uneven sample in the side subframe, which means the lost least significant bit can be restored by taking it from the sample in the side subframe.
 
 # Prediction
 
