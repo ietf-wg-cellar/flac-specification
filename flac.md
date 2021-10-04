@@ -74,7 +74,7 @@ In many audio files different channels have some form of correlation. The FLAC f
 
 - **Right-side**. The right subblock is coded and the left and right subblock are used to code a side subframe. Note that the actual coded subframe order is side-right. The side subframe is constructed in the same way as for mid-side. To decode, the left subblock is restored by adding the samples in the side subframe to the corresponding samples in the left subframe.
 
-The side channel needs one extra bit of bitdepth as the subtraction can produce sample values twice as large as the maximum possible in any given bitdepth. The mid channel in mid-side stereo does not need one extra bit, as it is is shifted left one bit. The left shift of the mid channel does not lead to non-lossless behaviour, because an uneven sample in the mid subframe must always be accompanied by a corresponding uneven sample in the side subframe, which means the lost least significant bit can be restored by taking it from the sample in the side subframe.
+The side channel needs one extra bit of bit depth as the subtraction can produce sample values twice as large as the maximum possible in any given bit depth. The mid channel in mid-side stereo does not need one extra bit, as it is is shifted left one bit. The left shift of the mid channel does not lead to non-lossless behavior, because an uneven sample in the mid subframe must always be accompanied by a corresponding uneven sample in the side subframe, which means the lost least significant bit can be restored by taking it from the sample in the side subframe.
 
 # Prediction
 
@@ -130,6 +130,7 @@ Before the formal description of the stream, an overview might be helpful.
 * The bits-per-sample bits in the `FRAME_HEADER` MUST be 0b001-0b111.
 * If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [SUBFRAME_LPC section](#subframelpc)) MUST be less than or equal to 12, i.e. the subframe type bits in the `SUBFRAME_HEADER` (see [SUBFRAME_HEADER section](#subframeheader)) SHOULD NOT be 0b101100-0b111111.
 * The Rice partition order in an `exp-golomb coded residual section` (see [RESIDUAL\_CODING\_METHOD\_PARTITIONE\_EXP\_GOLOMB section](#residualcodingmethodpartitionedexpgolomb)) MUST be less than or equal to 8.
+* The channel ordering is a standard one, i.e. no WAVEFORMATEXTENSIBLE_CHANNEL_MASK tag is necessary to define a non-standard channel ordering (see [channel assignment](#channel-assignment)).
 
 ## Conventions
 
@@ -376,7 +377,7 @@ Value   | Description
 
 ### CHANNEL ASSIGNMENT
 
-For values 0b0000-0b0111, the value represents the (number of independent channels)-1. Where defined, the channel order follows SMPTE/ITU-R recommendations.
+Values 0b0000-0b0111 represent the (number of independent channels)-1 coded independently, channel order follows SMPTE/ITU-R recommendations. Values 0b1000-0b1010 represent 2 channel (stereo) audio where the signal has been mapped to a different representation, see [section on Interchannel Decorrelation](#interchannel-decorrelation).
 
 Value           | Description
 ---------------:|:-----------
@@ -392,6 +393,36 @@ Value           | Description
 0b1001          | right/side stereo: channel 0 is the side(difference) channel, channel 1 is the right channel
 0b1010          | mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
 0b1011 - 0b1111 | reserved
+
+In case different channels than those in the table above are coded, it is recommended to add a WAVEFORMATEXTENSIBLE_CHANNEL_MASK to a VORBIS_COMMENT metadata block to describe which channels are stored. This channel mask consists of flag bits indicating which channels are present, stored in a hexadecimal representation preceded by 0x. The flags only signal which channels are present, not in which order, so in case a file has to be encoded in which channels are ordered differently, they have to be reordered. Please note that a file in which the channel order is defined through the WAVEFORMATEXTENSIBLE_CHANNEL_MASK is not streamable, i.e. non-subset, as the tag is not found in each frame header. The mask bits can be found in the following table
+
+Bit number | Channel description
+----------:|:-----------
+0          | Front left
+1          | Front right
+2          | Front center
+3          | LFE
+4          | Back left
+5          | Back right
+6          | Front left of center
+7          | Front right of center
+8          | Back center
+9          | Side left
+10         | Side right
+11         | Top center
+12         | Top front left
+13         | Top front center
+14         | Top front right
+15         | Top rear left
+16         | Top rear center
+17         | Top rear right
+
+Following are 3 examples:
+- if a file has a single channel, being a LFE channel, the VORBIS_COMMENT tag is WAVEFORMATEXTENSIBLE_CHANNEL_MASK=0x8
+- if a file has 4 channels, being front left, front right, top front left and top front right, the VORBIS_COMMENT tag is WAVEFORMATEXTENSIBLE_CHANNEL_MASK=0x5003
+- if an input has 4 channels, being back center, top front center, front center and top rear center in that order, they have to be reordered to front center, back center, top front center and top rear center. The VORBIS_COMMENT tag added is WAVEFORMATEXTENSIBLE_CHANNEL_MASK=0x12004.
+
+WAVEFORMATEXTENSIBLE_CHANNEL_MASK tags MAY be padded with zeroes, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE_CHANNEL_MASK tags MUST be case-insensitive for both the tag name and the tag contents.
 
 ### SAMPLE SIZE
 Value   | Description
