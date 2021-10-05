@@ -422,7 +422,7 @@ Following are 3 examples:
 - if a file has 4 channels, being front left, front right, top front left and top front right, the VORBIS_COMMENT tag is WAVEFORMATEXTENSIBLE_CHANNEL_MASK=0x5003
 - if an input has 4 channels, being back center, top front center, front center and top rear center in that order, they have to be reordered to front center, back center, top front center and top rear center. The VORBIS_COMMENT tag added is WAVEFORMATEXTENSIBLE_CHANNEL_MASK=0x12004.
 
-WAVEFORMATEXTENSIBLE_CHANNEL_MASK tags MAY be padded with zeroes, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE_CHANNEL_MASK tags MUST be case-insensitive for both the tag name and the tag contents.
+WAVEFORMATEXTENSIBLE_CHANNEL_MASK tags MAY be padded with zeros, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE_CHANNEL_MASK tags MUST be case-insensitive for both the tag name and the tag contents.
 
 ### SAMPLE SIZE
 Value   | Description
