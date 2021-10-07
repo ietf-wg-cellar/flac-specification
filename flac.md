@@ -11,7 +11,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 # Acknowledgments
 
 FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
-- [A. J. Robinson](http://svr-www.eng.cam.ac.uk/~ajr/) for his work on [Shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html); his paper is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Exponential-Golomb coding used in Shorten.
+- [A. J. Robinson](http://svr-www.eng.cam.ac.uk/~ajr/) for his work on [Shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html); his paper is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
 - [S. W. Golomb](https://web.archive.org/web/20040215005354/http://csi.usc.edu/faculty/golomb.html) and Robert F. Rice; their universal codes are used by FLAC's entropy coder.
 - N. Levinson and J. Durbin; the reference encoder uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients.
 - And of course, [Claude Shannon](http://en.wikipedia.org/wiki/Claude_Shannon)
@@ -90,17 +90,11 @@ FLAC uses four methods for modeling the input signal:
 
 # Residual Coding
 
-FLAC uses Exponential-Golomb (a variant of Rice) coding as its residual encoder. You can learn more about [exp-golomb coding](https://en.wikipedia.org/wiki/Exponential-Golomb_coding) on Wikipedia.
+In case a subframe uses a predictor to approximate the coded audio signal, a residual needs to be stored. In case an effective predictor is used, the residual samples usually have on average a smaller numerical value than the samples before prediction, but it is possible the residual has outlier samples much larger than any of the original samples, sometimes even needing more bits for arithmetic than the bit depth of the original audio block.
 
-FLAC currently defines two similar methods for the coding of the error signal from the prediction stage. The error signal is coded using Exponential-Golomb codes in one of two ways:
+To be able to efficiently code numbers that are small on average but with occasionally a much larger number, Rice coding is used for the residual. This code works by choosing a Rice parameter, splitting the numerical value of each residual sample in two parts by dividing it with `2^(Rice parameter)`, creating a quotient and a remainder. The quotient is stored in unary form, the remainder in binary form. If indeed most residual samples are close to zero and the Rice parameter is chosen right, this form of coding, a so-called variable-length code, usually needs less bits to store than storing the residual in binary form.
 
-1. the encoder estimates a single exp-golomb parameter based on the variance of the residual and exp-golomb codes the entire residual using this parameter;
-
-1. the residual is partitioned into several equal-length regions of contiguous samples, and each region is coded with its own exp-golomb parameter based on the region's mean.
-
-(Note that the first method is a special case of the second method with one partition, except the exp-golomb parameter is based on the residual variance instead of the mean.)
-
-The FLAC format has reserved space for other coding methods. Some possibilities for volunteers would be to explore better context-modeling of the exp-golomb parameter, or Huffman coding. See [LOCO-I](http://www.hpl.hp.com/techreports/98/HPL-98-193.html) and [pucrunch](http://web.archive.org/web/20140827133312/http://www.cs.tut.fi/~albert/Dev/pucrunch/packing.html) for descriptions of several universal codes.
+Quite often the optimal Rice parameter varies over the course of a subframe. To accommodate this, the residual is split up into `2^(partition order)` partitions, where each partition has its own Rice parameter. The FLAC format uses two forms of Rice coding, which only differ in the number of bits used for encoding the Rice parameter, which is either 4 or 5 bits.
 
 # Format
 
