@@ -20,9 +20,9 @@ FLAC owes much to the many people who have advanced the audio compression field 
 
 FLAC stands for Free Lossless Audio Compressor: it is designed to reduce the amount of computer storage space needed to store digital audio signals (i.e. compression), without needing to remove information in doing so (i.e. lossless). FLAC is free in the sense that its specification is open, its reference implementation is open-source and it is not encumbered by any known patent.
 
-FLAC is able to achieve lossless compression because samples in audio signals tend to be highly correlated with their close neighbours. In contrast with general purpose compressors, which often use dictionaries, do run-length coding or exploit long-term repetition, FLAC removes redundancy solely in the very short term, looking back at most 32 samples.
+FLAC is able to achieve lossless compression because samples in audio signals tend to be highly correlated with their close neighbors. In contrast with general purpose compressors, which often use dictionaries, do run-length coding or exploit long-term repetition, FLAC removes redundancy solely in the very short term, looking back at most 32 samples.
 
-The FLAC format is suited for pulse-code modulated (PCM) audio with 1 to 8 channels, samplerates from 1 to 1048576 Hertz and bit depths between 4 and 32 bits. Most tools for reading and writing the FLAC format have been optimized for CD-audio, which is PCM audio with 2 channels, a samplerate of 44.1kHz and a bit depth of 16 bits.
+The FLAC format is suited for pulse-code modulated (PCM) audio with 1 to 8 channels, sample rates from 1 to 1048576 Hertz and bit depths between 4 and 32 bits. Most tools for reading and writing the FLAC format have been optimized for CD-audio, which is PCM audio with 2 channels, a sample rate of 44.1kHz and a bit depth of 16 bits.
 
 Compared to other lossless (audio) coding formats, FLAC is a format with low complexity and can be coded to and from with little computing resources. Decoding of FLAC has seen many independent implementations on many different platforms, and both encoding and decoding can be implemented without needing floating-point arithmetic.
 
