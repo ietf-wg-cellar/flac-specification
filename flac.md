@@ -50,11 +50,11 @@ In addition, FLAC specifies a metadata system, which allows arbitrary informatio
 
 - **Bit depth** or **bits per sample**: the number of bits used to contain each sample. This MUST be the same for all subblocks in a block but MAY be different for different subframes in a frame because of [interchannel decorrelation](#interchannel-decorrelation).
 
-- **LPC**: Linear predictive coding, a method to model an audio signal. FLAC uses LPC to remove redundancy in a signal, in order to be able to compress it
+- **Predictor**: a model used to predict samples in an audio signal based on past samples. FLAC uses such predictors to remove redundancy in a signal in order to be able to compress it.
 
-- **Predictor**: an LPC model used predict samples in an audio signal.
+- **Linear predictor**: a predictor using [linear prediction](https://en.wikipedia.org/wiki/Linear_prediction). This is also called **linear predictive coding (LPC)**. With a linear predictor each prediction is a linear combination of past samples, hence the name. A linear predictor has a [causal discrete-time finite impulse response](https://en.wikipedia.org/wiki/Finite_impulse_response).
 
-- **Fixed predictor**: an predictor in which the model parameters are the same across all FLAC files, and thus not need to be stored.
+- **Fixed predictor**: a linear predictor in which the model parameters are the same across all FLAC files, and thus not need to be stored.
 
 - **Predictor order**: the number of past samples that a predictor uses. For example, a 4th order predictor uses the 4 samples directly preceding a certain sample to predict it. In FLAC, samples used in a predictor are always consecutive, and are always the samples directly before the sample that is being predicted
 
