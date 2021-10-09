@@ -568,3 +568,13 @@ The number of samples (n) in the partition is determined as follows:
 - if the partition order is zero, n = frame's blocksize - predictor order
 - else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
 - else n = (frame's blocksize / (2\^partition order)) - predictor order
+
+# Past changes
+
+The FLAC format was originally specified in December 2000 and more or less finalized in March 2001. While the specification has seen several additions over the years, there has been one substantial change to the format.
+
+Before July 2007, variable blocksize streams were not explicitly marked as such by a flag in the frame header. A decoder had two ways to detect a variable blocksize stream, either by comparing the minimum and maximum blocksize in the STREAMINFO metadata block, or by detecting a change of blocksize during a stream which could in theory not happen at all. As the meaning of one number in the frame header depends on whether or not a stream is variable blocksize, one of the reserved bits was changed to be used as a variable blocksize flag, facilitating easier detection.
+
+Along with the addition of a new flag, the meaning of the blocksize bits was subtly changed. Before, blocksize bits 0b0001-0b0101 and 0b1000-0b1111 could only be used for fixed blocksize streams, while 0b0110 and 0b0111 could be used for both fixed blocksize and variable blocksize streams. After the change, these restrictions were lifted and 0b0001-0b1111 could all be used for both variable blocksize and fixed blocksize streams.
+
+Another change to the format that is worth noting is the addition of Rice coded residuals with a 5-bit Rice parameter. This was added in July 2007 as it was found that the optimal Rice parameter for the residual of certain audio signals with a 24-bit bit depth lies outside the range allowed by the 4-bit Rice parameter.
