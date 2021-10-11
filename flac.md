@@ -401,7 +401,7 @@ Bit number | Channel description
 0          | Front left
 1          | Front right
 2          | Front center
-3          | LFE
+3          | Low-frequency effects (LFE)
 4          | Back left
 5          | Back right
 6          | Front left of center
