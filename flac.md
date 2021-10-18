@@ -18,9 +18,15 @@ FLAC owes much to the many people who have advanced the audio compression field 
 
 # Scope
 
-It is a known fact that no algorithm can losslessly compress all possible input, so most compressors restrict themselves to a useful domain and try to work as well as possible within that domain. FLAC's domain is audio data. Though it can losslessly code any input, only certain kinds of input will get smaller. FLAC exploits the fact that audio data typically has a high degree of sample-to-sample correlation.
+FLAC stands for Free Lossless Audio Codec: it is designed to reduce the amount of computer storage space needed to store digital audio signals without needing to remove information in doing so (i.e. lossless). FLAC is free in the sense that its specification is open, its reference implementation is open-source and it is not encumbered by any known patent.
 
-Within the audio domain, there are many possible subdomains. For example: low bitrate speech, high-bitrate multi-channel music, etc. FLAC itself does not target a specific subdomain, but many of the default parameters of the reference encoder are tuned to CD-quality music data (i.e. 44.1 kHz, 2 channel, 16 bits per sample). The effect of the encoding parameters on different kinds of audio data will be examined later.
+FLAC is able to achieve lossless compression because samples in audio signals tend to be highly correlated with their close neighbors. In contrast with general purpose compressors, which often use dictionaries, do run-length coding or exploit long-term repetition, FLAC removes redundancy solely in the very short term, looking back at most 32 samples.
+
+The FLAC format is suited for pulse-code modulated (PCM) audio with 1 to 8 channels, sample rates from 1 to 1048576 Hertz and bit depths between 4 and 32 bits. Most tools for reading and writing the FLAC format have been optimized for CD-audio, which is PCM audio with 2 channels, a sample rate of 44.1 kHz and a bit depth of 16 bits.
+
+Compared to other lossless (audio) coding formats, FLAC is a format with low complexity and can be coded to and from with little computing resources. Decoding of FLAC has seen many independent implementations on many different platforms, and both encoding and decoding can be implemented without needing floating-point arithmetic.
+
+The coding methods provided by the FLAC format works best on PCM audio signals of which the samples have a signed representation and are centered around zero. Audio signals in which samples have an unsigned representation must be transformed to a signed representation as described in this document in order to achieve reasonable compression. The FLAC format is not suited to compress audio that is not PCM. Pulse-density modulated audio, e.g. DSD, cannot be compressed by FLAC.
 
 # Architecture
 
