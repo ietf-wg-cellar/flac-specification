@@ -488,13 +488,13 @@ Value | Description
 
 The size of the samples stored in the subframe is the subframe sample size reduced by k bits. Decoded samples must be shifted left by k bits.
 
-## Constant subframe
+## SUBFRAME_CONSTANT
 In a constant subframe only a single sample is stored. This sample is stored as a signed integer number, big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. This bit depth of a subframe is equal to the bit depth of the corresponding subblock, minus the number of wasted bits in that subblock, plus 1 bit when it has been converted to a side-channel subframe. See also the [section on interchannel decorrelation](#interchannel-decorrelation) and the [section on wasted bits per sample flag](#wasted-bits-per-sample-flag).
 
-## Verbatim subframe
-A verbatim subframe stores all samples unencoded. See [section on Constant subframe](#constant-subframe) on how samples are stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.
+## SUBFRAME_VERBATIM
+A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#constant-subframe) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.
 
-## Fixed predictor subframe
+## SUBFRAME_FIXED
 Five different fixed predictors are defined, one for each prediction order 0 through 4. To encode a signal with a fixed predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a fixed predictor, first the residual has to be decoded, after which for each sample the prediction can be added. This means that decoding MUST be a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
 
 Prediction and subsequent subtraction from the current sample or addition to the current residual sample MUST be implemented in signed integer math to eliminate the possibility of introducing rounding error. The minimum required size of the used signed integer data type depends on the sample bitdepth and the predictor order, and can be calculated by adding the headroom bits in the table below to the subframe bitdepth. For example, if the sample bitdepth of the source is 16, the current subframe encodes a side channel (see the [section on interchannel decorrelation](#interchannel-decorrelation)) and the predictor order is 3, the minimum required size of the used signed integer data type is at least 16 + 1 + 3 = 20 bits.
@@ -517,7 +517,7 @@ The first order fixed predictor is comparable to how DPCM encoding works, as the
 
 As the fixed predictors are specified, they do not have to be stored. The fixed predictor order specifies which predictor is used. To be able to predict samples, warm-up samples are stored, as the predictor needs previous samples in its prediction. The number of warm-up samples is equal to the predictor order. See [section on Constant subframe](#constant-subframe) on how samples are stored unencoded. Directly following the warm-up samples is the coded residual.
 
-## Linear predictor subframe
+## SUBFRAME_LPC
 Whereas fixed predictors are well suited for simple signals, using a (non-fixed) linear predictor on more complex signals can improve compression by making the residual samples even smaller. There is a certain trade-off however, as storing the predictor coefficients takes up space as well.
 
 In the FLAC format, a predictor is defined by up to 32 predictor coefficients and a shift. To form a prediction, each coefficient is multiplied with its corresponding past sample, the results are added and this addition is then shifted. To encode a signal with a linear predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a linear predictor, first the residual has to be decoded, after which for each sample the prediction can be added. This means that decoding MUST be a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
