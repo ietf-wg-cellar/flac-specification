@@ -130,7 +130,7 @@ Before the formal description of the stream, an overview might be helpful.
 * The bits-per-sample bits in the `FRAME_HEADER` MUST be 0b001-0b111.
 * If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [SUBFRAME_LPC section](#subframelpc)) MUST be less than or equal to 12, i.e. the subframe type bits in the `SUBFRAME_HEADER` (see [SUBFRAME_HEADER section](#subframeheader)) SHOULD NOT be 0b101100-0b111111.
 * The Rice partition order in an `exp-golomb coded residual section` (see [RESIDUAL\_CODING\_METHOD\_PARTITIONE\_EXP\_GOLOMB section](#residualcodingmethodpartitionedexpgolomb)) MUST be less than or equal to 8.
-* The channel ordering is a standard one, i.e. no WAVEFORMATEXTENSIBLE_CHANNEL_MASK tag is necessary to define a non-standard channel ordering (see [channel assignment](#channel-assignment)).
+* The channel ordering is one of the orderings defined under [channel assignment](#channel-assignment), i.e. no WAVEFORMATEXTENSIBLE_CHANNEL_MASK tag is necessary to define a channel ordering.
 
 ## Conventions
 
