@@ -394,35 +394,7 @@ Value           | Description
 0b1010          | mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
 0b1011 - 0b1111 | reserved
 
-In case different channels than those in the table above are coded, it is recommended to add a WAVEFORMATEXTENSIBLE_CHANNEL_MASK to a VORBIS_COMMENT metadata block to describe which channels are stored. This channel mask consists of flag bits indicating which channels are present, stored in a hexadecimal representation preceded by 0x. The flags only signal which channels are present, not in which order, so in case a file has to be encoded in which channels are ordered differently, they have to be reordered. Please note that a file in which the channel order is defined through the WAVEFORMATEXTENSIBLE_CHANNEL_MASK is not streamable, i.e. non-subset, as the tag is not found in each frame header. The mask bits can be found in the following table
-
-Bit number | Channel description
-----------:|:-----------
-0          | Front left
-1          | Front right
-2          | Front center
-3          | Low-frequency effects (LFE)
-4          | Back left
-5          | Back right
-6          | Front left of center
-7          | Front right of center
-8          | Back center
-9          | Side left
-10         | Side right
-11         | Top center
-12         | Top front left
-13         | Top front center
-14         | Top front right
-15         | Top rear left
-16         | Top rear center
-17         | Top rear right
-
-Following are 3 examples:
-- if a file has a single channel, being a LFE channel, the VORBIS_COMMENT tag is WAVEFORMATEXTENSIBLE_CHANNEL_MASK=0x8
-- if a file has 4 channels, being front left, front right, top front left and top front right, the VORBIS_COMMENT tag is WAVEFORMATEXTENSIBLE_CHANNEL_MASK=0x5003
-- if an input has 4 channels, being back center, top front center, front center and top rear center in that order, they have to be reordered to front center, back center, top front center and top rear center. The VORBIS_COMMENT tag added is WAVEFORMATEXTENSIBLE_CHANNEL_MASK=0x12004.
-
-WAVEFORMATEXTENSIBLE_CHANNEL_MASK tags MAY be padded with zeros, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE_CHANNEL_MASK tags MUST be case-insensitive for both the tag name and the tag contents.
+Please note that the actual coded subframe order for right/side stereo is side-right.
 
 ### SAMPLE SIZE
 Value   | Description
