@@ -488,11 +488,11 @@ Value | Description
 
 The size of the samples stored in the subframe is the subframe sample size reduced by k bits. Decoded samples must be shifted left by k bits.
 
-## SUBFRAME_CONSTANT
+## SUBFRAME CONSTANT
 In a constant subframe only a single sample is stored. This sample is stored as a signed integer number, big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. This bit depth of a subframe is equal to the bit depth of the corresponding subblock, minus the number of wasted bits in that subblock, plus 1 bit when it has been converted to a side-channel subframe. See also the [section on interchannel decorrelation](#interchannel-decorrelation) and the [section on wasted bits per sample flag](#wasted-bits-per-sample-flag).
 
 ## SUBFRAME_VERBATIM
-A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#constant-subframe) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.
+A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#subframe-constant) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.
 
 ## SUBFRAME_FIXED
 Five different fixed predictors are defined, one for each prediction order 0 through 4. To encode a signal with a fixed predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a fixed predictor, first the residual has to be decoded, after which for each sample the prediction can be added. This means that decoding MUST be a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
@@ -515,7 +515,7 @@ For fixed predictor order 0, the prediction is always 0, thus each residual samp
 
 The first order fixed predictor is comparable to how DPCM encoding works, as the resulting residual sample is the difference between the corresponding sample and the sample before it. The higher fixed predictors can be understood as polynomials fitted to the previous samples.
 
-As the fixed predictors are specified, they do not have to be stored. The fixed predictor order specifies which predictor is used. To be able to predict samples, warm-up samples are stored, as the predictor needs previous samples in its prediction. The number of warm-up samples is equal to the predictor order. See [section on Constant subframe](#constant-subframe) on how samples are stored unencoded. Directly following the warm-up samples is the coded residual.
+As the fixed predictors are specified, they do not have to be stored. The fixed predictor order specifies which predictor is used. To be able to predict samples, warm-up samples are stored, as the predictor needs previous samples in its prediction. The number of warm-up samples is equal to the predictor order. See [section on Constant subframe](#subframe-constant) on how samples are stored unencoded. Directly following the warm-up samples is the coded residual.
 
 ## SUBFRAME_LPC
 Whereas fixed predictors are well suited for simple signals, using a (non-fixed) linear predictor on more complex signals can improve compression by making the residual samples even smaller. There is a certain trade-off however, as storing the predictor coefficients takes up space as well.
@@ -532,7 +532,7 @@ Data       | Description
 `s(n)`     | Unencoded predictor coefficients (n = predictor coefficient precision \* lpc order).
 `Coded residual` | Encoded residual
 
-See [section on Constant subframe](#constant-subframe) on how the warm-up samples are stored unencoded. The unencoded predictor coefficients are stored the same way as the warm-up samples, but the number of bits needed for each coefficient is defined by the predictor coefficient precision. While the prediction right shift is signed two's complement, this number MUST be positive.
+See [section on Constant subframe](#subframe-constant) on how the warm-up samples are stored unencoded. The unencoded predictor coefficients are stored the same way as the warm-up samples, but the number of bits needed for each coefficient is defined by the predictor coefficient precision. While the prediction right shift is signed two's complement, this number MUST be positive.
 
 Please note that the order in which the predictor coefficients appear in the bitstream corresponds to which **past** sample they belong. In other words, the order of the predictor coefficients is opposite to the chronological order of the samples. So, the first predictor coefficient has to be multiplied with the sample directly before the sample that is being predicted, the second predictor coefficient has to be multiplied with the sample before that etc.
 
