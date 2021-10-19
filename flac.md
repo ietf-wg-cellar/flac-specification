@@ -499,17 +499,20 @@ Five different fixed predictors are defined, one for each prediction order 0 thr
 
 Prediction and subsequent subtraction from the current sample or addition to the current residual sample MUST be implemented in signed integer math to eliminate the possibility of introducing rounding error. The minimum required size of the used signed integer data type depends on the sample bitdepth and the predictor order, and can be calculated by adding the headroom bits in the table below to the subframe bitdepth. For example, if the sample bitdepth of the source is 16, the current subframe encodes a side channel (see the [section on interchannel decorrelation](#interchannel-decorrelation)) and the predictor order is 3, the minimum required size of the used signed integer data type is at least 16 + 1 + 3 = 20 bits.
 
-Order | Prediction | Derivation | Bits of headroom
-:-----|:-----------|:-----------|:---------------
-0     | 0          | N/A        | 0
-1     | s(n-1)     | N/A        | 1
-2     | 2 * s(n-1) - s(n-2) | s(n-1) + ∆s(n-1) | 2
-3     | 3 * s(n-1) - 3 * s(n-2) + s(n-3) |  s(n-1) + ∆s(n-1) + ∆∆s(n-1) | 3
+Order | Prediction                                    | Derivation                              | Bits of headroom
+:-----|:----------------------------------------------|:----------------------------------------|:----------------
+0     | 0                                             | N/A                                     | 0
+1     | s(n-1)                                        | N/A                                     | 1
+2     | 2 * s(n-1) - s(n-2)                           | s(n-1) + ∆s(n-1)                        | 2
+3     | 3 * s(n-1) - 3 * s(n-2) + s(n-3)              | s(n-1) + ∆s(n-1) + ∆∆s(n-1)             | 3
 4     | 4 * s(n-1) - 6 * s(n-2) + 4 * s(n-3) - s(n-4) | s(n-1) + ∆s(n-1) + ∆∆s(n-1) + ∆∆∆s(n-1) | 4
 
 Where
-- n is the number of the sample being predicted- s(n) is the sample being predicted- s(n-1) is the sample before the one being predicted- ∆s(n-1) is the difference between the previous sample and the sample before that, i.e. s(n-1) - s(n-2). This is the closest available first-order delta derivative- ∆∆s(n-1) is ∆s(n-1) - ∆s(n-2) or the closest available second-order delta derivative
-- ∆∆∆s(n-1) is ∆∆s(n-1) - ∆∆s(n-2) or the closest available third-order delta derivative
+- n is the number of the sample being predicted- s(n) is the sample being predicted
+- s(n-1) is the sample before the one being predicted
+- ∆s(n-1) is the difference between the previous sample and the sample before that, i.e. s(n-1) - s(n-2). This is the closest available first-order delta derivative
+- ∆∆s(n-1) is ∆s(n-1) - ∆s(n-2) or the closest available second-order delta derivative
+- ∆∆∆s(n-1) is ∆∆s(n-1) - ∆∆s(n-2) or the closest available third-order delta derivative
 
 For fixed predictor order 0, the prediction is always 0, thus each residual sample is equal to its corresponding input or decoded sample. The difference between a fixed predictor with order 0 and a verbatim subframe, is that a verbatim subframe stores all samples unencoded, while a fixed predictor with order 0 has all its samples processed by the residual coder.
 
