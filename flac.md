@@ -553,7 +553,7 @@ Value       | Description
 0b01        | partitioned Rice code with 5-bit parameters
 0b10 - 0b11 | reserved
 
-Both defined coding methods work the same way, but differ in the number of bits used for rice parameters. The 4 bits that directly follow the coding method bits form the partition order, which is an unsigned number. The rest of the entropy block consists of 2^(partition order) partitions. For example, if the 4 bits are 0b1000, the partition order is 8, and the rest of the entropy block contains 2^8 = 256 partitions.
+Both defined coding methods work the same way, but differ in the number of bits used for rice parameters. The 4 bits that directly follow the coding method bits form the partition order, which is an unsigned number. The rest of the coded residual consists of 2^(partition order) partitions. For example, if the 4 bits are 0b1000, the partition order is 8, and the rest of the entropy block contains 2^8 = 256 partitions.
 
 Each partition contains a certain amount of residual samples. The number of residual samples in the first partition is equal to (blocksize >> partition order) - predictor order, i.e. the blocksize divided by the number of partitions minus the predictor order. In all other partitions the number of residual samples is equal to (blocksize >> partition order).
 
