@@ -555,11 +555,11 @@ Value       | Description
 
 Both defined coding methods work the same way, but differ in the number of bits used for rice parameters. The 4 bits that directly follow the coding method bits form the partition order, which is an unsigned number. The rest of the entropy block consists of 2^(partition order) partitions. For example, if the 4 bits are 0b1000, the partition order is 8, and the rest of the entropy block contains 2^8 = 256 partitions.
 
-Each partition contains a certain amount of samples. The number of samples in the first partition is equal to (blocksize >> partition order) - predictor order, i.e. the blocksize divided by the number of partitions minus the predictor order. In all other partitions the number of samples is equal to (blocksize >> partition order).
+Each partition contains a certain amount of residual samples. The number of residual samples in the first partition is equal to (blocksize >> partition order) - predictor order, i.e. the blocksize divided by the number of partitions minus the predictor order. In all other partitions the number of residual samples is equal to (blocksize >> partition order).
 
 The partition order MUST be so that the blocksize is evenly divisible by the number of partitions. This means for example that for all uneven blocksizes, only partition order 0 is allowed.  The partition order also MUST be so that the (blocksize >> partition order) is larger than the predictor order. This means for example that with a blocksize of 4096 and a predictor order of 4, partition order cannot be larger than 9.
 
-In case the coded residual of the current subframe is one with a 4-bit Rice parameter (see table at the start of this section), the first 4 bits of a partition are either a rice parameter or an escape code. These 4 bits indicate an escape code if they are 0b1111, otherwise they contain the rice parameter as an unsigned number. In case the coded residual of the current subframe is one with a 5-bit Rice parameter, the first 5 bits indicate an escape code if they are 0b11111, otherwise they contain the rice parameter as an unsigned number as well.
+In case the coded residual of the current subframe is one with a 4-bit Rice parameter (see table at the start of this section), the first 4 bits of each partition are either a rice parameter or an escape code. These 4 bits indicate an escape code if they are 0b1111, otherwise they contain the rice parameter as an unsigned number. In case the coded residual of the current subframe is one with a 5-bit Rice parameter, the first 5 bits indicate an escape code if they are 0b11111, otherwise they contain the rice parameter as an unsigned number as well.
 
 In case an escape code was used, the partition does not contain a variable-length rice coded residual, but a fixed-length unencoded residual. Directly following the escape code are 5 bits containing the number of bits with which the residual is stored, as an unsigned number.
 
@@ -571,9 +571,9 @@ Decoding the coded residual thus involves selecting the right coding method, fin
 
 Provided is a subframe with blocksize 24, predictor order 2 and partition order 2. This means this subframe has 22 residual samples, as the predictor needs 2 warm-up samples, for which no residual needs to be stored. The residual samples are stored in a partitioned rice code with 4-bit parameters. The rice parameter for the first partition is 6, for the second it is 2, the third it is 0 and the last partition uses an escape code, specifing 2 bits.
 
-The residuals have a folded representation as described earlier. The first 4 are divided by 2^6, the next 6 are divided by 2^2, the 6 that folow are divided by 2^0 and the last 6 are stored unencoded. See the following table as to how the residuals are represented
+The residual samples have a folded representation as described earlier. The first 4 are divided by 2^6, the next 6 are divided by 2^2, the 6 that follow are divided by 2^0 and the last 6 are stored unencoded. See the following table as to how the residuals are represented
 
-residual | folded residual | rice parameter | quotient | remainder | coded residual
+residual | folded residual | rice parameter | quotient | remainder | rice codeword
 :---|:----|:--------------|:--|:---|:------------
 25  | 50  | 6             | 0 | 50 | 0b1110010
 -23 | 45  | 6             | 0 | 45 | 0b1101101
@@ -599,7 +599,7 @@ residual | folded residual | rice parameter | quotient | remainder | coded resid
 -1  | -   | Escape, 2 bit | - | -  | 0b10
 
 
-To sum up the whole coded residual for this example: the first two bits are 0b00 to indicate that this is a partitioned rice code with 4-bit parameters. This would be followed by 0b0010 indicating that this code is split into four partitions. The next 4 bits are 0b0110, being the rice parameter of the first partition, 6. Following that are the rice codewords of the first 4 residuals, which can be found in the last column of the table above. The next 4 bits are 0b0010, being the rice parameter of the second partition, 2, followed by the rice codewords of the next 6 residuals. The next 4 bits are 0b000, the rice parameter of the third partition, 0, followed by the rice codewords of the corresponding 6 residuals. Finally, the last partition is in unencoded binary form, with 2 bits. This partition starts with the escape code, 0b1111, followed by the number of bits 0b00010 and the last 6 residuals.
+To sum up the whole coded residual for this example: the first two bits are 0b00 to indicate that this is a partitioned rice code with 4-bit parameters. This is followed by 0b0010 indicating that this code is split into four partitions. The next 4 bits are 0b0110, being the rice parameter of the first partition, 6. Following that are the rice codewords of the first 4 residuals, which can be found in the last column of the table above. The next 4 bits are 0b0010, being the rice parameter of the second partition, 2, followed by the rice codewords of the next 6 residuals. The next 4 bits are 0b000, the rice parameter of the third partition, 0, followed by the rice codewords of the corresponding 6 residuals. Finally, the last partition is in unencoded binary form, with 2 bits. This partition starts with the escape code, 0b1111, followed by the number of bits 0b00010 and the last 6 residuals.
 
 # Security Considerations
 
