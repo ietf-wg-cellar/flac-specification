@@ -489,7 +489,7 @@ Value | Description
 The size of the samples stored in the subframe is the subframe sample size reduced by k bits. Decoded samples must be shifted left by k bits.
 
 ## SUBFRAME CONSTANT
-In a constant subframe only a single sample is stored. This sample is stored as a signed integer number, big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. This bit depth of a subframe is equal to the bit depth of the corresponding subblock, minus the number of wasted bits in that subblock, plus 1 bit when it has been converted to a side-channel subframe. See also the [section on interchannel decorrelation](#interchannel-decorrelation) and the [section on wasted bits per sample flag](#wasted-bits-per-sample-flag).
+In a constant subframe only a single sample is stored. This sample is stored as a signed integer number, big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the bit depth of the corresponding subblock, minus the number of wasted bits in that subblock, plus 1 bit when it has been converted to a side-channel subframe. See also the [section on interchannel decorrelation](#interchannel-decorrelation) and the [section on wasted bits per sample flag](#wasted-bits-per-sample-flag).
 
 ## SUBFRAME_VERBATIM
 A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#subframe-constant) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.
@@ -508,11 +508,12 @@ Order | Prediction                                    | Derivation              
 4     | 4 * s(n-1) - 6 * s(n-2) + 4 * s(n-3) - s(n-4) | s(n-1) + ∆s(n-1) + ∆∆s(n-1) + ∆∆∆s(n-1) | 4
 
 Where
-- n is the number of the sample being predicted- s(n) is the sample being predicted
+- n is the number of the sample being predicted
+- s(n) is the sample being predicted
 - s(n-1) is the sample before the one being predicted
-- ∆s(n-1) is the difference between the previous sample and the sample before that, i.e. s(n-1) - s(n-2). This is the closest available first-order delta derivative
-- ∆∆s(n-1) is ∆s(n-1) - ∆s(n-2) or the closest available second-order delta derivative
-- ∆∆∆s(n-1) is ∆∆s(n-1) - ∆∆s(n-2) or the closest available third-order delta derivative
+- ∆s(n-1) is the difference between the previous sample and the sample before that, i.e. s(n-1) - s(n-2). This is the closest available first-order discrete derivative
+- ∆∆s(n-1) is ∆s(n-1) - ∆s(n-2) or the closest available second-order discrete derivative
+- ∆∆∆s(n-1) is ∆∆s(n-1) - ∆∆s(n-2) or the closest available third-order discrete derivative
 
 For fixed predictor order 0, the prediction is always 0, thus each residual sample is equal to its corresponding input or decoded sample. The difference between a fixed predictor with order 0 and a verbatim subframe, is that a verbatim subframe stores all samples unencoded, while a fixed predictor with order 0 has all its samples processed by the residual coder.
 
