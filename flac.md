@@ -142,7 +142,7 @@ Before the formal description of the stream, an overview might be helpful.
 - The sample rate bits in the `FRAME_HEADER` MUST be 0b0001-0b1110.
 - The bits-per-sample bits in the `FRAME_HEADER` MUST be 0b001-0b111.
 - If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [SUBFRAME_LPC section](#subframelpc)) MUST be less than or equal to 12, i.e. the subframe type bits in the `SUBFRAME_HEADER` (see [SUBFRAME_HEADER section](#subframeheader)) SHOULD NOT be 0b101100-0b111111.
-- The Rice partition order in an `exp-golomb coded residual section` (see [RESIDUAL\_CODING\_METHOD\_PARTITIONE\_EXP\_GOLOMB section](#residualcodingmethodpartitionedexpgolomb)) MUST be less than or equal to 8.
+- The Rice partition order (see [Coded residual section](#coded-residual)) MUST be less than or equal to 8.
 
 ## Conventions
 
