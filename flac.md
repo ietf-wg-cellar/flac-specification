@@ -90,7 +90,7 @@ FLAC uses four methods for modeling the input signal:
 
 # Residual Coding
 
-In case a subframe uses a predictor to approximate the coded audio signal, a residual needs to be stored. In case an effective predictor is used, the residual samples usually have on average a smaller numerical value than the samples before prediction, but it is possible the residual has outlier samples much larger than any of the original samples, sometimes even needing more bits for arithmetic than the bit depth of the original audio block.
+In case a subframe uses a predictor to approximate the coded audio signal, a residual needs to be stored. When an effective predictor is used, the average numerical value of the residual samples is smaller than that of the samples before prediction. While having smaller values on average, it is possible a few 'outlier' residual samples are much larger than any of the original samples. Sometimes these outliers even exceed the range the bit depth of the original audio offers.
 
 To be able to efficiently code numbers that are small on average but with occasionally a much larger number, Rice coding is used for the residual. This code works by choosing a Rice parameter, splitting the numerical value of each residual sample in two parts by dividing it with `2^(Rice parameter)`, creating a quotient and a remainder. The quotient is stored in unary form, the remainder in binary form. If indeed most residual samples are close to zero and the Rice parameter is chosen right, this form of coding, a so-called variable-length code, usually needs less bits to store than storing the residual in binary form.
 
