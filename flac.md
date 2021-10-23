@@ -118,9 +118,19 @@ The FLAC format has reserved space for other coding methods. Some possibilities 
 
 # Format
 
-This section specifies the FLAC bitstream format. FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding or skip data encoded with newer methods. Apart from reserved patterns, in places the format specifies invalid patterns, meaning that the patterns MAY never appear in any valid bitstream, in any prior, present, or future versions of the format. These invalid patterns are usually used to make the synchronization mechanism more robust.
+This section specifies the FLAC bitstream format.
 
-All numbers used in a FLAC bitstream MUST be integers; there are no floating-point representations. All numbers MUST be big-endian coded. All numbers MUST be unsigned unless otherwise specified.
+## Principles
+
+FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding or skip data encoded with newer methods. Apart from reserved patterns, in places the format specifies invalid patterns, meaning that the patterns MAY never appear in any valid bitstream, in any prior, present, or future versions of the format. These invalid patterns are usually used to make the synchronization mechanism more robust.
+
+All numbers used in a FLAC bitstream MUST be integers; there are no floating-point representations. All numbers MUST be big-endian coded, except the length field used in Vorbis comments, which MUST be little-endian coded. All numbers MUST be unsigned except linear predictor coefficients, the linear prediction shift and numbers which directly represent samples, which MUST be signed. None of these restrictions apply to application metadata blocks.
+
+All samples encoded to and decoded from the FLAC format MUST be in a signed representation.
+
+There are several ways to convert unsigned sample representations to signed sample representations, but the coding methods provided by the FLAC format work best on audio signals of which the numerical values of the samples are centered around zero, i.e. have no DC offset. In most unsigned audio formats, signals are centered around halfway the range of the unsigned integer type used. If that is the case, all sample representations SHOULD be converted by first copying the number to a signed integer with sufficient range and then subtracting half of the range of the unsigned integer type, which should result in a signal with samples centered around 0.
+
+## Overview
 
 Before the formal description of the stream, an overview might be helpful.
 
@@ -138,12 +148,15 @@ Before the formal description of the stream, an overview might be helpful.
 - Since a decoder MAY start decoding in the middle of a stream, there MUST be a method to determine the start of a frame. A 14-bit sync code begins each frame. The sync code will not appear anywhere else in the frame header. However, since it MAY appear in the subframes, the decoder has two other ways of ensuring a correct sync. The first is to check that the rest of the frame header contains no invalid data. Even this is not foolproof since valid header patterns can still occur within the subframes. The decoder's final check is to generate an 8-bit CRC of the frame header and compare this to the CRC stored at the end of the frame header.
 - Again, since a decoder MAY start decoding at an arbitrary frame in the stream, each frame header MUST contain some basic information about the stream because the decoder MAY not have access to the STREAMINFO metadata block at the start of the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is pure overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame parameters. For instance, the sample rate part of the frame header is specified using 4 bits. Eight of the bit patterns correspond to the commonly used sample rates of 8, 16, 22.05, 24, 32, 44.1, 48 or 96 kHz. However, odd sample rates can be specified by using one of the 'hint' bit patterns, directing the decoder to find the exact sample rate at the end of the frame header. The same method is used for specifying the block size and bits per sample. In this way, the frame header size stays small for all of the most common forms of audio data.
 - Individual subframes (one for each channel) are coded separately within a frame, and appear serially in the stream. In other words, the encoded audio data is NOT channel-interleaved. This reduces decoder complexity at the cost of requiring larger decode buffers. Each subframe has its own header specifying the attributes of the subframe, like prediction method and order, residual coding parameters, etc. The header is followed by the encoded audio data for that channel.
-- `FLAC` specifies a subset of itself as the Subset format. The purpose of this is to ensure that any streams encoded according to the Subset are truly "streamable", meaning that a decoder that cannot seek within the stream can still pick up in the middle of the stream and start decoding. It also makes hardware decoder implementations more practical by limiting the encoding parameters such that decoder buffer sizes and other resource requirements can be easily determined. __flac__ generates Subset streams by default unless the "--lax" command-line option is used. The Subset makes the following limitations on what MAY be used in the stream:
-* The blocksize bits in the `FRAME_HEADER` (see [FRAME_HEADER section](#frameheader)) MUST be 0b0001-0b1110. The blocksize MUST be <= 16384; if the sample rate is <= 48000 Hz, the blocksize MUST be <= 4608 = 2\^9 \* 3\^2.
-* The sample rate bits in the `FRAME_HEADER` MUST be 0b0001-0b1110.
-* The bits-per-sample bits in the `FRAME_HEADER` MUST be 0b001-0b111.
-* If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [SUBFRAME_LPC section](#subframelpc)) MUST be less than or equal to 12, i.e. the subframe type bits in the `SUBFRAME_HEADER` (see [SUBFRAME_HEADER section](#subframeheader)) SHOULD NOT be 0b101100-0b111111.
-* The Rice partition order in an `exp-golomb coded residual section` (see [RESIDUAL\_CODING\_METHOD\_PARTITIONE\_EXP\_GOLOMB section](#residualcodingmethodpartitionedexpgolomb)) MUST be less than or equal to 8.
+
+## Subset
+`FLAC` specifies a subset of itself as the Subset format. The purpose of this is to ensure that any streams encoded according to the Subset are truly "streamable", meaning that a decoder that cannot seek within the stream can still pick up in the middle of the stream and start decoding. It also makes hardware decoder implementations more practical by limiting the encoding parameters such that decoder buffer sizes and other resource requirements can be easily determined. __flac__ generates Subset streams by default unless the "--lax" command-line option is used. The Subset makes the following limitations on what MAY be used in the stream:
+
+- The blocksize bits in the `FRAME_HEADER` (see [FRAME_HEADER section](#frameheader)) MUST be 0b0001-0b1110. The blocksize MUST be <= 16384; if the sample rate is <= 48000 Hz, the blocksize MUST be <= 4608 = 2\^9 \* 3\^2.
+- The sample rate bits in the `FRAME_HEADER` MUST be 0b0001-0b1110.
+- The bits-per-sample bits in the `FRAME_HEADER` MUST be 0b001-0b111.
+- If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [SUBFRAME_LPC section](#subframelpc)) MUST be less than or equal to 12, i.e. the subframe type bits in the `SUBFRAME_HEADER` (see [SUBFRAME_HEADER section](#subframeheader)) SHOULD NOT be 0b101100-0b111111.
+- The Rice partition order (see [Coded residual section](#coded-residual)) MUST be less than or equal to 8.
 
 ## Conventions
 
