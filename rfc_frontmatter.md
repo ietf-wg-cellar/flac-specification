@@ -14,11 +14,13 @@ status = "informational"
 value = "draft-ietf-cellar-flac-01"
 
 [[author]]
-initials="M."
-surname="Richardson"
-fullname="Michael Richardson"
+initials="M.Q.C."
+surname="van Beurden"
+fullname="Martijn van Beurden"
   [author.address]
-  email="mcr@sandelman.ca"
+  email="mvanb1@gmail.com"
+    [author.address.postal]
+    country="NLD"
 
 [[author]]
 initials="A."
