@@ -11,10 +11,10 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 # Acknowledgments
 
 FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
-- [A. J. Robinson](http://web.archive.org/web/20160719001218/http://svr-www.eng.cam.ac.uk:80/~ajr/) for his work on [Shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html); his paper is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
+- [A. J. Robinson](https://web.archive.org/web/20160315141134/http://mi.eng.cam.ac.uk/~ajr/) for his work on [Shorten](https://mi.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html); his paper is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
 - [S. W. Golomb](https://web.archive.org/web/20040215005354/http://csi.usc.edu/faculty/golomb.html) and Robert F. Rice; their universal codes are used by FLAC's entropy coder.
 - N. Levinson and J. Durbin; the reference encoder uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients.
-- And of course, [Claude Shannon](http://en.wikipedia.org/wiki/Claude_Shannon)
+- And of course, [Claude Shannon](https://en.wikipedia.org/wiki/Claude_Shannon)
 
 # Scope
 
