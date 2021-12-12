@@ -90,13 +90,15 @@ FLAC uses four methods for modeling the input signal:
 
 # Residual Coding
 
-In case a subframe uses a predictor to approximate the coded audio signal, a residual needs to be stored. When an effective predictor is used, the average numerical value of the residual samples is smaller than that of the samples before prediction. While having smaller values on average, it is possible a few 'outlier' residual samples are much larger than any of the original samples. Sometimes these outliers even exceed the range the bit depth of the original audio offers.
+In case a subframe uses a predictor to approximate the audio signal, a residual needs to be stored to 'correct' the approximation to the exact value. When an effective predictor is used, the average numerical value of the residual samples is smaller than that of the samples before prediction. While having smaller values on average, it is possible a few 'outlier' residual samples are much larger than any of the original samples. Sometimes these outliers even exceed the range the bit depth of the original audio offers.
 
-To be able to efficiently code numbers that are small on average but with occasionally a much larger number, Rice coding is used for the residual. This code works by choosing a Rice parameter, splitting the numerical value of each residual sample in two parts by dividing it with `2^(Rice parameter)`, creating a quotient and a remainder. The quotient is stored in unary form, the remainder in binary form. If indeed most residual samples are close to zero and the Rice parameter is chosen right, this form of coding, a so-called variable-length code, usually needs less bits to store than storing the residual in binary form.
+To be able to efficiently code such a stream of relatively small numbers with an occasional outlier, Rice coding is used. Depending on how small the numbers are that have to be coded, a Rice parameter is chosen. The numerical value of each residual sample is split in two parts by dividing it with `2^(Rice parameter)`, creating a quotient and a remainder. The quotient is stored in unary form, the remainder in binary form. If indeed most residual samples are close to zero and the Rice parameter is chosen right, this form of coding, a so-called variable-length code, needs less bits to store than storing the residual in unencoded form.
 
 As Rice codes can only handle unsigned numbers, signed numbers are zigzag encoded to a so-called folded residual. For more information see section [coded residual](#coded-residual) for a more thorough explanation.
 
-Quite often the optimal Rice parameter varies over the course of a subframe. To accommodate this, the residual is split up into `2^(partition order)` partitions, where each partition has its own Rice parameter. The FLAC format uses two forms of Rice coding, which only differ in the number of bits used for encoding the Rice parameter, which is either 4 or 5 bits.
+Quite often the optimal Rice parameter varies over the course of a subframe. To accommodate this, the residual can be split up into partitions, where each partition has its own Rice parameter. To keep overhead and complexity low, the number of partitions used in a subframe is limited to powers of two.
+
+The FLAC format uses two forms of Rice coding, which only differ in the number of bits used for encoding the Rice parameter, either 4 or 5 bits.
 
 # Format
 
