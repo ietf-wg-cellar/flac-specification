@@ -544,61 +544,28 @@ Data      | Description
 :---------|:-----------
 `u(n\*i)` | Unencoded subblock, where `n` is frame's bits-per-sample and `i` is frame's blocksize.
 
-## RESIDUAL
-Data       | Description
-:----------|:-----------
-`u(2)`     | `RESIDUAL_CODING_METHOD`
-`RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB` \|\| `RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB2` |
+## Coded residual
+The first two bits in a coded residual indicate which coding method is used. See the table below
 
-### RESIDUAL_CODING_METHOD
 Value       | Description
 -----------:|:-----------
-0b00        | partitioned Exp-Golomb coding with 4-bit Exp-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB follows
-0b01        | partitioned Exp-Golomb coding with 5-bit Exp-Golomb parameter; RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB2 follows
+0b00        | partitioned Rice code with 4-bit parameters
+0b01        | partitioned Rice code with 5-bit parameters
 0b10 - 0b11 | reserved
 
-### RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB
-Data              | Description
-:-----------------|:-----------
-`u(4)`            | Partition order.
-`EXP_GOLOMB_PARTITION`+ | There will be 2\^order partitions.
+Both defined coding methods work the same way, but differ in the number of bits used for rice parameters. The 4 bits that directly follow the coding method bits form the partition order, which is an unsigned number. The rest of the coded residual consists of 2^(partition order) partitions. For example, if the 4 bits are 0b1000, the partition order is 8 and the residual is split up into 2^8 = 256 partitions.
 
-#### EXP_GOLOMB_PARTITION
-Data       | Description
-:----------|:-----------
-`u(4(+5))` | `EXP-GOLOMB PARTITION ENCODING PARAMETER` (see [section on EXP-GOLOMB PARTITION ENCODING PARAMETER](#exp-golomb-partition-encoding-parameter))
-`u(?)`     | `ENCODED RESIDUAL` (see [section on ENCODED RESIDUAL](#encoded-residual))
+Each partition contains a certain amount of residual samples. The number of residual samples in the first partition is equal to (blocksize >> partition order) - predictor order, i.e. the blocksize divided by the number of partitions minus the predictor order. In all other partitions the number of residual samples is equal to (blocksize >> partition order).
 
-#### EXP GOLOMB PARTITION ENCODING PARAMETER
-Value           | Description
----------------:|:-----------
-0b0000 - 0b1110 | Exp-golomb parameter.
-0b1111          | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
+The partition order MUST be so that the blocksize is evenly divisible by the number of partitions. This means for example that for all uneven blocksizes, only partition order 0 is allowed.  The partition order also MUST be so that the (blocksize >> partition order) is larger than the predictor order. This means for example that with a blocksize of 4096 and a predictor order of 4, partition order cannot be larger than 9.
 
-### RESIDUAL_CODING_METHOD_PARTITIONED_EXP_GOLOMB2
-Data               | Description
-:------------------|:-----------
-`u(4)`             | Partition order.
-`EXP-GOLOMB2_PARTITION`+ | There will be 2\^order partitions.
+In case the coded residual of a subframe is one with a 4-bit Rice parameter (see table at the start of this section), the first 4 bits of each partition are either a rice parameter or an escape code. These 4 bits indicate an escape code if they are 0b1111, otherwise they contain the rice parameter as an unsigned number. In case the coded residual of the current subframe is one with a 5-bit Rice parameter, the first 5 bits indicate an escape code if they are 0b11111, otherwise they contain the rice parameter as an unsigned number as well.
 
-#### EXP_GOLOMB2_PARTITION
-Data       | Description
-:----------|:-----------
-`u(5(+5))` | `EXP-GOLOMB2 PARTITION ENCODING PARAMETER` (see [section on EXP-GOLOMB2 PARTITION ENCODING PARAMETER](#expgolomb2-partition-encoding-parameter))
-`u(?)`     | `ENCODED RESIDUAL` (see [section on ENCODED RESIDUAL](#encoded-residual))
+In case an escape code was used, the partition does not contain a variable-length rice coded residual, but a fixed-length unencoded residual. Directly following the escape code are 5 bits containing the number of bits with which each residual sample is stored, as an unsigned number.
 
-#### EXP-GOLOMB2 PARTITION ENCODING PARAMETER
-Value             | Description
------------------:|:-----------
-0b00000 - 0b11110 | Exp-golomb parameter.
-0b11111           | Escape code, meaning the partition is in unencoded binary form using n bits per sample; n follows as a 5-bit number.
+In case a rice parameter was provided, the partition contains a rice coded residual. The residual samples, which are signed numbers, are represented by unsigned numbers in the rice code. For positive numbers, the representation is the number doubled, for negative numbers, the representation is the number multiplied by -2 and has 1 subtracted. This representation of signed numbers is also known as zigzag encoding and the zigzag encoded residual is called the folded residual. The folded residual samples are then each divided by the rice parameter. The result of each division rounded down (the quotient) is stored unary, the remainder is stored binary.
 
-### ENCODED RESIDUAL
-The number of samples (n) in the partition is determined as follows:
-
-- if the partition order is zero, n = frame's blocksize - predictor order
-- else if this is not the first partition of the subframe, n = (frame's blocksize / (2\^partition order))
-- else n = (frame's blocksize / (2\^partition order)) - predictor order
+Decoding the coded residual thus involves selecting the right coding method, finding the number of partitions, reading unary and binary parts of each codeword one-by-one and keeping track of when a new partition starts and thus when a new rice parameter needs to be read.
 
 # Security Considerations
 
