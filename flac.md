@@ -495,17 +495,15 @@ In a constant subframe only a single sample is stored. This sample is stored as 
 A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#subframe-constant) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.
 
 ## SUBFRAME_FIXED
-Five different fixed predictors are defined, one for each prediction order 0 through 4. To encode a signal with a fixed predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a fixed predictor, first the residual has to be decoded, after which for each sample the prediction can be added. This means that decoding MUST be a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
+Five different fixed predictors are defined in the following table, one for each prediction order 0 through 4. In the table is also a derivation, which explains the rationale for choosing these fixed predictors.
 
-Prediction and subsequent subtraction from the current sample or addition to the current residual sample MUST be implemented in signed integer math to eliminate the possibility of introducing rounding error. The minimum required size of the used signed integer data type depends on the sample bitdepth and the predictor order, and can be calculated by adding the headroom bits in the table below to the subframe bitdepth. For example, if the sample bitdepth of the source is 16, the current subframe encodes a side channel (see the [section on interchannel decorrelation](#interchannel-decorrelation)) and the predictor order is 3, the minimum required size of the used signed integer data type is at least 16 + 1 + 3 = 20 bits.
-
-Order | Prediction                                    | Derivation                              | Bits of headroom
-:-----|:----------------------------------------------|:----------------------------------------|:----------------
-0     | 0                                             | N/A                                     | 0
-1     | s(n-1)                                        | N/A                                     | 1
-2     | 2 * s(n-1) - s(n-2)                           | s(n-1) + ∆s(n-1)                        | 2
-3     | 3 * s(n-1) - 3 * s(n-2) + s(n-3)              | s(n-1) + ∆s(n-1) + ∆∆s(n-1)             | 3
-4     | 4 * s(n-1) - 6 * s(n-2) + 4 * s(n-3) - s(n-4) | s(n-1) + ∆s(n-1) + ∆∆s(n-1) + ∆∆∆s(n-1) | 4
+Order | Prediction                                    | Derivation
+:-----|:----------------------------------------------|:----------------------------------------
+0     | 0                                             | N/A
+1     | s(n-1)                                        | N/A
+2     | 2 * s(n-1) - s(n-2)                           | s(n-1) + ∆s(n-1)
+3     | 3 * s(n-1) - 3 * s(n-2) + s(n-3)              | s(n-1) + ∆s(n-1) + ∆∆s(n-1)
+4     | 4 * s(n-1) - 6 * s(n-2) + 4 * s(n-3) - s(n-4) | s(n-1) + ∆s(n-1) + ∆∆s(n-1) + ∆∆∆s(n-1)
 
 Where
 - n is the number of the sample being predicted
@@ -514,6 +512,8 @@ Where
 - ∆s(n-1) is the difference between the previous sample and the sample before that, i.e. s(n-1) - s(n-2). This is the closest available first-order discrete derivative
 - ∆∆s(n-1) is ∆s(n-1) - ∆s(n-2) or the closest available second-order discrete derivative
 - ∆∆∆s(n-1) is ∆∆s(n-1) - ∆∆s(n-2) or the closest available third-order discrete derivative
+
+To encode a signal with a fixed predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a fixed predictor, first the residual has to be decoded, after which for each sample the prediction can be added. This means that decoding MUST be a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
 
 For fixed predictor order 0, the prediction is always 0, thus each residual sample is equal to its corresponding input or decoded sample. The difference between a fixed predictor with order 0 and a verbatim subframe, is that a verbatim subframe stores all samples unencoded, while a fixed predictor with order 0 has all its samples processed by the residual coder.
 
@@ -539,12 +539,6 @@ Data       | Description
 See [section on Constant subframe](#subframe-constant) on how the warm-up samples are stored unencoded. The unencoded predictor coefficients are stored the same way as the warm-up samples, but the number of bits needed for each coefficient is defined by the predictor coefficient precision. While the prediction right shift is signed two's complement, this number MUST be positive.
 
 Please note that the order in which the predictor coefficients appear in the bitstream corresponds to which **past** sample they belong. In other words, the order of the predictor coefficients is opposite to the chronological order of the samples. So, the first predictor coefficient has to be multiplied with the sample directly before the sample that is being predicted, the second predictor coefficient has to be multiplied with the sample before that etc.
-
-Prediction and subsequent subtraction from the current sample or addition to the current residual sample MUST be implemented in signed integer math to eliminate the possibility of introducing rounding error. The minimum required size of the used signed integer data type depends on the sample bitdepth, the predictor coefficient precision and the predictor order. It can be calculated by adding the predictor coefficient precision, log2(predictor order) rounded up and subframe bitdepth.
-
-For example, if the sample bitdepth of the source is 24, the current subframe encodes a side channel (see the [section on interchannel decorrelation](#interchannel-decorrelation)), the predictor order is 12 and the predictor coefficient precision is 15 bits, the minimum required size of the used signed integer data type is at least 24 + 1 + 15 + ceil(log2(12)) = 44 bits. As another example, with a side-channel subframe bitdepth of 16, a predictor order of 8 and a predictor coefficient precision of 15 bits, the minimum required size of the used signed integer data type is 16 + 1 + 12 + ceil(log2(8)) = 32 bits.
-
-
 
 ## RESIDUAL
 Data       | Description
