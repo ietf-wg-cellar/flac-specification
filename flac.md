@@ -158,7 +158,7 @@ Before the formal description of the stream, an overview might be helpful.
 
 ## Conventions
 
-The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. `n` may be expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
+The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. Values expressed as `s(n)` represent signed big-endian integer using `n` bits, signed two's complement. `n` may be expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
 
 ## STREAM
 
@@ -517,30 +517,57 @@ In case k is not equal to 0, samples are coded ignoring k least-significant bits
 
 Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed, as to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like lossyWAV that enable users to improve compression of their files by a lossless audio codec in a non-lossless way. Because of this the number of wasted bits k MAY change between frames and MAY differ between subframes.
 
-## SUBFRAME_CONSTANT
-Data      | Description
-:---------|:-----------
-`u(n)`    | Unencoded constant value of the subblock, n = frame's bits-per-sample.
-
-## SUBFRAME_FIXED
-Data       | Description
-:----------|:-----------
-`u(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* predictor order).
-`RESIDUAL` | Encoded residual
-
-## SUBFRAME_LPC
-Data       | Description
-:----------|:-----------
-`u(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
-`u(4)`     | (quantized linear predictor coefficients' precision in bits)-1 (NOTE: 0b1111 is invalid).
-`u(5)`     | Quantized linear predictor coefficient shift needed in bits (NOTE: this number is signed two's-complement).
-`u(n)`     | Unencoded predictor coefficients (n = qlp coeff precision \* lpc order) (NOTE: the coefficients are signed two's-complement).
-`RESIDUAL` | Encoded residual
+## SUBFRAME CONSTANT
+In a constant subframe only a single sample is stored. This sample is stored as a signed integer number, big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the bit depth of the corresponding subblock, minus the number of wasted bits in that subblock, plus 1 bit when it has been converted to a side-channel subframe. See also the [section on interchannel decorrelation](#interchannel-decorrelation) and the [section on wasted bits per sample flag](#wasted-bits-per-sample-flag).
 
 ## SUBFRAME_VERBATIM
-Data      | Description
-:---------|:-----------
-`u(n\*i)` | Unencoded subblock, where `n` is frame's bits-per-sample and `i` is frame's blocksize.
+A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#subframe-constant) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.
+
+## SUBFRAME_FIXED
+Five different fixed predictors are defined in the following table, one for each prediction order 0 through 4. In the table is also a derivation, which explains the rationale for choosing these fixed predictors.
+
+Order | Prediction                                    | Derivation
+:-----|:----------------------------------------------|:----------------------------------------
+0     | 0                                             | N/A
+1     | s(n-1)                                        | N/A
+2     | 2 * s(n-1) - s(n-2)                           | s(n-1) + ∆s(n-1)
+3     | 3 * s(n-1) - 3 * s(n-2) + s(n-3)              | s(n-1) + ∆s(n-1) + ∆∆s(n-1)
+4     | 4 * s(n-1) - 6 * s(n-2) + 4 * s(n-3) - s(n-4) | s(n-1) + ∆s(n-1) + ∆∆s(n-1) + ∆∆∆s(n-1)
+
+Where
+- n is the number of the sample being predicted
+- s(n) is the sample being predicted
+- s(n-1) is the sample before the one being predicted
+- ∆s(n-1) is the difference between the previous sample and the sample before that, i.e. s(n-1) - s(n-2). This is the closest available first-order discrete derivative
+- ∆∆s(n-1) is ∆s(n-1) - ∆s(n-2) or the closest available second-order discrete derivative
+- ∆∆∆s(n-1) is ∆∆s(n-1) - ∆∆s(n-2) or the closest available third-order discrete derivative
+
+To encode a signal with a fixed predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a fixed predictor, first the residual has to be decoded, after which for each sample the prediction can be added. This means that decoding MUST be a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
+
+For fixed predictor order 0, the prediction is always 0, thus each residual sample is equal to its corresponding input or decoded sample. The difference between a fixed predictor with order 0 and a verbatim subframe, is that a verbatim subframe stores all samples unencoded, while a fixed predictor with order 0 has all its samples processed by the residual coder.
+
+The first order fixed predictor is comparable to how DPCM encoding works, as the resulting residual sample is the difference between the corresponding sample and the sample before it. The higher fixed predictors can be understood as polynomials fitted to the previous samples.
+
+As the fixed predictors are specified, they do not have to be stored. The fixed predictor order specifies which predictor is used. To be able to predict samples, warm-up samples are stored, as the predictor needs previous samples in its prediction. The number of warm-up samples is equal to the predictor order. See [section on Constant subframe](#subframe-constant) on how samples are stored unencoded. Directly following the warm-up samples is the coded residual.
+
+## SUBFRAME_LPC
+Whereas fixed predictors are well suited for simple signals, using a (non-fixed) linear predictor on more complex signals can improve compression by making the residual samples even smaller. There is a certain trade-off however, as storing the predictor coefficients takes up space as well.
+
+In the FLAC format, a predictor is defined by up to 32 predictor coefficients and a shift. To form a prediction, each coefficient is multiplied with its corresponding past sample, the results are added and this addition is then shifted. To encode a signal with a linear predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a linear predictor, first the residual has to be decoded, after which for each sample the prediction can be added. This means that decoding MUST be a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
+
+The table below defines how a linear predictor subframe appears in the bitstream
+
+Data       | Description
+:----------|:-----------
+`s(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
+`u(4)`     | (Predictor coefficient precision in bits)-1 (NOTE: 0b1111 is invalid).
+`s(5)`     | Prediction right shift needed in bits.
+`s(n)`     | Unencoded predictor coefficients (n = predictor coefficient precision \* lpc order).
+`Coded residual` | Encoded residual
+
+See [section on Constant subframe](#subframe-constant) on how the warm-up samples are stored unencoded. The unencoded predictor coefficients are stored the same way as the warm-up samples, but the number of bits needed for each coefficient is defined by the predictor coefficient precision. While the prediction right shift is signed two's complement, this number MUST be positive.
+
+Please note that the order in which the predictor coefficients appear in the bitstream corresponds to which **past** sample they belong. In other words, the order of the predictor coefficients is opposite to the chronological order of the samples. So, the first predictor coefficient has to be multiplied with the sample directly before the sample that is being predicted, the second predictor coefficient has to be multiplied with the sample before that etc.
 
 ## RESIDUAL
 Data       | Description
