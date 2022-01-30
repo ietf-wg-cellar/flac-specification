@@ -341,7 +341,7 @@ Value   | Sample rate
 0b1011  | 96 kHz
 0b1100  | uncommon sample rate in kHz stored as an 8-bit number
 0b1101  | uncommon sample rate in Hz stored as a 16-bit number
-0b1110  | uncommon sample rate in Hz divided by 10 as a 16-bit number
+0b1110  | uncommon sample rate in Hz divided by 10, stored as a 16-bit number
 0b1111  | invalid
 
 ### Channels bits
@@ -382,15 +382,15 @@ The next bit is reserved and MUST be zero.
 
 ### Coded number
 
-Following the reserved bit (starting at the fifth byte of the frame) is either a sample or a frame number, which will be referred to as the coded number. When dealing with variable blocksize streams, the sample number of the first sample in the frame is encoded. When the file contains a fixed blocksize stream, the frame number is encoded. The coded number is stored in a variable length code like UTF-8, but extended to a maximum of 36 bit unencoded, 7 byte encoded. When a frame number is encoded, the value MUST NOT be larger than what fits a value 31 bit unencoded or 6 byte encoded. Please note that most general purpose UTF-8 encoders and decoders will not be able to handle these extended codes.
+Following the reserved bit (starting at the fifth byte of the frame) is either a sample or a frame number, which will be referred to as the coded number. When dealing with variable blocksize streams, the sample number of the first sample in the frame is encoded. When the file contains a fixed blocksize stream, the frame number is encoded. The coded number is stored in a variable length code like UTF-8, but extended to a maximum of 36 bits unencoded, 7 byte encoded. When a frame number is encoded, the value MUST NOT be larger than what fits a value 31 bits unencoded or 6 byte encoded. Please note that most general purpose UTF-8 encoders and decoders will not be able to handle these extended codes.
 
 ### Uncommon blocksize
 
-If the blocksize bits defined earlier in this section were 0b0110 or 0b0111 (uncommon blocksize minus 1 stored), this follows the coded number as either an 8 or a 16 bit unsigned number coded big-endian.
+If the blocksize bits defined earlier in this section were 0b0110 or 0b0111 (uncommon blocksize minus 1 stored), this follows the coded number as either an 8-bit or a 16-bit unsigned number coded big-endian.
 
 ### Uncommon sample rate
 
-Following either the coded number or an uncommon blocksize is the sample rate, if the sample rate bits were 0b1100, 0b1101 or 0b1110 (uncommon sample rate stored), as either an 8 or a 16 bit unsigned number coded big-endian.
+Following either the coded number or an uncommon blocksize is the sample rate, if the sample rate bits were 0b1100, 0b1101 or 0b1110 (uncommon sample rate stored), as either an 8-bit or a 16-bit unsigned number coded big-endian.
 
 ### Frame header CRC
 
