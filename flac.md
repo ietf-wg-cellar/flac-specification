@@ -8,6 +8,8 @@ For a user-oriented overview, see [About the FLAC Format](https://xiph.org/flac/
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [@!RFC2119] [@!RFC8174] when, and only when, they appear in all capitals, as shown here.
 
+Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. Values expressed as `s(n)` represent signed big-endian integer using `n` bits, signed two's complement. `n` may be expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
+
 # Acknowledgments
 
 FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
@@ -114,11 +116,7 @@ Quite often the optimal Rice parameter varies over the course of a subframe. To 
 
 The FLAC format uses two forms of Rice coding, which only differ in the number of bits used for encoding the Rice parameter, either 4 or 5 bits.
 
-# Format
-
-This section specifies the FLAC bitstream format.
-
-## Principles
+# Format principles
 
 FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding or skip data encoded with newer methods. Apart from reserved patterns, in places the format specifies invalid patterns, meaning that the patterns MAY never appear in any valid bitstream, in any prior, present, or future versions of the format. These invalid patterns are usually used to make the synchronization mechanism more robust.
 
@@ -128,9 +126,9 @@ All samples encoded to and decoded from the FLAC format MUST be in a signed repr
 
 There are several ways to convert unsigned sample representations to signed sample representations, but the coding methods provided by the FLAC format work best on audio signals of which the numerical values of the samples are centered around zero, i.e. have no DC offset. In most unsigned audio formats, signals are centered around halfway the range of the unsigned integer type used. If that is the case, all sample representations SHOULD be converted by first copying the number to a signed integer with sufficient range and then subtracting half of the range of the unsigned integer type, which should result in a signal with samples centered around 0.
 
-## Overview
+# Format lay-out
 
-Before the formal description of the stream, an overview might be helpful.
+Before the formal description of the stream, an overview of the lay-out of FLAC file might be helpful.
 
 - A FLAC bitstream consists of the "fLaC" (i.e. 0x664C6143) marker at the beginning of the stream, followed by a mandatory metadata block (called the STREAMINFO block), any number of other metadata blocks, then the audio frames.
 - FLAC supports up to 128 kinds of metadata blocks; currently the following are defined:
@@ -147,61 +145,37 @@ Before the formal description of the stream, an overview might be helpful.
 - Again, since a decoder MAY start decoding at an arbitrary frame in the stream, each frame header MUST contain some basic information about the stream because the decoder MAY not have access to the STREAMINFO metadata block at the start of the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is pure overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame parameters. For instance, the sample rate part of the frame header is specified using 4 bits. Eight of the bit patterns correspond to the commonly used sample rates of 8, 16, 22.05, 24, 32, 44.1, 48 or 96 kHz. However, odd sample rates can be specified by using one of the 'hint' bit patterns, directing the decoder to find the exact sample rate at the end of the frame header. The same method is used for specifying the block size and bits per sample. In this way, the frame header size stays small for all of the most common forms of audio data.
 - Individual subframes (one for each channel) are coded separately within a frame, and appear serially in the stream. In other words, the encoded audio data is NOT channel-interleaved. This reduces decoder complexity at the cost of requiring larger decode buffers. Each subframe has its own header specifying the attributes of the subframe, like prediction method and order, residual coding parameters, etc. The header is followed by the encoded audio data for that channel.
 
-## Subset
+# Format subset
 `FLAC` specifies a subset of itself as the Subset format. The purpose of this is to ensure that any streams encoded according to the Subset are truly "streamable", meaning that a decoder that cannot seek within the stream can still pick up in the middle of the stream and start decoding. It also makes hardware decoder implementations more practical by limiting the encoding parameters such that decoder buffer sizes and other resource requirements can be easily determined. __flac__ generates Subset streams by default unless the "--lax" command-line option is used. The Subset makes the following limitations on what MAY be used in the stream:
 
-- The blocksize bits in the `FRAME_HEADER` (see [FRAME_HEADER section](#frameheader)) MUST be 0b0001-0b1110. The blocksize MUST be <= 16384; if the sample rate is <= 48000 Hz, the blocksize MUST be <= 4608 = 2\^9 \* 3\^2.
-- The sample rate bits in the `FRAME_HEADER` MUST be 0b0001-0b1110.
-- The bits-per-sample bits in the `FRAME_HEADER` MUST be 0b001-0b111.
-- If the sample rate is <= 48000 Hz, the filter order in `LPC subframes` (see [SUBFRAME_LPC section](#subframelpc)) MUST be less than or equal to 12, i.e. the subframe type bits in the `SUBFRAME_HEADER` (see [SUBFRAME_HEADER section](#subframeheader)) SHOULD NOT be 0b101100-0b111111.
-- The Rice partition order (see [Coded residual section](#coded-residual)) MUST be less than or equal to 8.
+- The [blocksize bits](#blocksize-bits) in the frame header MUST be 0b0001-0b1110. The blocksize MUST be <= 16384; if the sample rate is <= 48000 Hz, the blocksize MUST be <= 4608 = 2\^9 \* 3\^2.
+- The [sample rate bits](#sample-rate-bits) in the frame header MUST be 0b0001-0b1110.
+- The [bits depth bits](#bit-depth-bits) in the frame header MUST be 0b001-0b111.
+- If the sample rate is <= 48000 Hz, the filter order in linear subframes (see section [linear predictor subframe](#linear-predictor-subframe)) MUST be less than or equal to 12, i.e. the subframe type bits in the subframe header (see [subframe header section](#subframe-header)) SHOULD NOT be 0b101100-0b111111.
+- The Rice partition order (see [coded residual section](#coded-residual)) MUST be less than or equal to 8.
 
-## Conventions
+# File-level metadata
 
-The following tables constitute a formal description of the FLAC format. Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. Values expressed as `s(n)` represent signed big-endian integer using `n` bits, signed two's complement. `n` may be expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
+At the start of a FLAC file or stream, following the fLaC ASCII file signature, one or more metadata blocks MUST be present before any audio frames appear. The first metadata block MUST be a streaminfo block.
 
-## STREAM
+## Metadata block header
 
-Data                        | Description
-:---------------------------|:------------------------------------------
-`u(32)`                     | "fLaC", the FLAC stream marker in ASCII, meaning byte 0 of the stream is 0x66, followed by 0x4C 0x61 0x43
-`METADATA_BLOCK_STREAMINFO` | This is the mandatory STREAMINFO metadata block that has the basic properties of the stream.
-`METADATA_BLOCK`\*          | Zero or more metadata blocks
-`FRAME`+                    | One or more audio frames
+Each metadata block starts with a 4 byte header. The first bit in this header flags whether a metadata block is the last one, it is a 0 when other metadata blocks follow, otherwise it is a 1. The 7 remaining bits of the first header byte contain the type of the metadata block as an unsigned number between 0 and 126 according to the following table. A value of 127 (i.e. 0b1111111) is invalid. The three bytes that follow code for the size of the metadata block in bytes excluding the 4 header bytes as an unsigned number coded big-endian.
 
-## METADATA_BLOCK
-Data                    | Description
-:-----------------------|:----------------------------------------------
-`METADATA_BLOCK_HEADER` | A block header that specifies the type and size of the metadata block data.
-`METADATA_BLOCK_DATA`   |
-
-## METADATA_BLOCK_HEADER
-Data    | Description
+Value   | Metadata block type
 :-------|:-----------
-`u(1)`  | Last-metadata-block flag: '1' if this block is the last metadata block before the audio blocks, '0' otherwise.
-`u(7)`  | `BLOCK_TYPE`
-`u(24)` | Length (in bytes) of metadata to follow (does not include the size of the `METADATA_BLOCK_HEADER`)
-
-
-## BLOCK_TYPE
-Value   | Description
-:-------|:-----------
-0       | STREAMINFO
-1       | PADDING
-2       | APPLICATION
-3       | SEEKTABLE
-4       | VORBIS_COMMENT
-5       | CUESHEET
-6       | PICTURE
+0       | Streaminfo
+1       | Padding
+2       | Application
+3       | Seektable
+4       | Vorbis comment
+5       | Cuesheet
+6       | Picture
 7 - 126 | reserved
 127     | invalid, to avoid confusion with a frame sync code
 
-## METADATA_BLOCK_DATA
-Data    | Description
-:-------|:-----------
-`METADATA_BLOCK_STREAMINFO` \|\| `METADATA_BLOCK_PADDING` \|\| `METADATA_BLOCK_APPLICATION` \|\| `METADATA_BLOCK_SEEKTABLE` \|\| `METADATA_BLOCK_VORBIS_COMMENT` \|\| `METADATA_BLOCK_CUESHEET` \|\| `METADATA_BLOCK_PICTURE` | The block data MUST match the block type in the block header.
 
-## METADATA_BLOCK_STREAMINFO
+## Streaminfo
 Data     | Description
 :--------|:-----------
 `u(16)`  | The minimum block size (in samples) used in the stream.
@@ -218,18 +192,18 @@ FLAC specifies a minimum block size of 16 and a maximum block size of 65535, mea
 
 The MD5 signature is made by performing an MD5 transformation on the samples of all channels interleaved, represented in signed, little-endian form. This interleaving is on a per-sample basis, so for a stereo file this means first the first sample of the first channel, then the first sample of the second channel, then the second sample of the first channel etc. Before performing the MD5 transformation, all samples must be byte-aligned. So, in case the bit depth is not a whole number of bytes, additional zero bits are inserted at the most-significant position until each sample representation is a whole number of bytes.
 
-## METADATA_BLOCK_PADDING
+## Padding
 Data     | Description
 :--------|:-----------
 `u(n)`   | n '0' bits (n MUST be a multiple of 8)
 
-## METADATA_BLOCK_APPLICATION
+## Application
 Data     | Description
 :--------|:-----------
 `u(32)`  | Registered application ID. (Visit the [registration page](https://xiph.org/flac/id.html) to register an ID with FLAC.)
 `u(n)`   | Application data (n MUST be a multiple of 8)
 
-## METADATA_BLOCK_SEEKTABLE
+## Seektable
 Data         | Description
 :------------|:-----------
 `SEEKPOINT`+ | One or more seek points.
@@ -237,7 +211,7 @@ Data         | Description
 NOTE
 - The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18.
 
-## SEEKPOINT
+### Seekpoint
 Data     | Description
 :--------|:-----------
 `u(64)`  | Sample number of first sample in the target frame, or `0xFFFFFFFFFFFFFFFF` for a placeholder point.
@@ -251,12 +225,12 @@ NOTES
 - Seek points within a table MUST be unique by sample number, with the exception of placeholder points.
 - The previous two notes imply that there MAY be any number of placeholder points, but they MUST all occur at the end of the table.
 
-## METADATA_BLOCK_VORBIS_COMMENT
+## Vorbis comment
 Data     | Description
 :--------|:-----------
 `u(n)`   | Also known as FLAC tags, the contents of a vorbis comment packet as specified [here](http://www.xiph.org/vorbis/doc/v-comment.html) (without the framing bit). Note that the vorbis comment spec allows for on the order of 2\^64 bytes of data where as the FLAC metadata block is limited to 2\^24 bytes. Given the stated purpose of vorbis comments, i.e. human-readable textual information, this limit is unlikely to be restrictive. Also note that the 32-bit field lengths are little-endian coded according to the vorbis spec, as opposed to the usual big-endian coding of fixed-length integers in the rest of FLAC.
 
-## METADATA_BLOCK_CUESHEET
+## Cuesheet
 Data              | Description
 :-----------------|:-----------
 `u(128*8)`        | Media catalog number, in ASCII printable characters 0x20-0x7E. In general, the media catalog number SHOULD be 0 to 128 bytes long; any unused characters SHOULD be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
@@ -266,7 +240,7 @@ Data              | Description
 `u(8)`            | The number of tracks. Must be at least 1 (because of the requisite lead-out track). For CD-DA, this number MUST be no more than 100 (99 regular tracks and one lead-out track).
 `CUESHEET_TRACK`+ | One or more tracks. A CUESHEET block is REQUIRED to have a lead-out track; it is always the last track in the CUESHEET. For CD-DA, the lead-out track number MUST be 170 as specified by the Red Book, otherwise it MUST be 255.
 
-## CUESHEET_TRACK
+### Cuesheet track
 Data                    | Description
 :-----------------------|:-----------
 `u(64)`                 | Track offset in samples, relative to the beginning of the FLAC audio stream. It is the offset to the first index point of the track. (Note how this differs from CD-DA, where the track's offset in the TOC is that of the track's INDEX 01 even if there is an INDEX 00.) For CD-DA, the offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/s \* 1/75 s).
@@ -278,14 +252,14 @@ Data                    | Description
 `u(8)`                  | The number of track index points. There MUST be at least one index in every track in a CUESHEET except for the lead-out track, which MUST have zero. For CD-DA, this number SHOULD NOT be more than 100.
 `CUESHEET_TRACK_INDEX`+ | For all tracks except the lead-out track, one or more track index points.
 
-## CUESHEET_TRACK_INDEX
+#### Cuesheet track index
 Data      | Description
 :---------|:-----------
 `u(64)`   | Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/s \* 1/75 s). Note that the offset is from the beginning of the track, not the beginning of the audio data.
 `u(8)`    | The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track MUST have a number of 0 or 1, and subsequently, index numbers MUST increase by 1. Index numbers MUST be unique within a track.
 `u(3*8)`  | Reserved. All bits MUST be set to zero.
 
-## METADATA_BLOCK_PICTURE
+## Picture
 Data      | Description
 :---------|:-----------
 `u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame.
@@ -300,7 +274,7 @@ Data      | Description
 `u(32)`   | The length of the picture data in bytes.
 `u(n*8)`  | The binary picture data.
 
-## PICTURE_TYPE
+### Picture type
 Value | Description
 -----:|:-----------
    0 | Other
@@ -327,62 +301,33 @@ Value | Description
 
 Other values are reserved and SHOULD NOT be used. There MAY only be one each of picture type 1 and 2 in a file.
 
-## FRAME
-Data           | Description
-:--------------|:-----------
-`FRAME_HEADER` |
-`SUBFRAME`+    | One SUBFRAME per channel.
-`u(?)`         | Zero-padding to byte alignment.
-`FRAME_FOOTER` |
+# Frame structure
 
-## FRAME_HEADER
-Data      | Description
-:---------|:-----------
-`u(14)`   | Sync code '0b11111111111110'
-`u(1)`    | `FRAME HEADER RESERVED`
-`u(1)`    | `BLOCKING STRATEGY`
-`u(4)`    | `INTERCHANNEL SAMPLE BLOCK SIZE`
-`u(4)`    | `SAMPLE RATE`
-`u(4)`    | `CHANNEL ASSIGNMENT`
-`u(3)`    | `SAMPLE SIZE`
-`u(1)`    | `FRAME HEADER RESERVED2`
-`u(?)`    | `CODED NUMBER`
-`u(?)`    | `BLOCK SIZE INT`
-`u(?)`    | `SAMPLE RATE INT`
-`u(8)`    | `FRAME CRC`
+Directly after the last metadata block, one or more frames follow. Each frame consists of a frame header, one or more subframes, padding zero bits to achieve byte-alignment and a frame footer. The number of subframes in each frame is equal to the number of audio channels.
 
-### FRAME HEADER RESERVED
-Value | Description
------:|:-----------
-0     | mandatory value
-1     | reserved for future use
+## Frame header
+Each frame starts with the 15-bit frame sync code 0b111111111111100. Following the sync code is the blocking strategy bit, which MUST NOT change during the audio stream. The blocking strategy bit is 0 for a fixed blocksize stream or 1 for variable blocksize stream. If the blocking strategy is known, a decoder can search for a 16-bit sync code, either 0xF8 for a fixed blocksize stream or 0xF9 for a variable blocksize stream. To ease the search for the sync code and further reduction of false positives, all frames MUST start on a byte boundary.
 
-FRAME HEADER RESERVED MUST remain reserved for `0` in order for a FLAC frame's initial 15 bits to be distinguishable from the start of an MPEG audio frame ([see also](http://lists.xiph.org/pipermail/flac-dev/2008-December/002607.html)).
+### Blocksize bits
 
-### BLOCKING STRATEGY
-Value | Description
------:|:-----------
-0     | fixed-blocksize stream; frame header encodes the frame number
-1     | variable-blocksize stream; frame header encodes the sample number
+Following the frame sync code and blocksize strategy bit are 4 bits referred to as the blocksize bits. Their value relates to the blocksize according to the following table, where v is the value of the 4 bits as an unsigned number. Uncommon blocksizes are stored after the coded number.
 
-The `BLOCKING STRATEGY` bit MUST be the same throughout the entire stream.
-
-The `BLOCKING STRATEGY` bit determines how to calculate the sample number of the first sample in the frame. If the bit is `0` (fixed-blocksize), the frame header encodes the frame number as above, and the frame's starting sample number will be the frame number times the blocksize. If it is `1` (variable-blocksize), the frame header encodes the frame's starting sample number itself. (In the case of a fixed-blocksize stream, only the last block MAY be shorter than the stream blocksize; its starting sample number will be calculated as the frame number times the previous frame's blocksize, or zero if it is the first frame).
-
-###  INTERCHANNEL SAMPLE BLOCK SIZE
-Value           | Description
----------------:|:-----------
+Value           | Blocksize
+:---------------|:-----------
 0b0000          | reserved
-0b0001          | 192 samples
-0b0010 - 0b0101 | 576 \* (2\^(n-2)) samples, i.e. 576, 1152, 2304 or 4608
-0b0110          | get 8 bit (blocksize-1) from end of header
-0b0111          | get 16 bit (blocksize-1) from end of header
-0b1000 - 0b1111 | 256 \* (2\^(n-8)) samples, i.e. 256, 512, 1024, 2048, 4096, 8192, 16384 or 32768
+0b0001          | 192
+0b0010 - 0b0101 | 144 \* (2\^v), i.e. 576, 1152, 2304 or 4608
+0b0110          | uncommon blocksize minus 1 stored as an 8-bit number
+0b0111          | uncommon blocksize minus 1 stored as a 16-bit number
+0b1000 - 0b1111 | 2\^v, i.e. 256, 512, 1024, 2048, 4096, 8192, 16384 or 32768
 
-### SAMPLE RATE
-Value   | Description
--------:|:-----------
-0b0000  | get from STREAMINFO metadata block
+### Sample rate bits
+
+The next 4 bits, referred to as the sample rate bits, contain the sample rate according to the following table
+
+Value   | Sample rate
+:-------|:-----------
+0b0000  | sample rate only stored in streaminfo metadata block
 0b0001  | 88.2 kHz
 0b0010  | 176.4 kHz
 0b0011  | 192 kHz
@@ -394,17 +339,17 @@ Value   | Description
 0b1001  | 44.1 kHz
 0b1010  | 48 kHz
 0b1011  | 96 kHz
-0b1100  | get 8 bit sample rate (in kHz) from end of header
-0b1101  | get 16 bit sample rate (in Hz) from end of header
-0b1110  | get 16 bit sample rate (in daHz) from end of header
-0b1111  | invalid, to prevent sync-fooling string of 1s
+0b1100  | uncommon sample rate in kHz stored as an 8-bit number
+0b1101  | uncommon sample rate in Hz stored as a 16-bit number
+0b1110  | uncommon sample rate in Hz divided by 10, stored as a 16-bit number
+0b1111  | invalid
 
-### CHANNEL ASSIGNMENT
+### Channels bits
 
-Values 0b0000-0b0111 represent the (number of independent channels)-1 coded independently, channel order follows SMPTE/ITU-R recommendations. Values 0b1000-0b1010 represent 2 channel (stereo) audio where the signal has been mapped to a different representation, see [section on Interchannel Decorrelation](#interchannel-decorrelation).
+The next 4 bits (the first 4 bits of the fourth byte of each frame), referred to as the channel bits, code for both the number of channels as well as any stereo decorrelation used according to the following table, where v is the value of the 4 bits as an unsigned number. See also [the section on interchannel decorrelation](#interchannel-decorrelation).
 
-Value           | Description
----------------:|:-----------
+Value           | Channels
+:---------------|:-----------
 0b0000          | 1 channel: mono
 0b0001          | 2 channels: left, right
 0b0010          | 3 channels: left, right, center
@@ -413,17 +358,18 @@ Value           | Description
 0b0101          | 6 channels: front left, front right, front center, LFE, back/surround left, back/surround right
 0b0110          | 7 channels: front left, front right, front center, LFE, back center, side left, side right
 0b0111          | 8 channels: front left, front right, front center, LFE, back left, back right, side left, side right
-0b1000          | left/side stereo: channel 0 is the left channel, channel 1 is the side(difference) channel
-0b1001          | right/side stereo: channel 0 is the side(difference) channel, channel 1 is the right channel
-0b1010          | mid/side stereo: channel 0 is the mid(average) channel, channel 1 is the side(difference) channel
+0b1000          | 2 channels, stored as left/side stereo
+0b1001          | 2 channels, stored as right/side stereo
+0b1010          | 2 channels, stored as mid/side stereo
 0b1011 - 0b1111 | reserved
 
-Please note that the actual coded subframe order for right/side stereo is side-right.
+### Bit depth bits
 
-### SAMPLE SIZE
-Value   | Description
--------:|:-----------
-0b000   | get from STREAMINFO metadata block
+The next 3 bits code for the bit depth of the samples in the subframe according to the following table.
+
+Value   | Bit depth
+:-------|:-----------
+0b000   | bit depth only stored in streaminfo metadata block
 0b001   | 8 bits per sample
 0b010   | 12 bits per sample
 0b011   | reserved
@@ -432,82 +378,43 @@ Value   | Description
 0b110   | 24 bits per sample
 0b111   | reserved
 
-For subframes that encode a difference channel, the sample size is one bit larger than the sample size of the frame, in order to be able to encode the difference between extreme values.
+The next bit is reserved and MUST be zero.
 
-### FRAME HEADER RESERVED2
-Value | Description
------:|:-----------
-0     | mandatory value
-1     | reserved for future use
+### Coded number
 
-### CODED NUMBER
+Following the reserved bit (starting at the fifth byte of the frame) is either a sample or a frame number, which will be referred to as the coded number. When dealing with variable blocksize streams, the sample number of the first sample in the frame is encoded. When the file contains a fixed blocksize stream, the frame number is encoded. The coded number is stored in a variable length code like UTF-8, but extended to a maximum of 36 bits unencoded, 7 byte encoded. When a frame number is encoded, the value MUST NOT be larger than what fits a value 31 bits unencoded or 6 byte encoded. Please note that most general purpose UTF-8 encoders and decoders will not be able to handle these extended codes.
 
-Frame/Sample numbers are encoded using the UTF-8 format, from BEFORE it was limited to 4 bytes by RFC3629, this variant supports the original 7 byte maximum.
+### Uncommon blocksize
 
-Note to implementors: All Unicode compliant UTF-8 decoders and encoders are limited to 4 bytes, it's best to just write your own one off solution.
+If the blocksize bits defined earlier in this section were 0b0110 or 0b0111 (uncommon blocksize minus 1 stored), this follows the coded number as either an 8-bit or a 16-bit unsigned number coded big-endian.
 
-~~~
-if(variable blocksize)
-  `u(8...56)`: "UTF-8" coded sample number (decoded number is 36 bits)
-else
-  `u(8...48)`: "UTF-8" coded frame number (decoded number is 31 bits)
-~~~
+### Uncommon sample rate
 
-### BLOCK SIZE INT
+Following either the coded number or an uncommon blocksize is the sample rate, if the sample rate bits were 0b1100, 0b1101 or 0b1110 (uncommon sample rate stored), as either an 8-bit or a 16-bit unsigned number coded big-endian.
 
-~~~
-if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0b0110)
-  8 bit (blocksize-1)
-else if(`INTERCHANNEL SAMPLE BLOCK SIZE` == 0b0111)
-  16 bit (blocksize-1)
-~~~
+### Frame header CRC
 
-### SAMPLE RATE INT
+Finally, after either the frame/sample number, the blocksize or the sample rate, is a 8-bit CRC. This CRC is initialized with 0 and has the polynomial x^8 + x^2 + x^1 + x^0. This CRC covers the whole frame header before the CRC, including the sync code.
 
-~~~
-if(`SAMPLE RATE` == 0b1100)
-  8 bit sample rate (in kHz)
-else if(`SAMPLE RATE` == 0b1101)
-  16 bit sample rate (in Hz)
-else if(`SAMPLE RATE` == 0b1110)
-  16 bit sample rate (in daHz)
-~~~
+## Subframes
 
-### FRAME CRC
+Following the frame header are a number subframes equal to the number of audio channels.
 
-CRC-8 (polynomial = x\^8 + x\^2 + x\^1 + x\^0, initialized with 0) of everything before the CRC, including the sync code
+### Subframe header
+Each subframe starts with a header. The first bit of the header is always 0, followed by 6 bits describing which subframe type is used according to the following table, where v is the value of the 6 bits as an unsigned number.
 
-## FRAME_FOOTER
-Data      | Description
-:---------|:-----------
-`u(16)`   | CRC-16 (polynomial = x\^16 + x\^15 + x\^2 + x\^0, initialized with 0) of everything before the CRC, back to and including the frame header sync code
+Value               | Subframe type
+:-------------------|:-----------
+0b000000            | Constant subframe
+0b000001            | Verbatim subframe
+0b000010 - 0b000111 | reserved
+0b001000 - 0b001100 | Subframe with a fixed predictor v-8, i.e. 0, 1, 2, 3 or 4
+0b001101 - 0b011111 | reserved
+0b100000 - 0b111111 | Subframe with a linear predictor v-31, i.e. 1 through 32 (inclusive)
 
-## SUBFRAME
-Data              | Description
-:-----------------|:-----------
-`SUBFRAME_HEADER` |
-`SUBFRAME_CONSTANT` \|\| `SUBFRAME_FIXED` \|\| `SUBFRAME_LPC` \|\| `SUBFRAME_VERBATIM` | The SUBFRAME_HEADER specifies which one.
+Following the subframe type bits is a bit that flags whether the subframe has any wasted bits. If it is 0, the subframe doesn’t have any wasted bits and the subframe header is complete. If it is 1, the subframe does have wasted bits and the number of wasted bits follows unary coded.
 
-## SUBFRAME_HEADER
-Data     | Description
-:--------|:-----------
-`u(1)`   | Zero bit padding, to prevent sync-fooling string of 1s
-`u(6)`   | `SUBFRAME TYPE` (see [section on SUBFRAME TYPE](#subframe-type))
-`u(1+k)` | `WASTED BITS PER SAMPLE FLAG` (see [section on WASTED BITS PER SAMPLE FLAG](#wasted-bits-per-sample-flag))
-
-
-### SUBFRAME TYPE
-Value    | Description
---------:|:-----------
-0b000000 | `SUBFRAME_CONSTANT`
-0b000001 | `SUBFRAME_VERBATIM`
-0b00001x | reserved
-0b0001xx | reserved
-0b001xxx | if(xxx <= 4) `SUBFRAME_FIXED`, xxx=order; else reserved
-0b01xxxx | reserved
-0b1xxxxx | `SUBFRAME_LPC`, xxxxx=order-1
-
-### WASTED BITS PER SAMPLE FLAG
+### Wasted bits per sample
 
 Certain file formats, like AIFF, can store audio samples with a bit depth that is not an integer number of bytes by padding them with least significant zero bits to a bit depth that is an integer number of bytes. For example, shifting a 14-bit sample right by 2 pads it to a 16-bit sample, which then has two zero least-significant bits. In this specification, these least-significant zero bits are referred to as wasted bits-per-sample or simply wasted bits. They are wasted in a sense that they contain no information, but are stored anyway.
 
@@ -517,13 +424,13 @@ In case k is not equal to 0, samples are coded ignoring k least-significant bits
 
 Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed, as to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like lossyWAV that enable users to improve compression of their files by a lossless audio codec in a non-lossless way. Because of this the number of wasted bits k MAY change between frames and MAY differ between subframes.
 
-## SUBFRAME CONSTANT
-In a constant subframe only a single sample is stored. This sample is stored as a signed integer number, big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the bit depth of the corresponding subblock, minus the number of wasted bits in that subblock, plus 1 bit when it has been converted to a side-channel subframe. See also the [section on interchannel decorrelation](#interchannel-decorrelation) and the [section on wasted bits per sample flag](#wasted-bits-per-sample-flag).
+### Constant subframe
+In a constant subframe only a single sample is stored. This sample is stored as a signed integer number, big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the bit depth of the corresponding subblock, minus the number of wasted bits in that subblock, plus 1 bit when it has been converted to a side-channel subframe. See also the [section on interchannel decorrelation](#interchannel-decorrelation) and the [section on wasted bits per sample flag](#wasted-bits-per-sample).
 
-## SUBFRAME_VERBATIM
-A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#subframe-constant) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.
+### Verbatim subframe
+A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#constant-subframe) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.
 
-## SUBFRAME_FIXED
+### Fixed predictor subframe
 Five different fixed predictors are defined in the following table, one for each prediction order 0 through 4. In the table is also a derivation, which explains the rationale for choosing these fixed predictors.
 
 Order | Prediction                                    | Derivation
@@ -535,6 +442,7 @@ Order | Prediction                                    | Derivation
 4     | 4 * s(n-1) - 6 * s(n-2) + 4 * s(n-3) - s(n-4) | s(n-1) + ∆s(n-1) + ∆∆s(n-1) + ∆∆∆s(n-1)
 
 Where
+
 - n is the number of the sample being predicted
 - s(n) is the sample being predicted
 - s(n-1) is the sample before the one being predicted
@@ -548,9 +456,9 @@ For fixed predictor order 0, the prediction is always 0, thus each residual samp
 
 The first order fixed predictor is comparable to how DPCM encoding works, as the resulting residual sample is the difference between the corresponding sample and the sample before it. The higher fixed predictors can be understood as polynomials fitted to the previous samples.
 
-As the fixed predictors are specified, they do not have to be stored. The fixed predictor order specifies which predictor is used. To be able to predict samples, warm-up samples are stored, as the predictor needs previous samples in its prediction. The number of warm-up samples is equal to the predictor order. See [section on Constant subframe](#subframe-constant) on how samples are stored unencoded. Directly following the warm-up samples is the coded residual.
+As the fixed predictors are specified, they do not have to be stored. The fixed predictor order specifies which predictor is used. To be able to predict samples, warm-up samples are stored, as the predictor needs previous samples in its prediction. The number of warm-up samples is equal to the predictor order. See [section on Constant subframe](#constant-subframe) on how samples are stored unencoded. Directly following the warm-up samples is the coded residual.
 
-## SUBFRAME_LPC
+### Linear predictor subframe
 Whereas fixed predictors are well suited for simple signals, using a (non-fixed) linear predictor on more complex signals can improve compression by making the residual samples even smaller. There is a certain trade-off however, as storing the predictor coefficients takes up space as well.
 
 In the FLAC format, a predictor is defined by up to 32 predictor coefficients and a shift. To form a prediction, each coefficient is multiplied with its corresponding past sample, the results are added and this addition is then shifted. To encode a signal with a linear predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a linear predictor, first the residual has to be decoded, after which for each sample the prediction can be added. This means that decoding MUST be a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
@@ -565,11 +473,11 @@ Data       | Description
 `s(n)`     | Unencoded predictor coefficients (n = predictor coefficient precision \* lpc order).
 `Coded residual` | Encoded residual
 
-See [section on Constant subframe](#subframe-constant) on how the warm-up samples are stored unencoded. The unencoded predictor coefficients are stored the same way as the warm-up samples, but the number of bits needed for each coefficient is defined by the predictor coefficient precision. While the prediction right shift is signed two's complement, this number MUST be positive.
+See [section on Constant subframe](#constant-subframe) on how the warm-up samples are stored unencoded. The unencoded predictor coefficients are stored the same way as the warm-up samples, but the number of bits needed for each coefficient is defined by the predictor coefficient precision. While the prediction right shift is signed two's complement, this number MUST be positive.
 
 Please note that the order in which the predictor coefficients appear in the bitstream corresponds to which **past** sample they belong. In other words, the order of the predictor coefficients is opposite to the chronological order of the samples. So, the first predictor coefficient has to be multiplied with the sample directly before the sample that is being predicted, the second predictor coefficient has to be multiplied with the sample before that etc.
 
-## Coded residual
+### Coded residual
 The first two bits in a coded residual indicate which coding method is used. See the table below
 
 Value       | Description
@@ -591,6 +499,10 @@ In case an escape code was used, the partition does not contain a variable-lengt
 In case a rice parameter was provided, the partition contains a rice coded residual. The residual samples, which are signed numbers, are represented by unsigned numbers in the rice code. For positive numbers, the representation is the number doubled, for negative numbers, the representation is the number multiplied by -2 and has 1 subtracted. This representation of signed numbers is also known as zigzag encoding and the zigzag encoded residual is called the folded residual. The folded residual samples are then each divided by the rice parameter. The result of each division rounded down (the quotient) is stored unary, the remainder is stored binary.
 
 Decoding the coded residual thus involves selecting the right coding method, finding the number of partitions, reading unary and binary parts of each codeword one-by-one and keeping track of when a new partition starts and thus when a new rice parameter needs to be read.
+
+## Frame footer
+
+Following the last subframe is the frame footer. If the last subframe is not byte aligned (i.e. the bits required to store all subframes put together are not divisible by 8), zero bits are added until byte alignment is reached. Following this is a 16-bit CRC, initialized with 0, with polynomial x^16 + x^15 + x^2 + x^0. This CRC covers the whole frame excluding the 16-bit CRC, including the sync code.
 
 # Security Considerations
 
