@@ -15,26 +15,17 @@ Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 # Acknowledgments
 
 FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
+
 - [A. J. Robinson](https://web.archive.org/web/20160315141134/http://mi.eng.cam.ac.uk/~ajr/) for his work on [Shorten](https://mi.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html); his paper is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
 - [S. W. Golomb](https://web.archive.org/web/20040215005354/http://csi.usc.edu/faculty/golomb.html) and Robert F. Rice; their universal codes are used by FLAC's entropy coder.
 - N. Levinson and J. Durbin; the reference encoder uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients.
 - And of course, [Claude Shannon](https://en.wikipedia.org/wiki/Claude_Shannon)
 
-# Architecture
-
-Similar to many audio coders, a FLAC encoder has the following stages:
-
-- `Blocking` (see [section on Blocking](#blocking)). The input is broken up into many contiguous blocks. With FLAC, the blocks MAY vary in size. The optimal size of the block is usually affected by many factors, including the sample rate, spectral characteristics over time, etc. Though FLAC allows the block size to vary within a stream, the reference encoder uses a fixed block size.
-
-- `Interchannel Decorrelation` (see [section on Interchannel Decorrelation](#interchannel-decorrelation)). In the case of stereo streams, the encoder will create mid and side signals based on the average and difference (respectively) of the left and right channels. The encoder will then pass the best form of the signal to the next stage.
-
-- `Prediction` (see [section on Prediction](#prediction)). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors, but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even within the channels of a block.
-
-- `Residual Coding` (See [section on Residual Coding](#residual-coding)). If the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) MUST be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC currently uses only one method for encoding the residual, but the format has reserved space for additional methods. FLAC allows the residual coding method to change from block to block, or even within the channels of a block.
-
-In addition, FLAC specifies a metadata system, which allows arbitrary information about the stream to be included at the beginning of the stream.
-
 # Definitions
+
+- **Lossless compression**: reducing the amount of computer storage space needed to store data without needing to remove or irreversibly alter any of this data in doing so. In other words, decompressing losslessly compressed information returns exactly the original data.
+
+- **Lossy compression**: like lossless compression, but instead removing, irreversibly altering or only approximating information for the purpose of further reducing the amount of computer storage space needed. In other words, decompressing lossy compressed information returns an approximation of the original data.
 
 - **Block**: A (short) section of linear pulse-code modulated audio, with one or more channels.
 
@@ -60,7 +51,21 @@ In addition, FLAC specifies a metadata system, which allows arbitrary informatio
 
 - **Rice code**: A [variable-length code](https://en.wikipedia.org/wiki/Variable-length_code) which compresses data by making use of the observation that, after using an effective predictor, most residual samples are closer to zero than the original samples, while still allowing for a small part of the samples to be much larger.
 
-# Blocking
+# Conceptual overview
+
+Similar to many audio coders, a FLAC encoder has the following stages:
+
+- `Blocking` (see [section on Blocking](#blocking)). The input is broken up into many contiguous blocks. With FLAC, the blocks MAY vary in size. The optimal size of the block is usually affected by many factors, including the sample rate, spectral characteristics over time, etc. Though FLAC allows the block size to vary within a stream, the reference encoder uses a fixed block size.
+
+- `Interchannel Decorrelation` (see [section on Interchannel Decorrelation](#interchannel-decorrelation)). In the case of stereo streams, the encoder will create mid and side signals based on the average and difference (respectively) of the left and right channels. The encoder will then pass the best form of the signal to the next stage.
+
+- `Prediction` (see [section on Prediction](#prediction)). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors, but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even within the channels of a block.
+
+- `Residual Coding` (See [section on Residual Coding](#residual-coding)). If the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) MUST be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC currently uses only one method for encoding the residual, but the format has reserved space for additional methods. FLAC allows the residual coding method to change from block to block, or even within the channels of a block.
+
+In addition, FLAC specifies a metadata system, which allows arbitrary information about the stream to be included at the beginning of the stream.
+
+## Blocking
 
 The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that excess bits will be wasted on frame headers. If the block size is too large, the characteristics of the signal MAY vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, and a maximum block size of 65535 samples. This range covers the optimal size for all of the audio data FLAC supports.
 
@@ -68,7 +73,7 @@ Currently the reference encoder uses a fixed block size, optimized on the sample
 
 Blocked data is passed to the predictor stage one subblock (channel) at a time. Each subblock is independently coded into a subframe, and the subframes are concatenated into a frame. Because each channel is coded separately, one channel of a stereo frame MAY be encoded as a constant subframe, and the other an LPC subframe.
 
-# Interchannel Decorrelation
+## Interchannel Decorrelation
 
 In many audio files, channels are correlated. The FLAC format can exploit this correlation in stereo files by not directly coding subblocks into subframes, but instead coding an average of all samples in both subblocks (a mid channel) or the difference between all samples in both subblocks (a side channel). The following combinations are possible:
 
@@ -82,7 +87,7 @@ In many audio files, channels are correlated. The FLAC format can exploit this c
 
 The side channel needs one extra bit of bit depth as the subtraction can produce sample values twice as large as the maximum possible in any given bit depth. The mid channel in mid-side stereo does not need one extra bit, as it is shifted right one bit. The right shift of the mid channel does not lead to non-lossless behavior, because an uneven sample in the mid subframe must always be accompanied by a corresponding uneven sample in the side subframe, which means the lost least significant bit can be restored by taking it from the sample in the side subframe.
 
-# Prediction
+## Prediction
 
 FLAC uses four methods for modeling the input signal:
 
@@ -94,7 +99,7 @@ FLAC uses four methods for modeling the input signal:
 
 1. **FIR Linear prediction**. For more accurate modeling (at a cost of slower encoding), FLAC supports up to 32nd order FIR linear prediction (again, for information on linear prediction, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). The reference encoder uses the Levinson-Durbin method for calculating the LPC coefficients from the autocorrelation coefficients, and the coefficients are quantized before computing the residual. Whereas encoders such as Shorten used a fixed quantization for the entire input, FLAC allows the quantized coefficient precision to vary from subframe to subframe. The FLAC reference encoder estimates the optimal precision to use based on the block size and dynamic range of the original signal.
 
-# Residual Coding
+## Residual Coding
 
 In case a subframe uses a predictor to approximate the audio signal, a residual needs to be stored to 'correct' the approximation to the exact value. When an effective predictor is used, the average numerical value of the residual samples is smaller than that of the samples before prediction. While having smaller values on average, it is possible a few 'outlier' residual samples are much larger than any of the original samples. Sometimes these outliers even exceed the range the bit depth of the original audio offers.
 
