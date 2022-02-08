@@ -402,7 +402,7 @@ Value               | Subframe type
 0b001101 - 0b011111 | reserved
 0b100000 - 0b111111 | Subframe with a linear predictor v-31, i.e. 1 through 32 (inclusive)
 
-Following the subframe type bits is a bit that flags whether the subframe has any wasted bits. If it is 0, the subframe doesn’t have any wasted bits and the subframe header is complete. If it is 1, the subframe does have wasted bits and the number of wasted bits follows unary coded.
+Following the subframe type bits is a bit that flags whether the subframe has any wasted bits. If it is 0, the subframe doesn't have any wasted bits and the subframe header is complete. If it is 1, the subframe does have wasted bits and the number of wasted bits follows unary coded.
 
 ### Wasted bits per sample
 
@@ -425,20 +425,20 @@ Five different fixed predictors are defined in the following table, one for each
 
 Order | Prediction                                    | Derivation
 :-----|:----------------------------------------------|:----------------------------------------
-0     | 0                                             | N/A
-1     | s(n-1)                                        | N/A
-2     | 2 * s(n-1) - s(n-2)                           | s(n-1) + ∆s(n-1)
-3     | 3 * s(n-1) - 3 * s(n-2) + s(n-3)              | s(n-1) + ∆s(n-1) + ∆∆s(n-1)
-4     | 4 * s(n-1) - 6 * s(n-2) + 4 * s(n-3) - s(n-4) | s(n-1) + ∆s(n-1) + ∆∆s(n-1) + ∆∆∆s(n-1)
+0     | 0                                             | N/A
+1     | s(n-1)                                        | N/A
+2     | 2 * s(n-1) - s(n-2)                           | s(n-1) + s'(n-1)
+3     | 3 * s(n-1) - 3 * s(n-2) + s(n-3)              | s(n-1) + s'(n-1) + s''(n-1)
+4     | 4 * s(n-1) - 6 * s(n-2) + 4 * s(n-3) - s(n-4) | s(n-1) + s'(n-1) + s''(n-1) + s'''(n-1)
 
 Where
 
 - n is the number of the sample being predicted
 - s(n) is the sample being predicted
 - s(n-1) is the sample before the one being predicted
-- ∆s(n-1) is the difference between the previous sample and the sample before that, i.e. s(n-1) - s(n-2). This is the closest available first-order discrete derivative
-- ∆∆s(n-1) is ∆s(n-1) - ∆s(n-2) or the closest available second-order discrete derivative
-- ∆∆∆s(n-1) is ∆∆s(n-1) - ∆∆s(n-2) or the closest available third-order discrete derivative
+- s'(n-1) is the difference between the previous sample and the sample before that, i.e. s(n-1) - s(n-2). This is the closest available first-order discrete derivative
+- s''(n-1) is s'(n-1) - s'(n-2) or the closest available second-order discrete derivative
+- s'''(n-1) is s''(n-1) - s''(n-2) or the closest available third-order discrete derivative
 
 To encode a signal with a fixed predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a fixed predictor, first the residual has to be decoded, after which for each sample the prediction can be added. This means that decoding MUST be a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
 
@@ -455,12 +455,12 @@ In the FLAC format, a predictor is defined by up to 32 predictor coefficients an
 
 The table below defines how a linear predictor subframe appears in the bitstream
 
-Data       | Description
-:----------|:-----------
-`s(n)`     | Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
-`u(4)`     | (Predictor coefficient precision in bits)-1 (NOTE: 0b1111 is invalid).
-`s(5)`     | Prediction right shift needed in bits.
-`s(n)`     | Unencoded predictor coefficients (n = predictor coefficient precision \* lpc order).
+Data             | Description
+:----------------|:-----------
+`s(n)`           | Unencoded warm-up samples (n = frame's bits-per-sample \* lpc order).
+`u(4)`           | (Predictor coefficient precision in bits)-1 (NOTE: 0b1111 is invalid).
+`s(5)`           | Prediction right shift needed in bits.
+`s(n)`           | Unencoded predictor coefficients (n = predictor coefficient precision \* lpc order).
 `Coded residual` | Encoded residual
 
 See [section on Constant subframe](#constant-subframe) on how the warm-up samples are stored unencoded. The unencoded predictor coefficients are stored the same way as the warm-up samples, but the number of bits needed for each coefficient is defined by the predictor coefficient precision. While the prediction right shift is signed two's complement, this number MUST be positive.
