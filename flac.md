@@ -216,9 +216,61 @@ NOTES
 - The previous two notes imply that there MAY be any number of placeholder points, but they MUST all occur at the end of the table.
 
 ## Vorbis comment
-Data     | Description
-:--------|:-----------
-`u(n)`   | Also known as FLAC tags, the contents of a vorbis comment packet as specified [here](http://www.xiph.org/vorbis/doc/v-comment.html) (without the framing bit). Note that the vorbis comment spec allows for on the order of 2\^64 bytes of data where as the FLAC metadata block is limited to 2\^24 bytes. Given the stated purpose of vorbis comments, i.e. human-readable textual information, this limit is unlikely to be restrictive. Also note that the 32-bit field lengths are little-endian coded according to the vorbis spec, as opposed to the usual big-endian coding of fixed-length integers in the rest of FLAC.
+
+A vorbis comment metadata block contains human-readable information coded in UTF-8. The name vorbis comment points to the fact that the vorbis codec stores such metadata in almost the same way. A vorbis comment metadata block consists of a vendor string optionally followed by a number of fields, which are pairs of field names and field contents. Many users refer to these fields as FLAC tags or simply as tags. A FLAC file MUST NOT contain more than one vorbis comment metadata block.
+
+In a vorbis comment metadata block, the metadata block header is directly followed by 4 bytes containing the length in bytes of the vendor string as an unsigned number coded little-endian. The vendor string follows UTF-8 coded, and is not terminated in any way.
+
+Following the vendor string are 4 bytes containing the number of fields that are in the vorbis comment block, stored as an unsigned number, coded little-endian. If this number is non-zero, it is followed by the fields themselves, each field stored with a 4 byte length. First, the 4 byte field length in bytes is stored as an unsigned number, coded little-endian. The field itself is, like the vendor string, UTF-8 coded, not terminated in any way.
+
+Each field consists of a field name and a field content, separated by an = character. The field name MUST only consist of UTF-8 code points U+0020 through U+0074, excluding U+003D, which is the = character. In other words, the field name can contain all printable ASCII characters except the equals sign. The evaluation of the field names MUST be case insensitive, so U+0041 through 0+005A (A-Z) MUST be considered equivalent to U+0061 through U+007A (a-z) respectively. The field contents can contain any UTF-8 character.
+
+Note that the vorbis comment as used in vorbis allows for on the order of 2\^64 bytes of data whereas the FLAC metadata block is limited to 2\^24 bytes. Given the stated purpose of vorbis comments, i.e. human-readable textual information, this limit is unlikely to be restrictive. Also note that the 32-bit field lengths are coded little-endian, as opposed to the usual big-endian coding of fixed-length integers in the rest of the FLAC format.
+
+### Standard field names
+
+Except the one defined in the [section channel mask](#channel-mask), no standard field names are defined. In general, most software recognizes the following field names
+
+- Title: name of the current work
+- Artist: name of the artist generally responsible for the current work. For orchestral works this is usually the composer, otherwise is it often the performer
+- Album: name of the collection the current work belongs to
+
+For a more comprehensive list of possible field names, [the list of tags used in the MusicBrainz project](http://picard-docs.musicbrainz.org/en/variables/variables.html) is recommended.
+
+### Channel mask
+
+Besides fields containing information about the work itself, one field is defined for technical reasons, of which the field name is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK. This field contains information on which channels the file contains. Use of this field is RECOMMENDED in case these differ from the channels defined in [the section channels bits](#channels-bits).
+
+The channel mask consists of flag bits indicating which channels are present, stored in a hexadecimal representation preceded by 0x. The flags only signal which channels are present, not in which order, so in case a file has to be encoded in which channels are ordered differently, they have to be reordered. Please note that a file in which the channel order is defined through the WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK is not streamable, i.e. non-subset, as the field is not found in each frame header. The mask bits can be found in the following table
+
+Bit number | Channel description
+:----------|:-----------
+0          | Front left
+1          | Front right
+2          | Front center
+3          | Low-frequency effects (LFE)
+4          | Back left
+5          | Back right
+6          | Front left of center
+7          | Front right of center
+8          | Back center
+9          | Side left
+10         | Side right
+11         | Top center
+12         | Top front left
+13         | Top front center
+14         | Top front right
+15         | Top rear left
+16         | Top rear center
+17         | Top rear right
+
+Following are 3 examples:
+
+- if a file has a single channel, being a LFE channel, the vorbis comment field is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x8
+- if a file has 4 channels, being front left, front right, top front left and top front right, the vorbis comment field is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x5003
+- if an input has 4 channels, being back center, top front center, front center and top rear center in that order, they have to be reordered to front center, back center, top front center and top rear center. The vorbis comment field added is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x12004.
+
+WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MAY be padded with zeros, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MUST be case-insensitive for both the field name and the field contents.
 
 ## Cuesheet
 Data              | Description
