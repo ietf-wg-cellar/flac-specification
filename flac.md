@@ -255,9 +255,14 @@ Data      | Description
 `u(3*8)`  | Reserved. All bits MUST be set to zero.
 
 ## Picture
+
+The picture metadata block contains image data of a picture in some way belonging to the audio contained in the FLAC file. Its format is derived from the APIC frame in the ID3v2 specification. However, contrary to the APIC frame in ID3v2, the MIME type and description are prepended with a 4-byte length field instead of being null delimited strings. A FLAC file MAY contain one or more picture metadata blocks.
+
+Note that while the length fields for MIME type, description and picture data are 4 bytes in length and could in theory code for a size up to 4 GiB, the total metadata block size cannot exceed what can be described by the metadata block header, i.e. 16 MiB.
+
 Data      | Description
 :---------|:-----------
-`u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame.
+`u(32)`   | The picture type according to next table
 `u(32)`   | The length of the MIME type string in bytes.
 `u(n*8)`  | The MIME type string, in printable ASCII characters 0x20-0x7E. The MIME type MAY also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
 `u(32)`   | The length of the description string in bytes.
@@ -269,32 +274,31 @@ Data      | Description
 `u(32)`   | The length of the picture data in bytes.
 `u(n*8)`  | The binary picture data.
 
-### Picture type
-Value | Description
------:|:-----------
-   0 | Other
-   1 | 32x32 pixels 'file icon' (PNG only)
-   2 | Other file icon
-   3 | Cover (front)
-   4 | Cover (back)
-   5 | Leaflet page
-   6 | Media (e.g. label side of CD)
-   7 | Lead artist/lead performer/soloist
-   8 | Artist/performer
-   9 | Conductor
-  10 | Band/Orchestra
-  11 | Composer
-  12 | Lyricist/text writer
-  13 | Recording Location
-  14 | During recording
-  15 | During performance
-  16 | Movie/video screen capture
-  17 | A bright colored fish
-  18 | Illustration
-  19 | Band/artist logotype
-  20 | Publisher/Studio logotype
+The following table contains all defined picture types. Values other than those listed in the table are reserved and SHOULD NOT be used. There MAY only be one each of picture type 1 and 2 in a file. In general practice, many decoders display the contents of a picture metadata block with picture type 3 (front cover) during playback, if present.
 
-Other values are reserved and SHOULD NOT be used. There MAY only be one each of picture type 1 and 2 in a file.
+Value | Picture type
+:-----|:-----------
+0     | Other
+1     | PNG file icon of 32x32 pixels
+2     | General file icon
+3     | Front cover
+4     | Back cover
+5     | Liner notes page
+6     | Media label (e.g. CD, Vinyl or Cassette label)
+7     | Lead artist, lead performer or soloist
+8     | Artist or performer
+9     | Conductor
+10    | Band or orchestra
+11    | Composer
+12    | Lyricist or text writer
+13    | Recording location
+14    | During recording
+15    | During performance
+16    | Movie or video screen capture
+17    | A bright colored fish
+18    | Illustration
+19    | Band or artist logotype
+20    | Publisher or studio logotype
 
 # Frame structure
 
