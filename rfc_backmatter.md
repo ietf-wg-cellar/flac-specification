@@ -3,7 +3,7 @@
 
 # Numerical considerations
 
-In order to maintain lossless behavior, all arithmetic used in encoding and decoding sample values MUST be done with integer data types, in order to eliminate the possibility of introducing rounding errors associated with floating-point arithmetic. Use of floating-point representations in analysis (e.g. finding a good predictor or rice parameter) is not a concern, as long as the process of using the found predictor and rice parameter to encode audio samples is implemented with only integer math.
+In order to maintain lossless behavior, all arithmetic used in encoding and decoding sample values MUST be done with integer data types to eliminate the possibility of introducing rounding errors associated with floating-point arithmetic. Use of floating-point representations in analysis (e.g. finding a good predictor or rice parameter) is not a concern, as long as the process of using the found predictor and rice parameter to encode audio samples is implemented with only integer math.
 
 Furthermore, the possibility of integer overflow MUST be eliminated by using data types large enough to never overflow. Choosing a 64-bit signed data type for all arithmetic involving sample values would make sure the possibility for overflow is eliminated, but usually smaller data types are chosen for increased performance, especially in embedded devices. This section will provide guidelines for choosing the right data type in each step of encoding and decoding FLAC files.
 
@@ -12,7 +12,7 @@ To find the smallest data type size that is guaranteed not to overflow for a cer
 
 If for example two 16-bit signed integers are added, the largest possible result forms if both values are the largest number that can be represented with a 16-bit signed integer. To store the result, an signed integer data type with at least 17 bits is needed. Similarly, when adding 4 of these values, 18 bits are needed, when adding 8, 19 bits are needed etc. In general, the number of bits necessary when adding numbers together is increased by the log base 2 of the number of values rounded up to the nearest integer. So, when adding 18 unknown values stored in 8 bit signed integers, we need a signed integer data type of at least 13 bits to store the result, as the log base 2 of 18 rounded up is 5.
 
-In case of multiplication, the number of bits needed for the result is the size of the first variable plus the size of the second variable, ignoring one sign bit. If for example a 16-bit signed integer is multiplied by a 16-bit signed integer, the result needs at least 31 bits to store without overflowing.
+In case of multiplication, the number of bits needed for the result is the size of the first variable plus the size of the second variable, but counting only one sign bit if working with signed data types. If for example a 16-bit signed integer is multiplied by a 16-bit signed integer, the result needs at least 31 bits to store without overflowing.
 
 ## Stereo decorrelation
 When stereo decorrelation is used, the side channel will have one extra bit of bit depth, see  [section on Interchannel Decorrelation](#interchannel-decorrelation).
@@ -22,9 +22,9 @@ This means that while 16-bit signed integers have sufficient range to store samp
 Most FLAC decoders store decoded (subframe) samples as 32-bit values, which is sufficient for files with bit depths up to (and including) 31 bit.
 
 ## Prediction
-A prediction (which is used to calculate the residual on encoding or with the residual to calculate the sample value on decoding) is formed by multiplying and summing preceding sample values. In order to eliminate the possibility of integer overflow, the combination of preceding sample values and predictor coefficients producing the largest possible value should be considered.
+A prediction (which is used to calculate the residual on encoding or added to the residual to calculate the sample value on decoding) is formed by multiplying and summing preceding sample values. In order to eliminate the possibility of integer overflow, the combination of preceding sample values and predictor coefficients producing the largest possible value should be considered.
 
-To determine the size of the data type needed to to calculate either the residual sample (on encoding) or the audio sample value (on decoding), the maximal possible value for these is calculated [as described in the previous subsection](#determining-necessary-data-type-size) in the following table. For example: if a frame codes for 16-bit audio and has some form of stereo decorrelation, the subframe coding for the side channel would need 16+1+3 bits in case a third order fixed predictor is used.
+To determine the size of the data type needed to calculate either a residual sample (on encoding) or an audio sample value (on decoding) in a fixed predictor subframe, the maximal possible value for these is calculated [as described in the previous subsection](#determining-necessary-data-type-size) in the following table. For example: if a frame codes for 16-bit audio and has some form of stereo decorrelation, the subframe coding for the side channel would need 16+1+3 bits in case a third order fixed predictor is used.
 
 Order | Calculation of residual                              | Sample values summed | Extra bits
 :-----|:-----------------------------------------------------|:---------------------|:-----------
