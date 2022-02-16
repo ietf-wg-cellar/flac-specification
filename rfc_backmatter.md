@@ -190,12 +190,12 @@ This FLAC file is larger than the first example, but still contains very little 
 00000018: 0013 d5b0 5649 75e9 8b8d 8b93  ....VIu.....
 00000024: 0422 757b 8103 0300 0012 0000  ."u{........
 00000030: 0000 0000 0000 0000 0000 0000  ............
-0000003c: 0000 0010 0400 0039 2000 0000  .......9 ...
+0000003c: 0000 0010 0400 003a 2000 0000  .......: ...
 00000048: 7265 6665 7265 6e63 6520 6c69  reference li
 00000054: 6246 4c41 4320 312e 332e 3320  bFLAC 1.3.3
 00000060: 3230 3139 3038 3034 0100 0000  20190804....
-0000006c: 0d00 0000 7469 746c 653d 5175  ....title=Qu
-00000078: c3a9 6265 6381 0000 0700 0000  ..bec.......
+0000006c: 0e00 0000 5449 544c 453d d7a9  ....TITLE=..
+00000078: d79c d795 d79d 8100 0006 0000  ............
 00000084: 0000 0000 fff8 6998 000f 9912  ......i.....
 00000090: 0867 0162 3d14 4299 8f5d f70d  .g.b=.B..]..
 0000009c: 6fe0 0c17 caeb 2100 0ee7 a77a  o.....!....z
@@ -271,14 +271,14 @@ Start  | Length  | Contents           | Description
 :------|:--------|:-------------------|:-----------------
 0x40+0 | 1 bit   | 0b0                | Not the last metadata block
 0x40+1 | 7 bit   | 0b0000100          | Vorbis comment metadata block
-0x41+0 | 3 byte  | 0x000039           | Length 57 byte
+0x41+0 | 3 byte  | 0x00003a           | Length 58 byte
 0x44+0 | 4 byte  | 0x20000000         | Vendor string length 32 byte
 0x48+0 | 32 byte | (...)              | Vendor string
 0x68+0 | 4 byte  | 0x01000000         | Number of fields 1
-0x6c+0 | 4 byte  | 0x0d000000         | Field length 13 byte
-0x70+0 | 13 byte | (...)              | Field contents
+0x6c+0 | 4 byte  | 0x0e000000         | Field length 14 byte
+0x70+0 | 14 byte | (...)              | Field contents
 
-The vendor string is reference libFLAC 1.3.3 20190804, the field contents of the only field is title=Québec. The vorbis comment field is 13 bytes but only 12 characters in size, because it contains one character needing 2 bytes to represent.
+The vendor string is reference libFLAC 1.3.3 20190804, the field contents of the only field is TITLE=שלום. The vorbis comment field is 14 bytes but only 10 characters in size, because it contains four 2-byte characters.
 
 ### Padding
 
@@ -286,10 +286,10 @@ The last metadata block is a (very short) padding block.
 
 Start  | Length  | Contents           | Description
 :------|:--------|:-------------------|:-----------------
-0x7d+0 | 1 bit   | 0b1                | Last metadata block
-0x7d+1 | 7 bit   | 0b0000001          | Padding metadata block
-0x7e+0 | 3 byte  | 0x000007           | Length 7 byte
-0x81+0 | 7 byte  | 0x00000000000000   | Padding bytes
+0x7e+0 | 1 bit   | 0b1                | Last metadata block
+0x7e+1 | 7 bit   | 0b0000001          | Padding metadata block
+0x7f+0 | 3 byte  | 0x000006           | Length 6 byte
+0x82+0 | 6 byte  | 0x000000000000     | Padding bytes
 
 ### First audio frame
 
