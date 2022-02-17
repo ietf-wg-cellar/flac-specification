@@ -2,16 +2,17 @@ AUTHOR=ietf
 VERSION=03
 BASENAME=draft-$(AUTHOR)-cellar-flac-$(VERSION)
 
-all: $(BASENAME).html $(BASENAME).txt
+all: $(BASENAME).txt $(BASENAME).html $(BASENAME).pdf
+
+$(BASENAME).txt $(BASENAME).html: $(BASENAME).xml
+	xml2rfc --v3 $^ --text --html
+
+$(BASENAME).pdf: $(BASENAME).xml
+	xml2rfc --v3 $^ --pdf
+
 
 $(BASENAME).xml: rfc_frontmatter.md flac.md rfc_backmatter.md
-	cat $^ | mmark > $@
-
-$(BASENAME).html: $(BASENAME).xml
-	xml2rfc --html --v3 $^ -o "$@"
-
-$(BASENAME).txt: $(BASENAME).xml
-	xml2rfc --v3 $^ -o "$@"
+	cat $^ | sed -e "s/@BUILD_VERSION@/$(BASENAME)/" |  mmark > $@
 
 clean:
-	rm -f $(BASENAME).txt $(BASENAME).html merged.md $(BASENAME).xml
+	rm -f $(BASENAME).txt $(BASENAME).html $(BASENAME).pdf merged.md $(BASENAME).xml
