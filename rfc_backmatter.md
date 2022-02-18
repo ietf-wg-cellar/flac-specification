@@ -158,7 +158,7 @@ Start  | Length | Contents        | Description
 
 As the wasted bits flag is 1 in this subframe, an unary coded number follows. Starting at 0x32, we see 0b01, which unary codes for 1, meaning we have 2 wasted bits in this subframe.
 
-As this is a verbatim subframe, the subframe only contains unencoded sample values. With a blocksize of 1, it contains only a single sample. The bit depth of the audio is 16 bit, but as the subframe header signals 2 wasted bits, only 14 bits are stored. As no stereo decorrelation is used, a bit depth increase for the side channel is not applicable. So, the next 14 bit (starting at position 0x32+2) contain the unencoded sample coded big-endian, signed two’s complement. The value reads 0b011000 11111101, or 6397. This value needs to be shifted left by 2 bits, to account for the wasted bits. The value is then 0b011000 11111101 00, or 25588.
+As this is a verbatim subframe, the subframe only contains unencoded sample values. With a blocksize of 1, it contains only a single sample. The bit depth of the audio is 16 bit, but as the subframe header signals 2 wasted bits, only 14 bits are stored. As no stereo decorrelation is used, a bit depth increase for the side channel is not applicable. So, the next 14 bit (starting at position 0x32+2) contain the unencoded sample coded big-endian, signed two's complement. The value reads 0b011000 11111101, or 6397. This value needs to be shifted left by 2 bits, to account for the wasted bits. The value is then 0b011000 11111101 00, or 25588.
 
 The second subframe starts at 0x34, it is broken down in the following table.
 
@@ -248,7 +248,7 @@ Start  | Length  | Contents           | Description
 0x15+4 | 36 bit  | 0b0000, 0x00000013 | Total no. of samples 19
 0x1a   | 16 byte | (...)              | MD5 signature
 
-This time, the minimum and maximum blocksizes are reflected in the file: there is one block of 16 samples, but the last block (which has 3 samples) is excluded from this number. The MD5 signature is d5b0564975e98b8d8b930422757b8103, this will be verified at the end of this example.
+This time, the minimum and maximum blocksizes are reflected in the file: there is one block of 16 samples, but the last block (which has 3 samples) is excluded from this number. The MD5 signature is 0xd5b0 5649 75e9 8b8d 8b93 0422 757b 8103, this will be verified at the end of this example.
 
 ### Seektable
 
@@ -355,7 +355,7 @@ Start  | Length | Contents        | Description
 0xaa+4 | 1 bit  | 0b1             | Quotient 0
 0xaa+5 | 11 bit | 0b00100001100   | Remainder 268
 
-At this point, the decoder should know it is done decoding the coded residual, as it received 16 samples, 1 warm-up sample and 15 residual samples. Each residual sample can be calculated from the quotient and remainder, and then undoing the zig-zag encoding. For example, the value of the first zig-zag encoded residual sample is 3 * 2^11 + 244 = 6388. As this is an even number, the zig-zag encoding is undone by dividing by 2, the residual sample value is 3194. This is done for all residual samples in the next table
+At this point, the decoder should know it is done decoding the coded residual, as it received 16 samples: 1 warm-up sample and 15 residual samples. Each residual sample can be calculated from the quotient and remainder, and undoing the zig-zag encoding. For example, the value of the first zig-zag encoded residual sample is 3 * 2^11 + 244 = 6388. As this is an even number, the zig-zag encoding is undone by dividing by 2, the residual sample value is 3194. This is done for all residual samples in the next table
 
 Quotient | Remainder | Zig-zag encoded | Residual sample value
 :--------|:----------|:----------------|:---------------------
