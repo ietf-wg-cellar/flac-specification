@@ -10,8 +10,8 @@ keyword = ["free,lossless,audio,codec,encoder,decoder,compression,compressor,arc
 [seriesInfo]
 name = "Internet-Draft"
 stream = "IETF"
-status = "informational"
-value = "draft-ietf-cellar-flac-01"
+status = "standard"
+value = "draft-ietf-cellar-flac-03"
 
 [[author]]
 initials="M.Q.C."
