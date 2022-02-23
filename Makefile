@@ -1,23 +1,18 @@
-SRC=flac.md
-PDF=$(SRC:.md=.pdf)
-HTML=$(SRC:.md=.html)
 AUTHOR=ietf
-VERSION=01
+VERSION=03
+BASENAME=draft-$(AUTHOR)-cellar-flac-$(VERSION)
 
-$(info PDF and HTML rendering has been tested with pandoc version 1.13.2.1, some older versions are known to produce very poor output, please ensure your pandoc is recent enough.)
-$(info RFC rendering has been tested with mmark version 1.3.4 and xml2rfc 2.5.1, please ensure these are installed and recent enough.)
+all: $(BASENAME).txt $(BASENAME).html $(BASENAME).pdf
 
-all: draft-$(AUTHOR)-cellar-flac-$(VERSION).html draft-$(AUTHOR)-cellar-flac-$(VERSION).txt
+$(BASENAME).txt $(BASENAME).html: $(BASENAME).xml
+	xml2rfc --v3 $^ --text --html
 
-draft-$(AUTHOR)-cellar-flac-$(VERSION).html: flac.md
-	cat rfc_frontmatter.md "$<" rfc_backmatter.md > merged.md
-	mmark merged.md > draft-$(AUTHOR)-cellar-flac-$(VERSION).xml
-	xml2rfc --html --v3 draft-$(AUTHOR)-cellar-flac-$(VERSION).xml -o "$@"
+$(BASENAME).pdf: $(BASENAME).xml
+	xml2rfc --v3 $^ --pdf
 
-draft-$(AUTHOR)-cellar-flac-$(VERSION).txt: flac.md
-	cat rfc_frontmatter.md "$<" rfc_backmatter.md > merged.md
-	mmark merged.md > draft-$(AUTHOR)-cellar-flac-$(VERSION).xml
-	xml2rfc --v3 draft-$(AUTHOR)-cellar-flac-$(VERSION).xml -o "$@"
+
+$(BASENAME).xml: rfc_frontmatter.md flac.md rfc_backmatter.md
+	cat $^ | sed -e "s/@BUILD_VERSION@/$(BASENAME)/" |  mmark > $@
 
 clean:
-	rm -f draft-$(AUTHOR)-cellar-flac-$(VERSION).txt draft-$(AUTHOR)-cellar-flac-$(VERSION).html merged.md draft-$(AUTHOR)-cellar-flac-$(VERSION).xml
+	rm -f $(BASENAME).txt $(BASENAME).html $(BASENAME).pdf merged.md $(BASENAME).xml
