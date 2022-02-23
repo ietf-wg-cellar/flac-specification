@@ -352,6 +352,8 @@ Other values are reserved and SHOULD NOT be used. There MAY only be one each of 
 
 Directly after the last metadata block, one or more frames follow. Each frame consists of a frame header, one or more subframes, padding zero bits to achieve byte-alignment and a frame footer. The number of subframes in each frame is equal to the number of audio channels.
 
+Each frame header stores the audio sample rate, number of bits per sample and number of channels independently of the streaminfo metadata block and other frame headers. This was done to permit multicasting of FLAC files but it also allows these properties to change mid-stream. Because not all environments in which FLAC decoders are used are able to cope with changes to these parameters during playback, a decoder MAY choose to stop decoding on such a change. A decoder that does not check for such a change could be vulnerable to buffer overflows. See also [the section on security considerations](#security-considerations).
+
 ## Frame header
 Each frame starts with the 15-bit frame sync code 0b111111111111100. Following the sync code is the blocking strategy bit, which MUST NOT change during the audio stream. The blocking strategy bit is 0 for a fixed blocksize stream or 1 for variable blocksize stream. If the blocking strategy is known, a decoder can search for a 16-bit sync code, either 0xF8 for a fixed blocksize stream or 0xF9 for a variable blocksize stream. To ease the search for the sync code and further reduction of false positives, all frames MUST start on a byte boundary.
 
@@ -430,6 +432,10 @@ The next bit is reserved and MUST be zero.
 ### Coded number
 
 Following the reserved bit (starting at the fifth byte of the frame) is either a sample or a frame number, which will be referred to as the coded number. When dealing with variable blocksize streams, the sample number of the first sample in the frame is encoded. When the file contains a fixed blocksize stream, the frame number is encoded. The coded number is stored in a variable length code like UTF-8, but extended to a maximum of 36 bits unencoded, 7 byte encoded. When a frame number is encoded, the value MUST NOT be larger than what fits a value 31 bits unencoded or 6 byte encoded. Please note that most general purpose UTF-8 encoders and decoders will not be able to handle these extended codes.
+
+In case the coded number is a frame number, it MUST be equal to the number of frames preceding the current frame. In case the coded number is a sample number, it MUST be equal to the number of samples preceding the current frame. In a stream where these requirements are not met, seeking is not (reliably) possible.
+
+A decoder that relies on the coded number during seeking could be vulnerable to buffer overflows or getting stuck in an infinite loops in case it seeks in a stream where the coded numbers are non-consecutive or otherwise invalid. See also [the section on security considerations](#security-considerations).
 
 ### Uncommon blocksize
 
