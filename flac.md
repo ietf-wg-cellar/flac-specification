@@ -278,7 +278,7 @@ Following are 3 examples:
 WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MAY be padded with zeros, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MUST be case-insensitive for both the field name and the field contents.
 
 ## Cuesheet
-To either store the track and index point structure of a CDDA along with its audio or to provide a mechanism to store locations of interest within a FLAC file, a cuesheet metadata block can be used. Certain aspects of this metadata block follow directly from the CDDA specification, called Red Book, which is standardized as IEC 60908. For more information on the function and history of these aspects, please refer to IEC 60908.
+To either store the track and index point structure of a CD-DA along with its audio or to provide a mechanism to store locations of interest within a FLAC file, a cuesheet metadata block can be used. Certain aspects of this metadata block follow directly from the CD-DA specification, called Red Book, which is standardized as IEC 60908. For more information on the function and history of these aspects, please refer to IEC 60908.
 
 The structure of a cuesheet metadata block is enumerated in the following table.
 
