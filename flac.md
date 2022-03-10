@@ -285,33 +285,56 @@ Following are 3 examples:
 WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MAY be padded with zeros, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MUST be case-insensitive for both the field name and the field contents.
 
 ## Cuesheet
+To either store the track and index point structure of a CD-DA along with its audio or to provide a mechanism to store locations of interest within a FLAC file, a cuesheet metadata block can be used. Certain aspects of this metadata block follow directly from the CD-DA specification, called Red Book, which is standardized as IEC 60908. For more information on the function and history of these aspects, please refer to IEC 60908.
+
+The structure of a cuesheet metadata block is enumerated in the following table.
+
 Data              | Description
 :-----------------|:-----------
-`u(128*8)`        | Media catalog number, in ASCII printable characters 0x20-0x7E. In general, the media catalog number SHOULD be 0 to 128 bytes long; any unused characters SHOULD be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
-`u(64)`           | The number of lead-in samples. This field has meaning only for CD-DA cuesheets; for other uses it SHOULD be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to the Red Book, the lead-in MUST be silence and CD grabbing software does not usually store it; additionally, the lead-in MUST be at least two seconds but MAY be longer. For these reasons the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track MAY have INDEX 00 data.
-`u(1)`            | `1` if the CUESHEET corresponds to a Compact Disc, else `0`.
+`u(128*8)`        | Media catalog number, in ASCII printable characters 0x20-0x7E.
+`u(64)`           | Number of lead-in samples.
+`u(1)`            | `1` if the cuesheet corresponds to a Compact Disc, else `0`.
 `u(7+258*8)`      | Reserved. All bits MUST be set to zero.
-`u(8)`            | The number of tracks. Must be at least 1 (because of the requisite lead-out track). For CD-DA, this number MUST be no more than 100 (99 regular tracks and one lead-out track).
-`CUESHEET_TRACK`+ | One or more tracks. A CUESHEET block is REQUIRED to have a lead-out track; it is always the last track in the CUESHEET. For CD-DA, the lead-out track number MUST be 170 as specified by the Red Book, otherwise it MUST be 255.
+`u(8)`            | Number of tracks in this cuesheet.
+Cuesheet tracks   | A number of structures as specified in the [section cuesheet track](#cuesheet-track) equal to the number of tracks specified previously.
+
+If the media catalog number is less than 128 bytes long, it SHOULD be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
+
+The number of lead-in samples has meaning only for CD-DA cuesheets; for other uses it SHOULD be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to the Red Book (IEC 60908), the lead-in MUST be silence and CD grabbing software does not usually store it; additionally, the lead-in MUST be at least two seconds but MAY be longer. For these reasons the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track MAY have INDEX 00 data.
+
+The number of tracks MUST be at least 1, as a cuesheet block MUST have a lead-out track. For CD-DA, this number MUST be no more than 100 (99 regular tracks and one lead-out track). The lead-out track is always the last track in the cuesheet. For CD-DA, the lead-out track number MUST be 170 as specified by the Red Book (IEC 60908), otherwise it MUST be 255.
 
 ### Cuesheet track
-Data                    | Description
-:-----------------------|:-----------
-`u(64)`                 | Track offset in samples, relative to the beginning of the FLAC audio stream. It is the offset to the first index point of the track. (Note how this differs from CD-DA, where the track's offset in the TOC is that of the track's INDEX 01 even if there is an INDEX 00.) For CD-DA, the offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/s \* 1/75 s).
-`u(8)`                  | Track number. A track number of 0 is not allowed to avoid conflicting with the CD-DA spec, which reserves this for the lead-in. For CD-DA the number MUST be 1-99, or 170 for the lead-out; for non-CD-DA, the track number MUST for 255 for the lead-out. It is not REQUIRED but encouraged to start with track 1 and increase sequentially. Track numbers MUST be unique within a CUESHEET.
-`u(12*8)`              | Track ISRC. This is a 12-digit alphanumeric code; see [here](http://isrc.ifpi.org/) and [here](http://www.disctronics.co.uk/technology/cdaudio/cdaud_isrc.htm). A value of 12 ASCII NUL characters MAY be used to denote absence of an ISRC.
-`u(1)`                  | The track type: 0 for audio, 1 for non-audio. This corresponds to the CD-DA Q-channel control bit 3.
-`u(1)`                  | The pre-emphasis flag: 0 for no pre-emphasis, 1 for pre-emphasis. This corresponds to the CD-DA Q-channel control bit 5; see [here](http://www.chipchapin.com/CDMedia/cdda9.php3).
-`u(6+13*8)`             | Reserved. All bits MUST be set to zero.
-`u(8)`                  | The number of track index points. There MUST be at least one index in every track in a CUESHEET except for the lead-out track, which MUST have zero. For CD-DA, this number SHOULD NOT be more than 100.
-`CUESHEET_TRACK_INDEX`+ | For all tracks except the lead-out track, one or more track index points.
+Data                          | Description
+:-----------------------------|:-----------
+`u(64)`                       | Track offset of first index point in samples, relative to the beginning of the FLAC audio stream.
+`u(8)`                        | Track number.
+`u(12*8)`                     | Track ISRC.
+`u(1)`                        | The track type: 0 for audio, 1 for non-audio. This corresponds to the CD-DA Q-channel control bit 3.
+`u(1)`                        | The pre-emphasis flag: 0 for no pre-emphasis, 1 for pre-emphasis. This corresponds to the CD-DA Q-channel control bit 5.
+`u(6+13*8)`                   | Reserved. All bits MUST be set to zero.
+`u(8)`                        | The number of track index points.
+Cuesheet track index points   | For all tracks except the lead-out track, a number of structures as specified in the [section cuesheet track index point](#cuesheet-track-index-point) equal to the number of index points specified previously.
 
-#### Cuesheet track index
+Note that the track offset differs from the one in CD-DA, where the track's offset in the TOC is that of the track's INDEX 01 even if there is an INDEX 00. For CD-DA, the track offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/s \* 1/75 s).
+
+A track number of 0 is not allowed to avoid conflicting with the CD-DA spec, which reserves this for the lead-in. For CD-DA the number MUST be 1-99, or 170 for the lead-out; for non-CD-DA, the track number MUST for 255 for the lead-out. It is RECOMMENDED to start with track 1 and increase sequentially. Track numbers MUST be unique within a cuesheet.
+
+The track ISRC (International Standard Recording Code) is a 12-digit alphanumeric code; see [the ISRC handbook](http://isrc.ifpi.org/). A value of 12 ASCII NUL characters MAY be used to denote absence of an ISRC.
+
+There MUST be at least one index point in every track in a cuesheet except for the lead-out track, which MUST have zero. For CD-DA, the number of index points SHOULD NOT be more than 100.
+
+
+#### Cuesheet track index point
 Data      | Description
 :---------|:-----------
-`u(64)`   | Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/s \* 1/75 s). Note that the offset is from the beginning of the track, not the beginning of the audio data.
-`u(8)`    | The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track MUST have a number of 0 or 1, and subsequently, index numbers MUST increase by 1. Index numbers MUST be unique within a track.
+`u(64)`   | Offset in samples, relative to the track offset, of the index point.
+`u(8)`    | The track index point number.
 `u(3*8)`  | Reserved. All bits MUST be set to zero.
+
+For CD-DA, the track index point offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/s \* 1/75 s). Note that the offset is from the beginning of the track, not the beginning of the audio data.
+
+For CD-DA, an track index point number of 0 corresponds to the track pre-gap. The first index point in a track MUST have a number of 0 or 1, and subsequently, index point numbers MUST increase by 1. Index point numbers MUST be unique within a track.
 
 ## Picture
 
