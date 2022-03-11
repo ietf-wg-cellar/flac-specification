@@ -59,7 +59,7 @@ Similar to many audio coders, a FLAC encoder has the following stages:
 
 - `Interchannel Decorrelation` (see [section on Interchannel Decorrelation](#interchannel-decorrelation)). In the case of stereo streams, the encoder will create mid and side signals based on the average and difference (respectively) of the left and right channels. The encoder will then pass the best form of the signal to the next stage.
 
-- `Prediction` (see [section on Prediction](#prediction)). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors, but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even within the channels of a block.
+- `Prediction` (see [section on Prediction](#prediction)). The block is passed through a prediction stage where the encoder tries to find a mathematical description (usually an approximate one) of the signal. This description is typically much smaller than the raw signal itself. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. FLAC currently uses four different classes of predictors, but the format has reserved space for additional methods. FLAC allows the class of predictor to change from block to block, or even between the channels within a block.
 
 - `Residual Coding` (See [section on Residual Coding](#residual-coding)). If the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) MUST be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC currently uses only one method for encoding the residual, but the format has reserved space for additional methods. FLAC allows the residual coding method to change from block to block, or even within the channels of a block.
 
@@ -89,15 +89,17 @@ The side channel needs one extra bit of bit depth as the subtraction can produce
 
 ## Prediction
 
-FLAC uses four methods for modeling the input signal:
+The FLAC format has four methods for modeling the input signal:
 
-1. **Verbatim**. This is essentially a zero-order predictor of the signal. The predicted signal is zero, meaning the residual is the signal itself, and the compression is zero. This is the baseline against which the other predictors are measured. If you feed random data to the encoder, the verbatim predictor will probably be used for every subblock. Since the raw signal is not actually passed through the residual coding stage (it is added to the stream 'verbatim'), the encoding results will not be the same as a zero-order linear predictor.
+1. **Verbatim**. Samples are stored directly, without any modelling. This method is used for inputs with little correlation like white noise. Since the raw signal is not actually passed through the residual coding stage (it is added to the stream 'verbatim'), the method is different from using a zero-order fixed predictor.
 
-1. **Constant**. This predictor is used whenever the subblock is pure DC ("digital silence"), i.e. a constant value throughout. The signal is run-length encoded and added to the stream.
+1. **Constant**. A single sample value is stored. This method is used whenever a signal is pure DC ("digital silence"), i.e. a constant value throughout.
 
-1. **Fixed linear predictor**. FLAC uses a class of computationally-efficient fixed linear predictors (for a good description, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). FLAC adds a fourth-order predictor to the zero-to-third-order predictors used by Shorten. Since the predictors are fixed, the predictor order is the only parameter that needs to be stored in the compressed stream. The error signal is then passed to the residual coder.
+1. **Fixed predictor**. Samples are predicted with one of five fixed (i.e. predefined) predictors, the error of this prediction is processed by the residual coder. These fixed predictors are well suited for predicting simple waveforms. Since the predictors are fixed, no predictor coefficients are stored. From a mathematical point of view, the predictors work by extrapolating the signal from the previous samples. The number of previous samples used is equal to the predictor order. For more information see the [section on the fixed predictor subframe](#fixed-predictor-subframe)
 
-1. **FIR Linear prediction**. For more accurate modeling (at a cost of slower encoding), FLAC supports up to 32nd order FIR linear prediction (again, for information on linear prediction, see [audiopak](http://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](http://svr-www.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html)). The reference encoder uses the Levinson-Durbin method for calculating the LPC coefficients from the autocorrelation coefficients, and the coefficients are quantized before computing the residual. Whereas encoders such as Shorten used a fixed quantization for the entire input, FLAC allows the quantized coefficient precision to vary from subframe to subframe. The FLAC reference encoder estimates the optimal precision to use based on the block size and dynamic range of the original signal.
+1. **Linear predictor**. Samples are predicted using past samples and a set of predictor coefficients, the error of this prediction is processed by the residual coder. Compared to a fixed predictor, using a generic linear predictor adds overhead as predictor coefficients need to be stored. Therefore, this method of prediction is best suited for predicting more complex waveforms, where the added overhead is offset by space savings in the residual coding stage resulting from more accurate prediction. A linear predictor in FLAC has two parameters besides the predictor coefficients and the predictor order: the number of bits with which each coefficient is stored (the coefficient precision) and a prediction right shift. A prediction is formed by taking the sum of multiplying each predictor coefficient with the corresponding past sample, and dividing that sum by applying the specified right shift. For more information see the [section on the linear predictor subframe](#linear-predictor-subframe)
+
+For more information on fixed and linear predictors, see [audiopak](https://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](https://mi.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html).
 
 ## Residual Coding
 
@@ -171,19 +173,24 @@ Value   | Metadata block type
 
 
 ## Streaminfo
+
+The streaminfo metadata block contains technical information about the FLAC stream relevant for decoding. Decoder behavior in case of incorrect or incomplete information is left unspecified (i.e. up to the decoder implementation). A decoder MAY choose to stop further decoding in case the information supplied by the streaminfo metadata block turns out to be incorrect or invalid. A decoder accepting information from the streaminfo block (most significantly the maximum frame size, maximum block size, number of audio channels, number of bits per sample and total number of samples) without doing further checks during decoding of audio frames could be vulnerable to buffer overflows. See also [the section on security considerations](#security-considerations).
+
 Data     | Description
 :--------|:-----------
-`u(16)`  | The minimum block size (in samples) used in the stream.
-`u(16)`  | The maximum block size (in samples) used in the stream. (Minimum blocksize == maximum blocksize) implies a fixed-blocksize stream.
+`u(16)`  | The minimum block size (in samples) used in the stream, excluding the last block.
+`u(16)`  | The maximum block size (in samples) used in the stream.
 `u(24)`  | The minimum frame size (in bytes) used in the stream. A value of `0` signifies that the value is not known.
 `u(24)`  | The maximum frame size (in bytes) used in the stream. A value of `0` signifies that the value is not known.
 `u(20)`  | Sample rate in Hz. Though 20 bits are available, the maximum sample rate is limited by the structure of frame headers to 655350 Hz. Also, a value of 0 is invalid.
 `u(3)`   | (number of channels)-1. FLAC supports from 1 to 8 channels
 `u(5)`   | (bits per sample)-1. FLAC supports from 4 to 32 bits per sample. Currently the reference encoder and decoders only support up to 24 bits per sample.
 `u(36)`  | Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1 kHz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
-`u(128)` | MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream.
+`u(128)` | MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream. A value of `0` signifies that the value is not known.
 
-FLAC specifies a minimum block size of 16 and a maximum block size of 65535, meaning the bit patterns corresponding to the numbers 0-15 in the minimum blocksize and maximum blocksize fields are invalid.
+The minimum block size is excluding the last block of a FLAC file, which may be smaller. If the minimum block size is equal to the maximum block size, the file contains a fixed block size stream. Note that the actual maximum block size might be smaller than the maximum block size listed in the streaminfo block, and the actual smallest block size excluding the last block might be larger than the minimum block size listed in the streaminfo block. This is because the encoder has to write these fields before receiving any input audio data, and cannot know beforehand what block sizes it will use, only between what bounds these will be chosen.
+
+FLAC specifies a minimum block size of 16 and a maximum block size of 65535, meaning the bit patterns corresponding to the numbers 0-15 in the minimum block size and maximum block size fields are invalid.
 
 The MD5 signature is made by performing an MD5 transformation on the samples of all channels interleaved, represented in signed, little-endian form. This interleaving is on a per-sample basis, so for a stereo file this means first the first sample of the first channel, then the first sample of the second channel, then the second sample of the first channel etc. Before performing the MD5 transformation, all samples must be byte-aligned. So, in case the bit depth is not a whole number of bytes, additional zero bits are inserted at the most-significant position until each sample representation is a whole number of bytes.
 
@@ -221,43 +228,123 @@ NOTES
 - The previous two notes imply that there MAY be any number of placeholder points, but they MUST all occur at the end of the table.
 
 ## Vorbis comment
-Data     | Description
-:--------|:-----------
-`u(n)`   | Also known as FLAC tags, the contents of a vorbis comment packet as specified [here](http://www.xiph.org/vorbis/doc/v-comment.html) (without the framing bit). Note that the vorbis comment spec allows for on the order of 2\^64 bytes of data where as the FLAC metadata block is limited to 2\^24 bytes. Given the stated purpose of vorbis comments, i.e. human-readable textual information, this limit is unlikely to be restrictive. Also note that the 32-bit field lengths are little-endian coded according to the vorbis spec, as opposed to the usual big-endian coding of fixed-length integers in the rest of FLAC.
+
+A vorbis comment metadata block contains human-readable information coded in UTF-8. The name vorbis comment points to the fact that the vorbis codec stores such metadata in almost the same way. A vorbis comment metadata block consists of a vendor string optionally followed by a number of fields, which are pairs of field names and field contents. Many users refer to these fields as FLAC tags or simply as tags. A FLAC file MUST NOT contain more than one vorbis comment metadata block.
+
+In a vorbis comment metadata block, the metadata block header is directly followed by 4 bytes containing the length in bytes of the vendor string as an unsigned number coded little-endian. The vendor string follows UTF-8 coded, and is not terminated in any way.
+
+Following the vendor string are 4 bytes containing the number of fields that are in the vorbis comment block, stored as an unsigned number, coded little-endian. If this number is non-zero, it is followed by the fields themselves, each field stored with a 4 byte length. First, the 4 byte field length in bytes is stored as an unsigned number, coded little-endian. The field itself is, like the vendor string, UTF-8 coded, not terminated in any way.
+
+Each field consists of a field name and a field content, separated by an = character. The field name MUST only consist of UTF-8 code points U+0020 through U+0074, excluding U+003D, which is the = character. In other words, the field name can contain all printable ASCII characters except the equals sign. The evaluation of the field names MUST be case insensitive, so U+0041 through 0+005A (A-Z) MUST be considered equivalent to U+0061 through U+007A (a-z) respectively. The field contents can contain any UTF-8 character.
+
+Note that the vorbis comment as used in vorbis allows for on the order of 2\^64 bytes of data whereas the FLAC metadata block is limited to 2\^24 bytes. Given the stated purpose of vorbis comments, i.e. human-readable textual information, this limit is unlikely to be restrictive. Also note that the 32-bit field lengths are coded little-endian, as opposed to the usual big-endian coding of fixed-length integers in the rest of the FLAC format.
+
+### Standard field names
+
+Except the one defined in the [section channel mask](#channel-mask), no standard field names are defined. In general, most software recognizes the following field names
+
+- Title: name of the current work
+- Artist: name of the artist generally responsible for the current work. For orchestral works this is usually the composer, otherwise is it often the performer
+- Album: name of the collection the current work belongs to
+
+For a more comprehensive list of possible field names, [the list of tags used in the MusicBrainz project](http://picard-docs.musicbrainz.org/en/variables/variables.html) is recommended.
+
+### Channel mask
+
+Besides fields containing information about the work itself, one field is defined for technical reasons, of which the field name is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK. This field contains information on which channels the file contains. Use of this field is RECOMMENDED in case these differ from the channels defined in [the section channels bits](#channels-bits).
+
+The channel mask consists of flag bits indicating which channels are present, stored in a hexadecimal representation preceded by 0x. The flags only signal which channels are present, not in which order, so in case a file has to be encoded in which channels are ordered differently, they have to be reordered. Please note that a file in which the channel order is defined through the WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK is not streamable, i.e. non-subset, as the field is not found in each frame header. The mask bits can be found in the following table
+
+Bit number | Channel description
+:----------|:-----------
+0          | Front left
+1          | Front right
+2          | Front center
+3          | Low-frequency effects (LFE)
+4          | Back left
+5          | Back right
+6          | Front left of center
+7          | Front right of center
+8          | Back center
+9          | Side left
+10         | Side right
+11         | Top center
+12         | Top front left
+13         | Top front center
+14         | Top front right
+15         | Top rear left
+16         | Top rear center
+17         | Top rear right
+
+Following are 3 examples:
+
+- if a file has a single channel, being a LFE channel, the vorbis comment field is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x8
+- if a file has 4 channels, being front left, front right, top front left and top front right, the vorbis comment field is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x5003
+- if an input has 4 channels, being back center, top front center, front center and top rear center in that order, they have to be reordered to front center, back center, top front center and top rear center. The vorbis comment field added is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x12004.
+
+WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MAY be padded with zeros, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MUST be case-insensitive for both the field name and the field contents.
 
 ## Cuesheet
+To either store the track and index point structure of a CD-DA along with its audio or to provide a mechanism to store locations of interest within a FLAC file, a cuesheet metadata block can be used. Certain aspects of this metadata block follow directly from the CD-DA specification, called Red Book, which is standardized as IEC 60908. For more information on the function and history of these aspects, please refer to IEC 60908.
+
+The structure of a cuesheet metadata block is enumerated in the following table.
+
 Data              | Description
 :-----------------|:-----------
-`u(128*8)`        | Media catalog number, in ASCII printable characters 0x20-0x7E. In general, the media catalog number SHOULD be 0 to 128 bytes long; any unused characters SHOULD be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
-`u(64)`           | The number of lead-in samples. This field has meaning only for CD-DA cuesheets; for other uses it SHOULD be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to the Red Book, the lead-in MUST be silence and CD grabbing software does not usually store it; additionally, the lead-in MUST be at least two seconds but MAY be longer. For these reasons the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track MAY have INDEX 00 data.
-`u(1)`            | `1` if the CUESHEET corresponds to a Compact Disc, else `0`.
+`u(128*8)`        | Media catalog number, in ASCII printable characters 0x20-0x7E.
+`u(64)`           | Number of lead-in samples.
+`u(1)`            | `1` if the cuesheet corresponds to a Compact Disc, else `0`.
 `u(7+258*8)`      | Reserved. All bits MUST be set to zero.
-`u(8)`            | The number of tracks. Must be at least 1 (because of the requisite lead-out track). For CD-DA, this number MUST be no more than 100 (99 regular tracks and one lead-out track).
-`CUESHEET_TRACK`+ | One or more tracks. A CUESHEET block is REQUIRED to have a lead-out track; it is always the last track in the CUESHEET. For CD-DA, the lead-out track number MUST be 170 as specified by the Red Book, otherwise it MUST be 255.
+`u(8)`            | Number of tracks in this cuesheet.
+Cuesheet tracks   | A number of structures as specified in the [section cuesheet track](#cuesheet-track) equal to the number of tracks specified previously.
+
+If the media catalog number is less than 128 bytes long, it SHOULD be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
+
+The number of lead-in samples has meaning only for CD-DA cuesheets; for other uses it SHOULD be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to the Red Book (IEC 60908), the lead-in MUST be silence and CD grabbing software does not usually store it; additionally, the lead-in MUST be at least two seconds but MAY be longer. For these reasons the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track MAY have INDEX 00 data.
+
+The number of tracks MUST be at least 1, as a cuesheet block MUST have a lead-out track. For CD-DA, this number MUST be no more than 100 (99 regular tracks and one lead-out track). The lead-out track is always the last track in the cuesheet. For CD-DA, the lead-out track number MUST be 170 as specified by the Red Book (IEC 60908), otherwise it MUST be 255.
 
 ### Cuesheet track
-Data                    | Description
-:-----------------------|:-----------
-`u(64)`                 | Track offset in samples, relative to the beginning of the FLAC audio stream. It is the offset to the first index point of the track. (Note how this differs from CD-DA, where the track's offset in the TOC is that of the track's INDEX 01 even if there is an INDEX 00.) For CD-DA, the offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/s \* 1/75 s).
-`u(8)`                  | Track number. A track number of 0 is not allowed to avoid conflicting with the CD-DA spec, which reserves this for the lead-in. For CD-DA the number MUST be 1-99, or 170 for the lead-out; for non-CD-DA, the track number MUST for 255 for the lead-out. It is not REQUIRED but encouraged to start with track 1 and increase sequentially. Track numbers MUST be unique within a CUESHEET.
-`u(12*8)`              | Track ISRC. This is a 12-digit alphanumeric code; see [here](http://isrc.ifpi.org/) and [here](http://www.disctronics.co.uk/technology/cdaudio/cdaud_isrc.htm). A value of 12 ASCII NUL characters MAY be used to denote absence of an ISRC.
-`u(1)`                  | The track type: 0 for audio, 1 for non-audio. This corresponds to the CD-DA Q-channel control bit 3.
-`u(1)`                  | The pre-emphasis flag: 0 for no pre-emphasis, 1 for pre-emphasis. This corresponds to the CD-DA Q-channel control bit 5; see [here](http://www.chipchapin.com/CDMedia/cdda9.php3).
-`u(6+13*8)`             | Reserved. All bits MUST be set to zero.
-`u(8)`                  | The number of track index points. There MUST be at least one index in every track in a CUESHEET except for the lead-out track, which MUST have zero. For CD-DA, this number SHOULD NOT be more than 100.
-`CUESHEET_TRACK_INDEX`+ | For all tracks except the lead-out track, one or more track index points.
+Data                          | Description
+:-----------------------------|:-----------
+`u(64)`                       | Track offset of first index point in samples, relative to the beginning of the FLAC audio stream.
+`u(8)`                        | Track number.
+`u(12*8)`                     | Track ISRC.
+`u(1)`                        | The track type: 0 for audio, 1 for non-audio. This corresponds to the CD-DA Q-channel control bit 3.
+`u(1)`                        | The pre-emphasis flag: 0 for no pre-emphasis, 1 for pre-emphasis. This corresponds to the CD-DA Q-channel control bit 5.
+`u(6+13*8)`                   | Reserved. All bits MUST be set to zero.
+`u(8)`                        | The number of track index points.
+Cuesheet track index points   | For all tracks except the lead-out track, a number of structures as specified in the [section cuesheet track index point](#cuesheet-track-index-point) equal to the number of index points specified previously.
 
-#### Cuesheet track index
+Note that the track offset differs from the one in CD-DA, where the track's offset in the TOC is that of the track's INDEX 01 even if there is an INDEX 00. For CD-DA, the track offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/s \* 1/75 s).
+
+A track number of 0 is not allowed to avoid conflicting with the CD-DA spec, which reserves this for the lead-in. For CD-DA the number MUST be 1-99, or 170 for the lead-out; for non-CD-DA, the track number MUST for 255 for the lead-out. It is RECOMMENDED to start with track 1 and increase sequentially. Track numbers MUST be unique within a cuesheet.
+
+The track ISRC (International Standard Recording Code) is a 12-digit alphanumeric code; see [the ISRC handbook](http://isrc.ifpi.org/). A value of 12 ASCII NUL characters MAY be used to denote absence of an ISRC.
+
+There MUST be at least one index point in every track in a cuesheet except for the lead-out track, which MUST have zero. For CD-DA, the number of index points SHOULD NOT be more than 100.
+
+
+#### Cuesheet track index point
 Data      | Description
 :---------|:-----------
-`u(64)`   | Offset in samples, relative to the track offset, of the index point. For CD-DA, the offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/s \* 1/75 s). Note that the offset is from the beginning of the track, not the beginning of the audio data.
-`u(8)`    | The index point number. For CD-DA, an index number of 0 corresponds to the track pre-gap. The first index in a track MUST have a number of 0 or 1, and subsequently, index numbers MUST increase by 1. Index numbers MUST be unique within a track.
+`u(64)`   | Offset in samples, relative to the track offset, of the index point.
+`u(8)`    | The track index point number.
 `u(3*8)`  | Reserved. All bits MUST be set to zero.
 
+For CD-DA, the track index point offset MUST be evenly divisible by 588 samples (588 samples = 44100 samples/s \* 1/75 s). Note that the offset is from the beginning of the track, not the beginning of the audio data.
+
+For CD-DA, an track index point number of 0 corresponds to the track pre-gap. The first index point in a track MUST have a number of 0 or 1, and subsequently, index point numbers MUST increase by 1. Index point numbers MUST be unique within a track.
+
 ## Picture
+
+The picture metadata block contains image data of a picture in some way belonging to the audio contained in the FLAC file. Its format is derived from the APIC frame in the ID3v2 specification. However, contrary to the APIC frame in ID3v2, the MIME type and description are prepended with a 4-byte length field instead of being null delimited strings. A FLAC file MAY contain one or more picture metadata blocks.
+
+Note that while the length fields for MIME type, description and picture data are 4 bytes in length and could in theory code for a size up to 4 GiB, the total metadata block size cannot exceed what can be described by the metadata block header, i.e. 16 MiB.
+
 Data      | Description
 :---------|:-----------
-`u(32)`   | The PICTURE_TYPE according to the ID3v2 APIC frame.
+`u(32)`   | The picture type according to next table
 `u(32)`   | The length of the MIME type string in bytes.
 `u(n*8)`  | The MIME type string, in printable ASCII characters 0x20-0x7E. The MIME type MAY also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
 `u(32)`   | The length of the description string in bytes.
@@ -269,32 +356,31 @@ Data      | Description
 `u(32)`   | The length of the picture data in bytes.
 `u(n*8)`  | The binary picture data.
 
-### Picture type
-Value | Description
------:|:-----------
-   0 | Other
-   1 | 32x32 pixels 'file icon' (PNG only)
-   2 | Other file icon
-   3 | Cover (front)
-   4 | Cover (back)
-   5 | Leaflet page
-   6 | Media (e.g. label side of CD)
-   7 | Lead artist/lead performer/soloist
-   8 | Artist/performer
-   9 | Conductor
-  10 | Band/Orchestra
-  11 | Composer
-  12 | Lyricist/text writer
-  13 | Recording Location
-  14 | During recording
-  15 | During performance
-  16 | Movie/video screen capture
-  17 | A bright colored fish
-  18 | Illustration
-  19 | Band/artist logotype
-  20 | Publisher/Studio logotype
+The following table contains all defined picture types. Values other than those listed in the table are reserved and SHOULD NOT be used. There MAY only be one each of picture type 1 and 2 in a file. In general practice, many decoders display the contents of a picture metadata block with picture type 3 (front cover) during playback, if present.
 
-Other values are reserved and SHOULD NOT be used. There MAY only be one each of picture type 1 and 2 in a file.
+Value | Picture type
+:-----|:-----------
+0     | Other
+1     | PNG file icon of 32x32 pixels
+2     | General file icon
+3     | Front cover
+4     | Back cover
+5     | Liner notes page
+6     | Media label (e.g. CD, Vinyl or Cassette label)
+7     | Lead artist, lead performer or soloist
+8     | Artist or performer
+9     | Conductor
+10    | Band or orchestra
+11    | Composer
+12    | Lyricist or text writer
+13    | Recording location
+14    | During recording
+15    | During performance
+16    | Movie or video screen capture
+17    | A bright colored fish
+18    | Illustration
+19    | Band or artist logotype
+20    | Publisher or studio logotype
 
 # Frame structure
 
@@ -420,7 +506,7 @@ In case k is not equal to 0, samples are coded ignoring k least-significant bits
 Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed, as to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like lossyWAV that enable users to improve compression of their files by a lossless audio codec in a non-lossless way. Because of this the number of wasted bits k MAY change between frames and MAY differ between subframes.
 
 ### Constant subframe
-In a constant subframe only a single sample is stored. This sample is stored as a signed integer number, big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the bit depth of the corresponding subblock, minus the number of wasted bits in that subblock, plus 1 bit when it has been converted to a side-channel subframe. See also the [section on interchannel decorrelation](#interchannel-decorrelation) and the [section on wasted bits per sample flag](#wasted-bits-per-sample).
+In a constant subframe only a single sample is stored. This sample is stored as a integer number coded big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the [bit depth as coded in the frame header](#bit-depth-bits), minus the number of [wasted bits coded in the subframe header](#wasted-bits-per-sample). In case a subframe is a side subframe (see the [section on interchannel decorrelation](#interchannel-decorrelation), the bit depth of that subframe is increased by 1 bit.
 
 ### Verbatim subframe
 A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#constant-subframe) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.

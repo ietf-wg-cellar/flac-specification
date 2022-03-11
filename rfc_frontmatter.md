@@ -11,7 +11,7 @@ keyword = ["free,lossless,audio,codec,encoder,decoder,compression,compressor,arc
 name = "Internet-Draft"
 stream = "IETF"
 status = "standard"
-value = "draft-ietf-cellar-flac-03"
+value = "@BUILD_VERSION@"
 
 [[author]]
 initials="M.Q.C."
