@@ -16,7 +16,7 @@ Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 
 FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
 
-- [A. J. Robinson](https://web.archive.org/web/20160315141134/http://mi.eng.cam.ac.uk/~ajr/) for his work on [Shorten](https://mi.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html); his paper is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
+- [A. J. Robinson](https://web.archive.org/web/20160315141134/http://mi.eng.cam.ac.uk/~ajr/) for his work on Shorten; his paper ([@robinson-tr156]) is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
 - [S. W. Golomb](https://web.archive.org/web/20040215005354/http://csi.usc.edu/faculty/golomb.html) and Robert F. Rice; their universal codes are used by FLAC's entropy coder.
 - N. Levinson and J. Durbin; the reference encoder uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients.
 - And of course, [Claude Shannon](https://en.wikipedia.org/wiki/Claude_Shannon)
@@ -99,7 +99,31 @@ The FLAC format has four methods for modeling the input signal:
 
 1. **Linear predictor**. Samples are predicted using past samples and a set of predictor coefficients, the error of this prediction is processed by the residual coder. Compared to a fixed predictor, using a generic linear predictor adds overhead as predictor coefficients need to be stored. Therefore, this method of prediction is best suited for predicting more complex waveforms, where the added overhead is offset by space savings in the residual coding stage resulting from more accurate prediction. A linear predictor in FLAC has two parameters besides the predictor coefficients and the predictor order: the number of bits with which each coefficient is stored (the coefficient precision) and a prediction right shift. A prediction is formed by taking the sum of multiplying each predictor coefficient with the corresponding past sample, and dividing that sum by applying the specified right shift. For more information see the [section on the linear predictor subframe](#linear-predictor-subframe)
 
-For more information on fixed and linear predictors, see [audiopak](https://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf) and [shorten](https://mi.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html).
+For more information on fixed and linear predictors, see [@HPL-1999-144] and [@robinson-tr156].
+
+<reference anchor="HPL-1999-144" target="https://www.hpl.hp.com/techreports/1999/HPL-1999-144.pdf">
+    <front>
+        <title>Lossless Compression of Digital Audio</title>
+        <author initials="M" surname="Hans" fullname="Mat Hans">
+            <organisation>Client and Media Systems Laboratory, HP Laboratories Palo Alto</organisation>
+        </author>
+        <author initials="RW" surname="Schafer" fullname="Ronald W. Schafer">
+            <organisation>Center for Signal &amp; Image Processing at the School of Electrical and Computer Engineering, Georgia Institute of the Technology, Atlanta, Georgia</organisation>
+        </author>
+        <date month="11" year="1999" />
+    </front>
+    <seriesInfo name="DOI" value="10.1109/79.939834"/>
+</reference>
+
+<reference anchor="robinson-tr156" target="https://mi.eng.cam.ac.uk/reports/abstracts/robinson_tr156.html">
+    <front>
+        <title>SHORTEN: Simple lossless and near-lossless waveform compression</title>
+        <author initials="T" surname="Robinson" fullname="Tony Robinson">
+            <organisation>Cambridge University Engineering Department</organisation>
+        </author>
+        <date month="12" year="1994" />
+    </front>
+</reference>
 
 ## Residual Coding
 
@@ -285,7 +309,18 @@ Following are 3 examples:
 WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MAY be padded with zeros, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MUST be case-insensitive for both the field name and the field contents.
 
 ## Cuesheet
-To either store the track and index point structure of a CD-DA along with its audio or to provide a mechanism to store locations of interest within a FLAC file, a cuesheet metadata block can be used. Certain aspects of this metadata block follow directly from the CD-DA specification, called Red Book, which is standardized as IEC 60908. For more information on the function and history of these aspects, please refer to IEC 60908.
+To either store the track and index point structure of a CD-DA along with its audio or to provide a mechanism to store locations of interest within a FLAC file, a cuesheet metadata block can be used. Certain aspects of this metadata block follow directly from the CD-DA specification, called Red Book, which is standardized as [@IEC.60908.1999]. For more information on the function and history of these aspects, please refer to [@IEC.60908.1999].
+
+<reference anchor="IEC.60908.1999">
+    <front>
+        <title>Audio recording - Compact disc digital audio system</title>
+        <author>
+            <organization>International Electrotechnical Commission</organization>
+        </author>
+        <date year="1999"/>
+    </front>
+    <seriesInfo name="IEC" value="International standard 60908 second edition"/>
+</reference>
 
 The structure of a cuesheet metadata block is enumerated in the following table.
 
@@ -300,9 +335,9 @@ Cuesheet tracks   | A number of structures as specified in the [section cuesheet
 
 If the media catalog number is less than 128 bytes long, it SHOULD be right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
 
-The number of lead-in samples has meaning only for CD-DA cuesheets; for other uses it SHOULD be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to the Red Book (IEC 60908), the lead-in MUST be silence and CD grabbing software does not usually store it; additionally, the lead-in MUST be at least two seconds but MAY be longer. For these reasons the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track MAY have INDEX 00 data.
+The number of lead-in samples has meaning only for CD-DA cuesheets; for other uses it SHOULD be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to [@IEC.60908.1999], the lead-in MUST be silence and CD grabbing software does not usually store it; additionally, the lead-in MUST be at least two seconds but MAY be longer. For these reasons the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track MAY have INDEX 00 data.
 
-The number of tracks MUST be at least 1, as a cuesheet block MUST have a lead-out track. For CD-DA, this number MUST be no more than 100 (99 regular tracks and one lead-out track). The lead-out track is always the last track in the cuesheet. For CD-DA, the lead-out track number MUST be 170 as specified by the Red Book (IEC 60908), otherwise it MUST be 255.
+The number of tracks MUST be at least 1, as a cuesheet block MUST have a lead-out track. For CD-DA, this number MUST be no more than 100 (99 regular tracks and one lead-out track). The lead-out track is always the last track in the cuesheet. For CD-DA, the lead-out track number MUST be 170 as specified by [@IEC.60908.1999], otherwise it MUST be 255.
 
 ### Cuesheet track
 Data                          | Description
