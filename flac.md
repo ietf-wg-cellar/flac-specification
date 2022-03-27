@@ -110,7 +110,7 @@ For more information on fixed and linear predictors, see [@HPL-1999-144] and [@r
         <author initials="RW" surname="Schafer" fullname="Ronald W. Schafer">
             <organisation>Center for Signal &amp; Image Processing at the School of Electrical and Computer Engineering, Georgia Institute of the Technology, Atlanta, Georgia</organisation>
         </author>
-        <date month="11" year="1999" />
+        <date month="11" year="1999"/>
     </front>
     <seriesInfo name="DOI" value="10.1109/79.939834"/>
 </reference>
@@ -121,7 +121,7 @@ For more information on fixed and linear predictors, see [@HPL-1999-144] and [@r
         <author initials="T" surname="Robinson" fullname="Tony Robinson">
             <organisation>Cambridge University Engineering Department</organisation>
         </author>
-        <date month="12" year="1994" />
+        <date month="12" year="1994"/>
     </front>
 </reference>
 
