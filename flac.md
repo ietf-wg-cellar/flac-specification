@@ -355,7 +355,17 @@ Note that the track offset differs from the one in CD-DA, where the track's offs
 
 A track number of 0 is not allowed to avoid conflicting with the CD-DA spec, which reserves this for the lead-in. For CD-DA the number MUST be 1-99, or 170 for the lead-out; for non-CD-DA, the track number MUST for 255 for the lead-out. It is RECOMMENDED to start with track 1 and increase sequentially. Track numbers MUST be unique within a cuesheet.
 
-The track ISRC (International Standard Recording Code) is a 12-digit alphanumeric code; see [the ISRC handbook](http://isrc.ifpi.org/). A value of 12 ASCII NUL characters MAY be used to denote absence of an ISRC.
+The track ISRC (International Standard Recording Code) is a 12-digit alphanumeric code; see [@ISRC-handbook]. A value of 12 ASCII NUL characters MAY be used to denote absence of an ISRC.
+
+<reference anchor="ISRC-handbook" target="https://www.ifpi.org/isrc_handbook/">
+    <front>
+        <title>International Standard Recording Code (ISRC) Handbook, 4th edition</title>
+        <author>
+            <organisation>International ISRC Registration Authority</organisation>
+        </author>
+        <date year="2021"/>
+    </front>
+</reference>
 
 There MUST be at least one index point in every track in a cuesheet except for the lead-out track, which MUST have zero. For CD-DA, the number of index points SHOULD NOT be more than 100.
 
