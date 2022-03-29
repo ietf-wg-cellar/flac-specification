@@ -10,7 +10,7 @@ keyword = ["free,lossless,audio,codec,encoder,decoder,compression,compressor,arc
 [seriesInfo]
 name = "Internet-Draft"
 stream = "IETF"
-status = "informational"
+status = "standard"
 value = "@BUILD_VERSION@"
 
 [[author]]
