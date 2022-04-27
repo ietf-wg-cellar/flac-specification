@@ -626,6 +626,8 @@ In case a rice parameter was provided, the partition contains a rice coded resid
 
 Decoding the coded residual thus involves selecting the right coding method, finding the number of partitions, reading unary and binary parts of each codeword one-by-one and keeping track of when a new partition starts and thus when a new rice parameter needs to be read.
 
+Residuals MUST NOT exceed the range of a 32-bit signed integer. A FLAC encoder MUST make sure of this. In case a FLAC encoder is, for a certain subframe, unable to find a suitable predictor of which all residual samples fall within the range of a 32-bit signed integer, it must default to writing a verbatim subframe. The [appendix numerical considerations](#numerical-considerations) explains in which circumstances residual samples are already implicitly representable by a 32-bit signed integer and thus an additional check is not needed.
+
 ## Frame footer
 
 Following the last subframe is the frame footer. If the last subframe is not byte aligned (i.e. the bits required to store all subframes put together are not divisible by 8), zero bits are added until byte alignment is reached. Following this is a 16-bit CRC, initialized with 0, with polynomial x^16 + x^15 + x^2 + x^0. This CRC covers the whole frame excluding the 16-bit CRC, including the sync code.
