@@ -20,7 +20,7 @@ fullname="Martijn van Beurden"
   [author.address]
   email="mvanb1@gmail.com"
     [author.address.postal]
-    country="NLD"
+    country="NL"
 
 [[author]]
 initials="A."
