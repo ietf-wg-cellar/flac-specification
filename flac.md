@@ -253,15 +253,15 @@ NOTES
 
 ## Vorbis comment
 
-A vorbis comment metadata block contains human-readable information coded in UTF-8. The name vorbis comment points to the fact that the vorbis codec stores such metadata in almost the same way. A vorbis comment metadata block consists of a vendor string optionally followed by a number of fields, which are pairs of field names and field contents. Many users refer to these fields as FLAC tags or simply as tags. A FLAC file MUST NOT contain more than one vorbis comment metadata block.
+A Vorbis comment metadata block contains human-readable information coded in UTF-8. The name Vorbis comment points to the fact that the Vorbis codec stores such metadata in almost the same way. A Vorbis comment metadata block consists of a vendor string optionally followed by a number of fields, which are pairs of field names and field contents. Many users refer to these fields as FLAC tags or simply as tags. A FLAC file MUST NOT contain more than one Vorbis comment metadata block.
 
-In a vorbis comment metadata block, the metadata block header is directly followed by 4 bytes containing the length in bytes of the vendor string as an unsigned number coded little-endian. The vendor string follows UTF-8 coded, and is not terminated in any way.
+In a Vorbis comment metadata block, the metadata block header is directly followed by 4 bytes containing the length in bytes of the vendor string as an unsigned number coded little-endian. The vendor string follows UTF-8 coded, and is not terminated in any way.
 
-Following the vendor string are 4 bytes containing the number of fields that are in the vorbis comment block, stored as an unsigned number, coded little-endian. If this number is non-zero, it is followed by the fields themselves, each field stored with a 4 byte length. First, the 4 byte field length in bytes is stored as an unsigned number, coded little-endian. The field itself is, like the vendor string, UTF-8 coded, not terminated in any way.
+Following the vendor string are 4 bytes containing the number of fields that are in the Vorbis comment block, stored as an unsigned number, coded little-endian. If this number is non-zero, it is followed by the fields themselves, each field stored with a 4 byte length. First, the 4 byte field length in bytes is stored as an unsigned number, coded little-endian. The field itself is, like the vendor string, UTF-8 coded, not terminated in any way.
 
 Each field consists of a field name and a field content, separated by an = character. The field name MUST only consist of UTF-8 code points U+0020 through U+0074, excluding U+003D, which is the = character. In other words, the field name can contain all printable ASCII characters except the equals sign. The evaluation of the field names MUST be case insensitive, so U+0041 through 0+005A (A-Z) MUST be considered equivalent to U+0061 through U+007A (a-z) respectively. The field contents can contain any UTF-8 character.
 
-Note that the vorbis comment as used in vorbis allows for on the order of 2\^64 bytes of data whereas the FLAC metadata block is limited to 2\^24 bytes. Given the stated purpose of vorbis comments, i.e. human-readable textual information, this limit is unlikely to be restrictive. Also note that the 32-bit field lengths are coded little-endian, as opposed to the usual big-endian coding of fixed-length integers in the rest of the FLAC format.
+Note that the Vorbis comment as used in Vorbis allows for on the order of 2\^64 bytes of data whereas the FLAC metadata block is limited to 2\^24 bytes. Given the stated purpose of Vorbis comments, i.e. human-readable textual information, this limit is unlikely to be restrictive. Also note that the 32-bit field lengths are coded little-endian, as opposed to the usual big-endian coding of fixed-length integers in the rest of the FLAC format.
 
 ### Standard field names
 
@@ -302,9 +302,9 @@ Bit number | Channel description
 
 Following are 3 examples:
 
-- if a file has a single channel, being a LFE channel, the vorbis comment field is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x8
-- if a file has 4 channels, being front left, front right, top front left and top front right, the vorbis comment field is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x5003
-- if an input has 4 channels, being back center, top front center, front center and top rear center in that order, they have to be reordered to front center, back center, top front center and top rear center. The vorbis comment field added is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x12004.
+- if a file has a single channel, being a LFE channel, the Vorbis comment field is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x8
+- if a file has 4 channels, being front left, front right, top front left and top front right, the Vorbis comment field is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x5003
+- if an input has 4 channels, being back center, top front center, front center and top rear center in that order, they have to be reordered to front center, back center, top front center and top rear center. The Vorbis comment field added is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x12004.
 
 WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MAY be padded with zeros, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MUST be case-insensitive for both the field name and the field contents.
 
