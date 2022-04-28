@@ -180,7 +180,7 @@ To validate the MD5, we line up the samples interleaved, byte-aligned, little en
 
 ## Decoding example 2
 
-This FLAC file is larger than the first example, but still contains very little audio. The focus of this example is on decoding a subframe with a fixed predictor and a coded residual, but it also contains a very short seektable, vorbis comment and padding metadata block.
+This FLAC file is larger than the first example, but still contains very little audio. The focus of this example is on decoding a subframe with a fixed predictor and a coded residual, but it also contains a very short seektable, Vorbis comment and padding metadata block.
 
 ### Example file 2 in hexadecimal representation
 
@@ -265,7 +265,7 @@ Start  | Length  | Contents           | Description
 
 ### Vorbis comment
 
-The vorbis comment metadata block contains the vendor string and a single comment. It is broken down in the following table.
+The Vorbis comment metadata block contains the vendor string and a single comment. It is broken down in the following table.
 
 Start  | Length  | Contents           | Description
 :------|:--------|:-------------------|:-----------------
@@ -278,7 +278,7 @@ Start  | Length  | Contents           | Description
 0x6c+0 | 4 byte  | 0x0e000000         | Field length 14 byte
 0x70+0 | 14 byte | (...)              | Field contents
 
-The vendor string is reference libFLAC 1.3.3 20190804, the field contents of the only field is TITLE=שלום. The vorbis comment field is 14 bytes but only 10 characters in size, because it contains four 2-byte characters.
+The vendor string is reference libFLAC 1.3.3 20190804, the field contents of the only field is TITLE=שלום. The Vorbis comment field is 14 bytes but only 10 characters in size, because it contains four 2-byte characters.
 
 ### Padding
 
