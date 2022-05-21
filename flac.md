@@ -524,7 +524,7 @@ Finally, after either the frame/sample number, the blocksize or the sample rate,
 
 ## Subframes
 
-Following the frame header are a number subframes equal to the number of audio channels.
+Following the frame header are a number of subframes equal to the number of audio channels.
 
 ### Subframe header
 Each subframe starts with a header. The first bit of the header is always 0, followed by 6 bits describing which subframe type is used according to the following table, where v is the value of the 6 bits as an unsigned number.
@@ -534,9 +534,9 @@ Value               | Subframe type
 0b000000            | Constant subframe
 0b000001            | Verbatim subframe
 0b000010 - 0b000111 | reserved
-0b001000 - 0b001100 | Subframe with a fixed predictor v-8, i.e. 0, 1, 2, 3 or 4
+0b001000 - 0b001100 | Subframe with a fixed predictor of order v-8, i.e. 0, 1, 2, 3 or 4
 0b001101 - 0b011111 | reserved
-0b100000 - 0b111111 | Subframe with a linear predictor v-31, i.e. 1 through 32 (inclusive)
+0b100000 - 0b111111 | Subframe with a linear predictor of order v-31, i.e. 1 through 32 (inclusive)
 
 Following the subframe type bits is a bit that flags whether the subframe has any wasted bits. If it is 0, the subframe doesn't have any wasted bits and the subframe header is complete. If it is 1, the subframe does have wasted bits and the number of wasted bits follows unary coded.
 
@@ -551,7 +551,7 @@ In case k is not equal to 0, samples are coded ignoring k least-significant bits
 Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed, as to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like lossyWAV that enable users to improve compression of their files by a lossless audio codec in a non-lossless way. Because of this the number of wasted bits k MAY change between frames and MAY differ between subframes.
 
 ### Constant subframe
-In a constant subframe only a single sample is stored. This sample is stored as a integer number coded big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the [bit depth as coded in the frame header](#bit-depth-bits), minus the number of [wasted bits coded in the subframe header](#wasted-bits-per-sample). In case a subframe is a side subframe (see the [section on interchannel decorrelation](#interchannel-decorrelation), the bit depth of that subframe is increased by 1 bit.
+In a constant subframe only a single sample is stored. This sample is stored as an integer number coded big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the [bit depth as coded in the frame header](#bit-depth-bits), minus the number of [wasted bits coded in the subframe header](#wasted-bits-per-sample). In case a subframe is a side subframe (see the [section on interchannel decorrelation](#interchannel-decorrelation)), the bit depth of that subframe is increased by 1 bit.
 
 ### Verbatim subframe
 A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#constant-subframe) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the blocksize in the frame header.
