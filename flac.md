@@ -630,6 +630,28 @@ Decoding the coded residual thus involves selecting the right coding method, fin
 
 Following the last subframe is the frame footer. If the last subframe is not byte aligned (i.e. the bits required to store all subframes put together are not divisible by 8), zero bits are added until byte alignment is reached. Following this is a 16-bit CRC, initialized with 0, with polynomial x^16 + x^15 + x^2 + x^0. This CRC covers the whole frame excluding the 16-bit CRC, including the sync code.
 
+# Container mappings
+
+The FLAC format can be used without any container as the FLAC format already provides for a very thin transport layer. However, the functionalty of this transport is rather limited, and to be able to combine FLAC audio with video, it needs to be encapsulated by a more capable container. This presents a problem: the transport layer provided by the FLAC format mixes data that belongs to the encoded data (like blocksize and sample rate) with data that belongs to the transport (like checksum and timecode). The choice was made to encapsulate FLAC frames as they are, which means some data will be duplicated and potentially deviating between the FLAC frames and the encapsulating container.
+
+To differentiate encapsulated FLAC streams from non-encapsulated FLAC streams, the latter will be referred to as 'native FLAC'.
+
+## Ogg mapping
+
+The Ogg container format is defined in [@?RFC3533]. The first packet of a logical bitstream carrying FLAC data contains the bytes `0x7F 0x46 0x4C 0x41 0x43` as defined by [@?RFC5334], followed by two bytes coding the version number of the FLAC-in-Ogg mapping. These bytes are `0x01 0x00`, meaning version 1.0 of the mapping. Following the version number bytes is a 2-byte unsigned number coded big-endian containing the number of header packets (i.e. the number of metadata blocks) that follow the first packet.  This number MAY be 0, which means the number of packets that follow is unknown. Following the 2-byte number of header packets is the `fLaC` signature and a streaminfo metadata block. Taken together this means the first packet of an logical stream of FLAC-in-Ogg is always 79 bytes. This first packet MUST NOT share a Ogg page with any other packets.
+
+Following the first packet are one or more header packets i.e. metadata blocks. The first of these MUST be a vorbis comment metadata block. This is contrary to native FLAC streams, where the order of metadata blocks is not important except for the streaminfo block and where a vorbis comment metadata block is optional.
+
+Following the header packets are audio packets. Each FLAC frame is a packet. The first FLAC audio frame must start on a new Ogg page, i.e. the last metadata block must finish its page.
+
+The granule position of all pages containing header packets MUST be 0, for pages containing audio packets the granule position is the number of the last sample contained by the last completed packet in the frame. The sample numbering start at 0 and considers inter-channel samples. If a page contains no packet end (e.g. when page only contains the start of a large packet, which continues on the next page) then the granule position is set to the maximum value possible i.e. `0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF`.
+
+The granule position of the first audio data page with a completed packet MAY be larger than the number of samples contained in packets that complete on that page. In other words, the apparent sample number of the first sample in the stream following from the granule position and the audio data MAY be larger than 0. This allows for example a server to cast a live stream to several clients which joined at different moments, without rewriting the granule position for each client.
+
+## Matroska mapping
+
+Refer to [@!I-D.ietf-cellar-codec] for the mapping of FLAC in Matroska.
+
 # Implementation status
 
 This section records the status of known implementations of the FLAC format, and is based on a proposal described in [@?RFC7942]. Please note that the listing of any individual implementation here does not imply endorsement by the IETF. Furthermore, no effort has been spent to verify the information presented here that was supplied by IETF contributors. This is not intended as, and must not be construed to be, a catalog of available implementations or their features.  Readers are advised to note that other implementations may exist.
