@@ -438,7 +438,7 @@ Each frame starts with the 15-bit frame sync code 0b111111111111100. Following t
 
 ### Blocksize bits
 
-Following the frame sync code and blocksize strategy bit are 4 bits referred to as the blocksize bits. Their value relates to the blocksize according to the following table, where v is the value of the 4 bits as an unsigned number. Uncommon blocksizes are stored after the coded number.
+Following the frame sync code and blocksize strategy bit are 4 bits referred to as the blocksize bits. Their value relates to the blocksize according to the following table, where v is the value of the 4 bits as an unsigned number. In case the blocksize bits code for an uncommon blocksize, this is stored after the coded number, see [section uncommon blocksize](#uncommon-blocksize).
 
 Value           | Blocksize
 :---------------|:-----------
@@ -451,7 +451,7 @@ Value           | Blocksize
 
 ### Sample rate bits
 
-The next 4 bits, referred to as the sample rate bits, contain the sample rate according to the following table
+The next 4 bits, referred to as the sample rate bits, contain the sample rate according to the following table. In case the sample rate bits code for an uncommon sample rate, this is stored after the uncommon blocksize or after the coded number in case no uncommon blocksize was used. See [section uncommon sample rate](#uncommon-sample-rate).
 
 Value   | Sample rate
 :-------|:-----------
@@ -518,11 +518,11 @@ If the blocksize bits defined earlier in this section were 0b0110 or 0b0111 (unc
 
 ### Uncommon sample rate
 
-Following either the coded number or an uncommon blocksize is the sample rate, if the sample rate bits were 0b1100, 0b1101 or 0b1110 (uncommon sample rate stored), as either an 8-bit or a 16-bit unsigned number coded big-endian.
+Following the uncommon blocksize (or the coded number if no uncommon blocksize is stored) is the sample rate, if the sample rate bits were 0b1100, 0b1101 or 0b1110 (uncommon sample rate stored), as either an 8-bit or a 16-bit unsigned number coded big-endian.
 
 ### Frame header CRC
 
-Finally, after either the frame/sample number, the blocksize or the sample rate, is a 8-bit CRC. This CRC is initialized with 0 and has the polynomial x^8 + x^2 + x^1 + x^0. This CRC covers the whole frame header before the CRC, including the sync code.
+Finally, after either the frame/sample number, an uncommon blocksize or an uncommon sample rate, depending on whether the latter two are stored, is an 8-bit CRC. This CRC is initialized with 0 and has the polynomial x^8 + x^2 + x^1 + x^0. This CRC covers the whole frame header before the CRC, including the sync code.
 
 ## Subframes
 
