@@ -227,7 +227,7 @@ Data     | Description
 
 ## Application
 
-The application metadata block is for use by third-party applications. The only mandatory field is a 32-bit identifier, much like a FourCC but not restricted to ASCII characters. This ID is granted upon request to an application by the FLAC maintainers. The remainder is of the block is defined by the registered application. Visit the [registration page](https://xiph.org/flac/id.html) if you would like to register an ID for your application with FLAC.
+The application metadata block is for use by third-party applications. The only mandatory field is a 32-bit identifier, much like a FourCC but not restricted to ASCII characters. A ID registry is being maintained at https://xiph.org/flac/id.html.
 
 Data     | Description
 :--------|:-----------
