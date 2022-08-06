@@ -239,14 +239,15 @@ Data     | Description
 
 ## Seektable
 
-The seektable metadata block can be used to store seek points. It is possible to seek to any given sample in a FLAC stream without a seek table, but the delay can be unpredictable since the bitrate MAY vary widely within a stream. By adding seek points to a stream, this delay can be significantly reduced. Each seek point takes 18 bytes, so a seek table with 1% resolution within a stream adds less than 2KB of data. There MUST NOT be more than one seektable metadata block in a stream, but the table can have any number of seek points. There is also a special 'placeholder' seekpoint which will be ignored by decoders but which can be used to reserve space for future seek point insertion.
+The seektable metadata block can be used to store seek points. It is possible to seek to any given sample in a FLAC stream without a seek table, but the delay can be unpredictable since the bitrate may vary widely within a stream. By adding seek points to a stream, this delay can be significantly reduced.  There MUST NOT be more than one seektable metadata block in a stream, but the table can have any number of seek points.
+
+Each seek point takes 18 bytes, so a seek table with 1% resolution within a stream adds less than 2KB of data. The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18. There is also a special 'placeholder' seekpoint which will be ignored by decoders but which can be used to reserve space for future seek point insertion.
 
 Data         | Description
 :------------|:-----------
 `SEEKPOINT`+ | One or more seek points.
 
-NOTE
-- The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18.
+A seektable is generally not usable for seeking in a FLAC file embedded in a container, as such containers usually interleave FLAC data with other data and the offsets used in seekpoints are those of an unmuxed FLAC stream. Also, containers often provide their own seeking methods. It is however possible to store the seektable in the container along with other metadata when muxing a FLAC file, so this stored seektable can be restored on demuxing the FLAC stream into a standalone FLAC file.
 
 ### Seekpoint
 Data     | Description
@@ -261,6 +262,7 @@ NOTES
 - Seek points within a table MUST be sorted in ascending order by sample number.
 - Seek points within a table MUST be unique by sample number, with the exception of placeholder points.
 - The previous two notes imply that there MAY be any number of placeholder points, but they MUST all occur at the end of the table.
+- The sample offsets are those of an unmuxed FLAC stream. The offsets MUST NOT be updated on muxing to reflect new offsets of FLAC frames in a container.
 
 ## Vorbis comment
 
