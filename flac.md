@@ -484,7 +484,9 @@ Value   | Sample rate
 
 ### Channels bits
 
-The next 4 bits (the first 4 bits of the fourth byte of each frame), referred to as the channel bits, code for both the number of channels as well as any stereo decorrelation used according to the following table, where v is the value of the 4 bits as an unsigned number. See also [the section on interchannel decorrelation](#interchannel-decorrelation).
+The next 4 bits (the first 4 bits of the fourth byte of each frame), referred to as the channels bits, code for both the number of channels as well as any stereo decorrelation used according to the following table, where v is the value of the 4 bits as an unsigned number.
+
+In case a channel lay-out different than the ones listed in the following table is used, this can be signalled with a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag in a Vorbis comment metadata block, see [the section channel mask](#channel-mask) for details. For details on the way left/side, right/side and mid/side stereo are coded, see [the section on interchannel decorrelation](#interchannel-decorrelation).
 
 Value           | Channels
 :---------------|:-----------
