@@ -44,9 +44,15 @@ For subframes with a linear predictor, calculation is a little more complicated.
 
 For example, if the sample bitdepth of the source is 24, the current subframe encodes a side channel (see the [section on interchannel decorrelation](#interchannel-decorrelation)), the predictor order is 12 and the predictor coefficient precision is 15 bits, the minimum required size of the used signed integer data type is at least (24 + 1) + (15 - 1) + ceil(log2(12)) = 43 bits. As another example, with a side-channel subframe bit depth of 16, a predictor order of 8 and a predictor coefficient precision of 12 bits, the minimum required size of the used signed integer data type is (16 + 1) + (12 - 1)  + ceil(log2(8)) = 31 bits.
 
-After the prediction has been shifted right, the number of bits needed is reduced by the amount of right shift and increased by one bit for the subtraction from the current sample on encoding. On decoding, the data type size needed to store the result of the addition of the residual and the prediction should fit the subframe bit depth, assuming all calculations were done correctly.
+## Residual
 
-Taking the last example where 31 bits were needed for the prediction, the required data type size for the residual samples in case of a right shift of 10 bits would be 31 - 10 + 1 = 22 bits.
+As stated in the section [coded residual](#coded-residual), an encoder must make sure residual samples are representable by a 32-bit integer, signed two's complement, excluding the most negative value. Continuing as in the previous section, it is possible to calculate when residual samples already implicitly fit and when an additional check is needed. This implicit fit is achieved when residuals would fit a theoretical 31-bit signed int, as that satisfies both mentioned criteria.
+
+For the residual of a fixed predictor, the maximum size of a residual was already calculated in the previous section. However, for a linear predictor, the prediction is shifted right by a certain amount. The number of bits needed for the residual is the number of bits calculated in the previous section, reduced by the prediction right shift, increased by one bit to account for the subtraction of the prediction from the current sample on encoding.
+
+Taking the last example of the previous section, where 31 bits were needed for the prediction, the required data type size for the residual samples in case of a right shift of 10 bits would be 31 - 10 + 1 = 22 bits, which means it is not necessary to check whether the residuals fit a 32-bit signed integer.
+
+As another example, when encoding 32-bit PCM with fixed predictors, all predictor orders must be checked. While the 0-order fixed predictor is guaranteed to have residuals that fit a 32-bit signed int, it might produce a residual being the most negative representable value of that 32-bit signed int.
 
 ## Rice coding
 When folding (i.e. zig-zag encoding) the residual sample values, no extra bits are needed when the absolute value of each residual sample is first stored in an unsigned data type of the size of the last step, then doubled and then has one subtracted depending on whether the residual sample was positive or negative. Many implementations however choose to require one extra bit of data type size so zig-zag encoding can happen in one step and without a cast instead of the procedure described in the previous sentence.
