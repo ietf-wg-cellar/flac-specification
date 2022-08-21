@@ -69,7 +69,7 @@ In addition, FLAC specifies a metadata system (see [section on File-level metada
 
 The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that excess bits will be wasted on frame headers. If the block size is too large, the characteristics of the signal may vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, and a maximum block size of 65535 samples. This range covers the optimal size for all of the audio data FLAC supports.
 
-While the block size MAY vary in a FLAC file, it is often difficult to find the optimal arrangement of block sizes for maximum compression. Because of this the FLAC format explicitly stores whether a file has a constant or a variable blocksize throughout the stream, and stores a block number instead of a sample number to slighly improve compression in case a stream has a constant block size.
+While the block size MAY vary in a FLAC file, it is often difficult to find the optimal arrangement of block sizes for maximum compression. Because of this the FLAC format explicitly stores whether a file has a constant or a variable blocksize throughout the stream, and stores a block number instead of a sample number to slightly improve compression in case a stream has a constant block size.
 
 Blocked data is passed to the predictor stage one subblock at a time. Each subblock is independently coded into a subframe, and the subframes are concatenated into a frame. Because each channel is coded separately, subframes MAY use different predictors, even within a frame.
 
@@ -91,7 +91,7 @@ The side channel needs one extra bit of bit depth as the subtraction can produce
 
 The FLAC format has four methods for modeling the input signal:
 
-1. **Verbatim**. Samples are stored directly, without any modelling. This method is used for inputs with little correlation like white noise. Since the raw signal is not actually passed through the residual coding stage (it is added to the stream 'verbatim'), the method is different from using a zero-order fixed predictor.
+1. **Verbatim**. Samples are stored directly, without any modeling. This method is used for inputs with little correlation like white noise. Since the raw signal is not actually passed through the residual coding stage (it is added to the stream 'verbatim'), the method is different from using a zero-order fixed predictor.
 
 1. **Constant**. A single sample value is stored. This method is used whenever a signal is pure DC ("digital silence"), i.e. a constant value throughout.
 
@@ -161,7 +161,7 @@ The audio data is composed of one or more audio frames. Each frame consists of a
 
 Since a decoder MAY start decoding in the middle of a stream, there MUST be a method to determine the start of a frame. A 15-bit sync code begins each frame. The sync code will not appear anywhere else in the frame header. However, since it MAY appear in the subframes, the decoder has two other ways of ensuring a correct sync. The first is to check that the rest of the frame header contains no invalid data. Even this is not foolproof since valid header patterns can still occur within the subframes. The decoder's final check is to generate an 8-bit CRC of the frame header and compare this to the CRC stored at the end of the frame header.
 
-Also, since a decoder MAY start decoding at an arbitrary frame in the stream, each frame header MUST contain some basic information about the stream because the decoder MAY not have access to the STREAMINFO metadata block at the start of the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is pure overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame parameters. When a certain parameter has a value that is covered by the lookup table, the deocder is directed find the exact sample rate at the end of the frame header or in the streaminfo metadata block. In case a frame header refers to the streaminfo metadata block, the file is not 'streamable', see [section format subset](#format-subset) for details. In this way, the file is streamable and the frame header size small for all of the most common forms of audio data.
+Also, since a decoder MAY start decoding at an arbitrary frame in the stream, each frame header MUST contain some basic information about the stream because the decoder MAY not have access to the STREAMINFO metadata block at the start of the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is pure overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame parameters. When a certain parameter has a value that is not covered by the lookup table, the decoder is directed to find the sample rate at the end of the frame header or in the streaminfo metadata block. In case a frame header refers to the streaminfo metadata block, the file is not 'streamable', see [section format subset](#format-subset) for details. In this way, the file is streamable and the frame header size small for all of the most common forms of audio data.
 
 Individual subframes (one for each channel) are coded separately within a frame, and appear serially in the stream. In other words, the encoded audio data is NOT channel-interleaved. This reduces decoder complexity at the cost of requiring larger decode buffers. Each subframe has its own header specifying the attributes of the subframe, like prediction method and order, residual coding parameters, etc. The header is followed by the encoded audio data for that channel
 
@@ -488,7 +488,7 @@ Value   | Sample rate
 
 The next 4 bits (the first 4 bits of the fourth byte of each frame), referred to as the channels bits, code for both the number of channels as well as any stereo decorrelation used according to the following table, where v is the value of the 4 bits as an unsigned number.
 
-In case a channel lay-out different than the ones listed in the following table is used, this can be signalled with a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag in a Vorbis comment metadata block, see [the section channel mask](#channel-mask) for details. For details on the way left/side, right/side and mid/side stereo are coded, see [the section on interchannel decorrelation](#interchannel-decorrelation).
+In case a channel lay-out different than the ones listed in the following table is used, this can be signaled with a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag in a Vorbis comment metadata block, see [the section channel mask](#channel-mask) for details. For details on the way left/side, right/side and mid/side stereo are coded, see [the section on interchannel decorrelation](#interchannel-decorrelation).
 
 Value           | Channels
 :---------------|:-----------
