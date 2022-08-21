@@ -672,3 +672,33 @@ Implementations of the FLAC codec need to take appropriate security consideratio
 See the [FLAC decoder testbench](https://wiki.hydrogenaud.io/index.php?title=FLAC_decoder_testbench) for a non-exhaustive list of FLAC files with extreme configurations which lead to crashes or reboots on some known implementations.
 
 None of the content carried in FLAC is intended to be executable.
+
+# IANA Considerations
+
+## Media type registration
+
+The following information serves as the registration form for the "audio/flac" media type. This media type is applicable for FLAC audio packaged in its native container. FLAC audio packaged in another container will take on the media type of its container, for example audio/ogg when packaged in an Ogg container or video/mp4 when packaged in a MP4 container alongside a video track.
+
+```
+   Type name: audio
+   Subtype name: flac
+   Required parameters: none
+   Optional parameters: none
+   Encoding considerations: as per this document
+   Security considerations: see section 12
+   Interoperability considerations: no known concerns
+   Published specification: THISRFC
+   Applications that use this media type: ffmpeg, apache, firefox
+   Fragment identifier considerations: none
+   Additional information:
+     Deprecated alias names for this type: audio/x-flac
+     Magic number(s): fLaC
+     File extension(s): flac
+     Macintosh file type code(s): none
+   Person & email address to contact for further information: IETF CELLAR WG
+   Intended usage: COMMON
+   Restrictions on usage: N/A
+   Author: IETF CELLAR WG
+   Change controller: IESG
+   Provisional registration? (standards tree only): NO
+```
