@@ -57,6 +57,26 @@ As another example, when encoding 32-bit PCM with fixed predictors, all predicto
 ## Rice coding
 When folding (i.e. zig-zag encoding) the residual sample values, no extra bits are needed when the absolute value of each residual sample is first stored in an unsigned data type of the size of the last step, then doubled and then has one subtracted depending on whether the residual sample was positive or negative. Many implementations however choose to require one extra bit of data type size so zig-zag encoding can happen in one step and without a cast instead of the procedure described in the previous sentence.
 
+# Past format changes
+
+This informational appendix documents what changes were made to the FLAC format over the years. This information might be of use when encountering FLAC files that were made with software following the format as it was specified initially.
+
+The FLAC format was first specified in December 2000 and the bitstream format was considered frozen with the release of FLAC 1.0 (the reference encoder/decoder) in July 2001. Only changes made since this first stable release are considered in this appendix. Changes made to the FLAC subset definition are not considered.
+
+## Addition of blocksize strategy flag
+
+Perhaps the largest backwards incompatible change to the specification was published in July 2007. Before this change, variable blocksize streams were not explicitly marked as such by a flag bit in the frame header. A decoder had two ways to detect a variable blocksize stream, either by comparing the minimum and maximum blocksize in the STREAMINFO metadata block (which are equal in case of a fixed blocksize stream), or, in case a STREAMINFO metadata block was not present in a file, by detecting a change of blocksize during a stream, which could in theory not happen at all. As the meaning of the coded number number in the frame header depends on whether or not a stream is variable blocksize, this presented a problem: the meaning of the coded number could not be reliably determined. To fix this problem, one of the reserved bits was changed to be used as a blocksize strategy flag. [See also the section frame header](#frame-header).
+
+Along with the addition of a new flag, the meaning of the [blocksize bits](#blocksize-bits) was subtly changed. Initially, blocksize bits 0b0001-0b0101 and 0b1000-0b1111 could only be used for fixed blocksize streams, while 0b0110 and 0b0111 could be used for both fixed blocksize and variable blocksize streams. With the change these restrictions were lifted and 0b0001-0b1111 are now used for both variable blocksize and fixed blocksize streams.
+
+## Restriction of encoded residual samples
+
+Another change to the specification was deemed necessary during standardization by the CELLAR working group of the IETF. As specified in [section coded residual](#coded-residual) a limit is imposed on residual samples. This limit was not specified prior to the IETF standardization effort. However, as far as was known to the working group, no FLAC encoder at that time produced FLAC files containing residual samples exceeding this limit. This is mostly because it is very unlikely to encounter residual samples exceeding this limit when encoding 24-bit PCM, and encoding of PCM with higher bitdepths was not yet implemented in any known encoder. In fact, these FLAC encoders would produce corrupt files upon being triggered to produce such residual samples and it is unlikely any non-experimental encoder would ever do so, even when presented with crafted material. Therefore, it was not expected existing implementation would be rendered non-compliant by this change.
+
+## Addition of 5-bit Rice parameter
+
+One significant addition to the format was the residual coding method using a 5-bit Rice parameter. Prior to publication of this addition in July 2007, there was only one residual coding method specified, a partitioned Rice code with a 4-bit Rice parameter. The range offered by this proved too small when encoding 24-bit PCM, therefore a second residual coding method was specified identical to the first but with a 5-bit Rice parameter.
+
 # Examples
 
 This informational appendix contains short example FLAC files which are decoded step by step. These examples provide a more engaging way to understand the FLAC format than the formal specification. The text explaining these examples assumes the reader has at least cursory read the specification and that the reader refers to the specification for explanation of the terminology used. These examples mostly focus on the lay-out of several metadata blocks and subframe types and the implications of certain aspects (for example wasted bits and stereo decorrelation) on this lay-out.
