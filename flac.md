@@ -151,7 +151,7 @@ There are several ways to convert unsigned sample representations to signed samp
 
 Before the formal description of the stream, an overview of the lay-out of FLAC file might be helpful.
 
-- A FLAC bitstream consists of the "fLaC" (i.e. 0x664C6143) marker at the beginning of the stream, followed by a mandatory metadata block (called the STREAMINFO block), any number of other metadata blocks, then the audio frames.
+- A FLAC bitstream consists of the `fLaC` (i.e. 0x664C6143) marker at the beginning of the stream, followed by a mandatory metadata block (called the STREAMINFO block), any number of other metadata blocks, then the audio frames.
 - FLAC supports up to 128 kinds of metadata blocks; currently the following are defined:
 
   - `STREAMINFO`: This block has information about the whole stream, like sample rate, number of channels, total number of samples, etc. It MUST be present as the first metadata block in the stream. Other metadata blocks MAY follow, and ones that the decoder doesn't understand, it will skip.
@@ -177,7 +177,7 @@ Before the formal description of the stream, an overview of the lay-out of FLAC 
 
 # File-level metadata
 
-At the start of a FLAC file or stream, following the fLaC ASCII file signature, one or more metadata blocks MUST be present before any audio frames appear. The first metadata block MUST be a streaminfo block.
+At the start of a FLAC file or stream, following the `fLaC` ASCII file signature, one or more metadata blocks MUST be present before any audio frames appear. The first metadata block MUST be a streaminfo block.
 
 ## Metadata block header
 
@@ -634,6 +634,10 @@ Following the last subframe is the frame footer. If the last subframe is not byt
 
 The FLAC format can be used without any container as the FLAC format already provides for a very thin transport layer. However, the functionalty of this transport is rather limited, and to be able to combine FLAC audio with video, it needs to be encapsulated by a more capable container. This presents a problem: the transport layer provided by the FLAC format mixes data that belongs to the encoded data (like blocksize and sample rate) with data that belongs to the transport (like checksum and timecode). The choice was made to encapsulate FLAC frames as they are, which means some data will be duplicated and potentially deviating between the FLAC frames and the encapsulating container.
 
+The sample rate, bit depth and number of channels MUST be the same between all frame headers, the streaminfo metadata block and (if applicable) container metadata. In case an audio stream is encoded where these parameters change at some point in the stream, this should be dealt with as specified by the container.
+
+As FLAC frames are completely independent of each other, container format features handling dependencies do not need to be used. For example, all FLAC frames embedded in Matroska are marked as keyframes when they are stored in a SimpleBlock and tracks in an MP4 file containing only FLAC frames do not need a sync sample box.
+
 ## Ogg mapping
 
 The Ogg container format is defined in [@?RFC3533]. The first packet of a logical bitstream carrying FLAC data is structured according to the following table
@@ -657,9 +661,19 @@ The granule position of all pages containing header packets MUST be 0, for pages
 
 The granule position of the first audio data page with a completed packet MAY be larger than the number of samples contained in packets that complete on that page. In other words, the apparent sample number of the first sample in the stream following from the granule position and the audio data MAY be larger than 0. This allows for example a server to cast a live stream to several clients which joined at different moments, without rewriting the granule position for each client.
 
+In case an audio stream is encoded where these parameters change at some point in the stream, this should be dealt with by finishing encoding of the current Ogg stream and starting a new Ogg stream, concatenated to the previous one. This is called chaining in Ogg. See the Ogg specification for details.
+
 ## Matroska mapping
 
-Refer to [@!I-D.ietf-cellar-codec] for the mapping of FLAC in Matroska.
+The Matroska container format is defined in [@!I-D.ietf-cellar-matroska]. The codec ID (EBML path `\Segment\Tracks\TrackEntry\CodecID`) assigned to signal tracks carrying FLAC data is `A_FLAC` in ASCII. All FLAC data before the first audio frame (i.e. the `fLaC` ASCII signature and all metadata blocks) is stored as CodecPrivate data (EBML path `\Segment\Tracks\TrackEntry\CodecPrivate`).
+
+Each FLAC frame (including all of its subframes) is treated as a single frame in the Matroska context.
+
+In case an audio stream is encoded where audio parameters (sample rate, number of channels or bit depth) change at some point in the stream, this should be dealt with a by finishing the current Matroska segment and starting a new one with the new parameters.
+
+## ISO Base Media File Format (MP4) mapping
+
+The encapsulation definition of FLAC audio in MP4 files was deemed too extensive to include in this document. A definition document can be found at https://github.com/xiph/flac/blob/master/doc/isoflac.txt
 
 # Implementation status
 
