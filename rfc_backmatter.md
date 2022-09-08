@@ -3,7 +3,7 @@
 
 # Numerical considerations
 
-In order to maintain lossless behavior, all arithmetic used in encoding and decoding sample values MUST be done with integer data types to eliminate the possibility of introducing rounding errors associated with floating-point arithmetic. Use of floating-point representations in analysis (e.g. finding a good predictor or rice parameter) is not a concern, as long as the process of using the found predictor and rice parameter to encode audio samples is implemented with only integer math.
+In order to maintain lossless behavior, all arithmetic used in encoding and decoding sample values MUST be done with integer data types to eliminate the possibility of introducing rounding errors associated with floating-point arithmetic. Use of floating-point representations in analysis (e.g. finding a good predictor or Rice parameter) is not a concern, as long as the process of using the found predictor and Rice parameter to encode audio samples is implemented with only integer math.
 
 Furthermore, the possibility of integer overflow MUST be eliminated by using data types large enough to never overflow. Choosing a 64-bit signed data type for all arithmetic involving sample values would make sure the possibility for overflow is eliminated, but usually smaller data types are chosen for increased performance, especially in embedded devices. This section will provide guidelines for choosing the right data type in each step of encoding and decoding FLAC files.
 
@@ -323,7 +323,7 @@ Start  | Length | Contents        | Description
 0x8f+7 | 1 bit  | 0b0             | no wasted bits present
 0x90+0 | 17 bit | 0x0867, 0b0     | unencoded warm-up sample
 
-The coded residual is broken down in the following table. All quotients are unary coded, all remainders are unencoded with a number of bits specified by the rice parameter.
+The coded residual is broken down in the following table. All quotients are unary coded, all remainders are unencoded with a number of bits specified by the Rice parameter.
 
 Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
@@ -381,7 +381,7 @@ Quotient | Remainder | Zig-zag encoded | Residual sample value
 0        | 533       | 533             | -267
 0        | 268       | 268             | 134
 
-It can be calculated that using a Rice code is in this case more efficient than storing values unencoded. The rice code (excluding the partition order and parameter) is 199 bits in length. The largest residual value (-13172) would need 15 bits to be stored unencoded, so storing all 15 samples with 15 bits results in a sequence with a length of 225 bits.
+It can be calculated that using a Rice code is in this case more efficient than storing values unencoded. The Rice code (excluding the partition order and parameter) is 199 bits in length. The largest residual value (-13172) would need 15 bits to be stored unencoded, so storing all 15 samples with 15 bits results in a sequence with a length of 225 bits.
 
 The next step is using the predictor and the residuals to restore the sample values. As this subframe uses a fixed predictor with order 1, this means adding the residual value to the value of the previous sample.
 
@@ -577,7 +577,7 @@ Start  | Length | Contents        | Description
 0x39+4 | 3 bit  | 0b001           | Remainder 1
 0x39+7 | 4 bit  | 0b0001          | Quotient 3
 0x3a+3 | 3 bit  | 0b001           | Remainder 1
-0x3a+6 | 4 bit  | 0b1111          | No rice parameter, escape code
+0x3a+6 | 4 bit  | 0b1111          | No Rice parameter, escape code
 0x3b+2 | 5 bit  | 0b00101         | Partition encoded with 5 bits
 0x3b+7 | 5 bit  | 0b10110         | Residual -10
 0x3c+4 | 5 bit  | 0b11010         | Residual -6
