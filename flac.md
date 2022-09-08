@@ -518,7 +518,7 @@ Value   | Bit depth
 0b100   | 16 bits per sample
 0b101   | 20 bits per sample
 0b110   | 24 bits per sample
-0b111   | reserved
+0b111   | 32 bits per sample
 
 The next bit is reserved and MUST be zero.
 
