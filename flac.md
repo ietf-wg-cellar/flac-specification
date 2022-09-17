@@ -634,8 +634,6 @@ Following the last subframe is the frame footer. If the last subframe is not byt
 
 The FLAC format can be used without any container as the FLAC format already provides for a very thin transport layer. However, the functionalty of this transport is rather limited, and to be able to combine FLAC audio with video, it needs to be encapsulated by a more capable container. This presents a problem: the transport layer provided by the FLAC format mixes data that belongs to the encoded data (like blocksize and sample rate) with data that belongs to the transport (like checksum and timecode). The choice was made to encapsulate FLAC frames as they are, which means some data will be duplicated and potentially deviating between the FLAC frames and the encapsulating container.
 
-The sample rate, bit depth and number of channels MUST be the same between all frame headers, the streaminfo metadata block and (if applicable) container metadata. In case an audio stream is encoded where these parameters change at some point in the stream, this should be dealt with as specified by the container.
-
 As FLAC frames are completely independent of each other, container format features handling dependencies do not need to be used. For example, all FLAC frames embedded in Matroska are marked as keyframes when they are stored in a SimpleBlock and tracks in an MP4 file containing only FLAC frames do not need a sync sample box.
 
 ## Ogg mapping
@@ -661,7 +659,7 @@ The granule position of all pages containing header packets MUST be 0, for pages
 
 The granule position of the first audio data page with a completed packet MAY be larger than the number of samples contained in packets that complete on that page. In other words, the apparent sample number of the first sample in the stream following from the granule position and the audio data MAY be larger than 0. This allows for example a server to cast a live stream to several clients which joined at different moments, without rewriting the granule position for each client.
 
-In case an audio stream is encoded where these parameters change at some point in the stream, this should be dealt with by finishing encoding of the current Ogg stream and starting a new Ogg stream, concatenated to the previous one. This is called chaining in Ogg. See the Ogg specification for details.
+In case an audio stream is encoded where audio parameters (sample rate, number of channels or bit depth) change at some point in the stream, this should be dealt with by finishing encoding of the current Ogg stream and starting a new Ogg stream, concatenated to the previous one. This is called chaining in Ogg. See the Ogg specification for details.
 
 ## Matroska mapping
 
@@ -673,7 +671,15 @@ In case an audio stream is encoded where audio parameters (sample rate, number o
 
 ## ISO Base Media File Format (MP4) mapping
 
-The encapsulation definition of FLAC audio in MP4 files was deemed too extensive to include in this document. A definition document can be found at https://github.com/xiph/flac/blob/master/doc/isoflac.txt
+The full encapsulation definition of FLAC audio in MP4 files was deemed too extensive to include in this document. A definition document can be found at https://github.com/xiph/flac/blob/master/doc/isoflac.txt This document is summarized here.
+
+The sample entry code is 'fLaC'. No object type indication is registered. The channelcount and samplesize fields in the sample entry follow from the values as found in the FLAC stream. The samplerate field can be different, because FLAC can carry audio with much higher samplerates than can be coded for in the sample entry. When possible, the samplerate field should contain the sample rate as found in the FLAC stream, shifted left by 16 bits to get the 16.16 fixed point representation of the samplerate field. When the FLAC stream contains a sample rate higher than can be coded, the samplerate field contains the greatest expressible regular division of the sample rate, e.g. 48000 for sample rates of 96kHz and 192kHz or 44100 for a sample rate of 88200Hz. When the FLAC stream contain audio with an unusual samplerate that has no regular division, the maximum value of 65535.0 Hz is used. As FLAC streams with a high sample rate are common, a parser or decoder MUST read the value from the FLAC streaminfo metadata block or a frame header to determine the actual sample rate. The sample entry contains one 'FLAC specific box' with code 'dfLa'.
+
+The FLAC specific box has version number 0 and contains the metadata blocks of the FLAC stream. Contrary to the CodecPrivate data in the Matroska mapping, this excludes the `fLaC` ASCII signature.
+
+In case an audio stream is encoded where audio parameters (sample rate, number of channels or bit depth) change at some point in the stream, this should be dealt with **TODO: Someone with knowledge of this should chime in. This is NOT handled in the mapping document**
+
+Each FLAC frame is a single sample in the context of MP4 files.
 
 # Implementation status
 
