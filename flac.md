@@ -701,7 +701,7 @@ The sample entry code is 'fLaC'. The channelcount and samplesize fields in the s
 
 The FLAC specific box extends FullBox, with version number 0 and all flags set to 0, and contains all FLAC data before the first audio frame but `fLaC` ASCII signature (i.e. all metadata blocks).
 
-In case an audio stream is encoded where audio parameters (sample rate, number of channels or bit depth) change at some point in the stream, this should be dealt with **TODO: Someone with knowledge of this should chime in. This is NOT handled in the mapping document**
+In case an audio stream is encoded where audio parameters (sample rate, number of channels or bit depth) change at some point in the stream, this MUST be dealt in a MP4 generic manner e.g. with several `stsd` atoms and different sample-description-index values in the `stsc` atom.
 
 Each FLAC frame is a single sample in the context of MP4 files.
 
