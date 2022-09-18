@@ -59,7 +59,7 @@ When folding (i.e. zig-zag encoding) the residual sample values, no extra bits a
 
 # Past format changes
 
-This informational appendix documents what changes were made to the FLAC format over the years. This information might be of use when encountering FLAC files that were made with software following the format as it was specified initially.
+This informational appendix documents what changes were made to the FLAC format over the years. This information might be of use when encountering FLAC files that were made with software following the format as it was before the changes documented in this appendix.
 
 The FLAC format was first specified in December 2000 and the bitstream format was considered frozen with the release of FLAC 1.0 (the reference encoder/decoder) in July 2001. Only changes made since this first stable release are considered in this appendix. Changes made to the FLAC subset definition are not considered.
 
