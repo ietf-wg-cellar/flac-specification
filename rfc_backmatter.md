@@ -77,6 +77,50 @@ Another change to the specification was deemed necessary during standardization 
 
 One significant addition to the format was the residual coding method using a 5-bit Rice parameter. Prior to publication of this addition in July 2007, there was only one residual coding method specified, a partitioned Rice code with a 4-bit Rice parameter. The range offered by this proved too small when encoding 24-bit PCM, therefore a second residual coding method was specified identical to the first but with a 5-bit Rice parameter.
 
+# Interoperability considerations
+
+As documented in appendix [past format changes](#past-format-changes), there have been some changes and additions to the FLAC format. Additionally, implementation of certain features of the FLAC format took many years, meaning early decoder implementations could not be tested against files with these features. Finally, many lower-quality FLAC decoders only implement a subset of FLAC features required for playback of the most common FLAC files.
+
+This appendix provides some considerations for encoder implementations aiming to create highly compatible files. As this topic is one that might change after this document is finished, consult [this web page](https://github.com/ietf-wg-cellar/flac-specification/wiki/Interoperability-considerations) for more up-to-date information.
+
+## Variable block size
+
+Because it is often difficult to find the optimal arrangement of block sizes for maximum compression, most encoders choose to create files with a fixed block size. Because of this many decoder implementations suffer from bugs when handling variable block size streams or do not decode them at all. Furthermore, as is explained in [section addition of blocksize strategy flag](#addition-of-blocksize-strategy-flag), there have been some changes to the way variable block size streams were encoded. Because of this, when maximum compatibility with decoders is desired it is RECOMMENDED to only use fixed block size streams.
+
+## 5-bit Rice parameter {#rice-parameter-5-bit}
+
+As the addition of the 5-bit Rice parameter as described in [section addition of 5-bit Rice parameter](#addition-of-5-bit-rice-parameter) was quite a few years after the FLAC format was first introduced, some early decoders might not be able to decode files containing such Rice parameters. The introduction of this was specifically aimed at improving compression of 24-bit PCM audio and compression of 16-bit PCM audio only rarely benefits from using a 5-bit Rice parameters. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to only use 4-bit Rice parameters when encoding audio with a bit depth higher than 16 bits.
+
+## Rice escape code
+
+Escapes Rice partitions are only seldom used as it turned out their use provides only very small compression improvement. As many encoders therefore do not use these by default or are not capable of producing them at all, it is likely many decoder implementation are not able to decode them correctly. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to not use escaped Rice partitions.
+
+## Uncommon block size
+
+For unknown reasons some decoders have chosen to support only common block sizes except for the last block. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to only use common blocksizes are listed in section [bocksize bits](#blocksize-bits) for all but the last block.
+
+## Uncommon bit depth
+
+Most audio is stored in bit depths that are a whole number of bytes, e.g. 8, 16 or 24 bit. There is however audio with different bit depths. A few examples:
+
+- DVD-Audio has the possibility to store 20 bit PCM audio
+- DAT and DV can store 12 bit PCM audio
+- NICAM-728 samples at 14 bit, which is companded to 10 bit
+- 8-bit µ-law can be losslessly converted to 14 bit (Linear) PCM
+- 8-bit A-law can be losslessly converted to 13 bit (Linear) PCM
+
+FLAC can store these bit depths directly, but because they are uncommon, some decoders are not able to process the resulting files correctly. It is possible to store these formats in a FLAC file with a more common bit depth without sacrificing compression by padding each sample with zero bits to a bit depth that is a whole byte. FLAC will detect these wasted bits. This transformation leaves no ambiguity in how it can be reversed and is thus lossless. See [section wasted bits per sample](#wasted-bits-per-sample) for details.
+
+Therefore, when maximum compatibility with decoders is required, it is RECOMMENDED to pad samples of such audio with zero bits to a bit depth that is a whole number of bytes.
+
+Besides audio with a 'non-whole byte' bit depth, some decoder implementations have chosen to only accept FLAC files coding for PCM audio with a bit depth of 16 bit. Many implementations support bit depths up to 24 bit but no higher. Consult [this web page](https://github.com/ietf-wg-cellar/flac-specification/wiki/Interoperability-considerations) for more up-to-date information.
+
+## Multi-channel audio and uncommon sample rates
+
+Many FLAC audio players are unable to render multi-channel audio or audio with an uncommon sample rate. While this is not a concern specific to the FLAC format, it is of note when requiring maximum compatibility with decoders. Unlike the previously mentioned interoperability considerations, this is one that cannot be satisfied without sacrificing the lossless nature of the FLAC format.
+
+From a non-exhaustive inquiry, it seems that a non-negligible amount of players, among those especially hardware players, does not support audio with 3 or more channels or sample rates other than those considered common, see [section sample rate bits](#sample-rate-bits).
+
 # Examples
 
 This informational appendix contains short example FLAC files which are decoded step by step. These examples provide a more engaging way to understand the FLAC format than the formal specification. The text explaining these examples assumes the reader has at least cursory read the specification and that the reader refers to the specification for explanation of the terminology used. These examples mostly focus on the lay-out of several metadata blocks and subframe types and the implications of certain aspects (for example wasted bits and stereo decorrelation) on this lay-out.
