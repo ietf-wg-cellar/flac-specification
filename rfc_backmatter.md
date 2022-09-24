@@ -240,9 +240,9 @@ This FLAC file is larger than the first example, but still contains very little 
 000000e0: 01111100 00010011 00110000           |.0
 ```
 
-### Signature and streaminfo
+### Streaminfo metadata block
 
-Most of the streaminfo block is the same as in example 1, so only parts that are different are listed in the following table
+Most of the streaminfo block, including its header, is the same as in example 1, so only parts that are different are listed in the following table
 
 Start  | Length  | Contents           | Description
 :------|:--------|:-------------------|:-----------------
@@ -516,9 +516,9 @@ This example is once again a very short FLAC file. The focus of this example is 
 00000046: 10000000 01010111 10100011           .W.
 ```
 
-### Signature and streaminfo
+### Streaminfo metadata block
 
-Most of the streaminfo block is the same as in example 1, so only parts that are different are listed in the following table
+Most of the streaminfo metadata block, including its header, is the same as in example 1, so only parts that are different are listed in the following table
 
 Start  | Length  | Contents           | Description
 :------|:--------|:-------------------|:-----------------
@@ -593,6 +593,8 @@ Start  | Length | Contents        | Description
 The frame ends with 6 padding bits and a 2 byte frame CRC
 
 To decode this subframe, 21 predictions have to be calculated and added to their corresponding residuals. This is a sequential process: as each prediction uses previous samples, it is not possible to start this decoding halfway a subframe or decode a subframe with parallel threads.
+
+The following table breaks down the calculation of each sample. For example, the predictor without shift value of row 4 is found by applying the predictor with the three warm-up samples: 7*111 - 6*79 + 2*0 = 303. This value is then shifted right by 2 bit: 303 >> 2 = 75. Then, the decoded residual sample is added: 75 + 3 = 78.
 
 Residual  | Predictor w/o shift | Predictor | Sample value
 ----------|:-----|:----|:----
