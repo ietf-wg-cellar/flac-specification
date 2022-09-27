@@ -91,7 +91,7 @@ The side channel needs one extra bit of bit depth as the subtraction can produce
 
 The FLAC format has four methods for modeling the input signal:
 
-1. **Verbatim**. Samples are stored directly, without any modeling. This method is used for inputs with little correlation like white noise. Since the raw signal is not actually passed through the residual coding stage (it is added to the stream 'verbatim'), the method is different from using a zero-order fixed predictor.
+1. **Verbatim**. Samples are stored directly, without any modeling. This method is used for inputs with little correlation like white noise. Since the raw signal is not actually passed through the residual coding stage (it is added to the stream 'verbatim'), this method is different from using a zero-order fixed predictor.
 
 1. **Constant**. A single sample value is stored. This method is used whenever a signal is pure DC ("digital silence"), i.e. a constant value throughout.
 
