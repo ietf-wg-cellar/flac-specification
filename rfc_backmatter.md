@@ -97,7 +97,7 @@ Escapes Rice partitions are only seldom used as it turned out their use provides
 
 ## Uncommon block size
 
-For unknown reasons some decoders have chosen to support only common block sizes except for the last block. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to only use common blocksizes are listed in section [bocksize bits](#blocksize-bits) for all but the last block.
+For unknown reasons some decoders have chosen to support only common block sizes except for the last block. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to only use common blocksizes as listed in section [bocksize bits](#blocksize-bits) for all but the last block.
 
 ## Uncommon bit depth
 
