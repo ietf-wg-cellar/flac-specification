@@ -42,7 +42,7 @@ Where
 
 For subframes with a linear predictor, calculation is a little more complicated. Each prediction is a sum of several multiplications. Each of these multiply a sample value with a predictor coefficient. The extra bits needed can be calculated by adding the predictor coefficient precision (in bits) to the bit depth of the audio samples. As both are signed numbers and only one 'sign bit' is necessary, 1 bit can be subtracted. To account for the summing of these multiplications, the log base 2 of the predictor order rounded up is added.
 
-For example, if the sample bitdepth of the source is 24, the current subframe encodes a side channel (see the [section on interchannel decorrelation](#interchannel-decorrelation)), the predictor order is 12 and the predictor coefficient precision is 15 bits, the minimum required size of the used signed integer data type is at least (24 + 1) + (15 - 1) + ceil(log2(12)) = 43 bits. As another example, with a side-channel subframe bit depth of 16, a predictor order of 8 and a predictor coefficient precision of 12 bits, the minimum required size of the used signed integer data type is (16 + 1) + (12 - 1)  + ceil(log2(8)) = 31 bits.
+For example, if the sample bit depth of the source is 24, the current subframe encodes a side channel (see the [section on interchannel decorrelation](#interchannel-decorrelation)), the predictor order is 12 and the predictor coefficient precision is 15 bits, the minimum required size of the used signed integer data type is at least (24 + 1) + (15 - 1) + ceil(log2(12)) = 43 bits. As another example, with a side-channel subframe bit depth of 16, a predictor order of 8 and a predictor coefficient precision of 12 bits, the minimum required size of the used signed integer data type is (16 + 1) + (12 - 1)  + ceil(log2(8)) = 31 bits.
 
 ## Residual
 
@@ -63,15 +63,15 @@ This informational appendix documents what changes were made to the FLAC format 
 
 The FLAC format was first specified in December 2000 and the bitstream format was considered frozen with the release of FLAC (the reference encoder/decoder) 1.0 in July 2001. Only changes made since this first stable release are considered in this appendix. Changes made to the FLAC subset definition are not considered.
 
-## Addition of blocksize strategy flag
+## Addition of block size strategy flag
 
-Perhaps the largest backwards incompatible change to the specification was published in July 2007. Before this change, variable blocksize streams were not explicitly marked as such by a flag bit in the frame header. A decoder had two ways to detect a variable blocksize stream, either by comparing the minimum and maximum blocksize in the STREAMINFO metadata block (which are equal in case of a fixed blocksize stream), or, in case a decoder did not receive a STREAMINFO metadata block, by detecting a change of blocksize during a stream, which could in theory not happen at all. As the meaning of the coded number in the frame header depends on whether or not a stream is variable blocksize, this presented a problem: the meaning of the coded number could not be reliably determined. To fix this problem, one of the reserved bits was changed to be used as a blocksize strategy flag. [See also the section frame header](#frame-header).
+Perhaps the largest backwards incompatible change to the specification was published in July 2007. Before this change, variable block size streams were not explicitly marked as such by a flag bit in the frame header. A decoder had two ways to detect a variable block size stream, either by comparing the minimum and maximum block size in the STREAMINFO metadata block (which are equal in case of a fixed block size stream), or, in case a decoder did not receive a STREAMINFO metadata block, by detecting a change of block size during a stream, which could in theory not happen at all. As the meaning of the coded number in the frame header depends on whether or not a stream is variable block size, this presented a problem: the meaning of the coded number could not be reliably determined. To fix this problem, one of the reserved bits was changed to be used as a block size strategy flag. [See also the section frame header](#frame-header).
 
-Along with the addition of a new flag, the meaning of the [blocksize bits](#blocksize-bits) was subtly changed. Initially, blocksize bits 0b0001-0b0101 and 0b1000-0b1111 could only be used for fixed blocksize streams, while 0b0110 and 0b0111 could be used for both fixed blocksize and variable blocksize streams. With the change these restrictions were lifted and 0b0001-0b1111 are now used for both variable blocksize and fixed blocksize streams.
+Along with the addition of a new flag, the meaning of the [block size bits](#block-size-bits) was subtly changed. Initially, block size bits 0b0001-0b0101 and 0b1000-0b1111 could only be used for fixed block size streams, while 0b0110 and 0b0111 could be used for both fixed block size and variable block size streams. With the change these restrictions were lifted and 0b0001-0b1111 are now used for both variable block size and fixed block size streams.
 
 ## Restriction of encoded residual samples
 
-Another change to the specification was deemed necessary during standardization by the CELLAR working group of the IETF. As specified in [section coded residual](#coded-residual) a limit is imposed on residual samples. This limit was not specified prior to the IETF standardization effort. However, as far as was known to the working group, no FLAC encoder at that time produced FLAC files containing residual samples exceeding this limit. This is mostly because it is very unlikely to encounter residual samples exceeding this limit when encoding 24-bit PCM, and encoding of PCM with higher bitdepths was not yet implemented in any known encoder. In fact, these FLAC encoders would produce corrupt files upon being triggered to produce such residual samples and it is unlikely any non-experimental encoder would ever do so, even when presented with crafted material. Therefore, it was not expected existing implementation would be rendered non-compliant by this change.
+Another change to the specification was deemed necessary during standardization by the CELLAR working group of the IETF. As specified in [section coded residual](#coded-residual) a limit is imposed on residual samples. This limit was not specified prior to the IETF standardization effort. However, as far as was known to the working group, no FLAC encoder at that time produced FLAC files containing residual samples exceeding this limit. This is mostly because it is very unlikely to encounter residual samples exceeding this limit when encoding 24-bit PCM, and encoding of PCM with higher bit depths was not yet implemented in any known encoder. In fact, these FLAC encoders would produce corrupt files upon being triggered to produce such residual samples and it is unlikely any non-experimental encoder would ever do so, even when presented with crafted material. Therefore, it was not expected existing implementation would be rendered non-compliant by this change.
 
 ## Addition of 5-bit Rice parameter
 
@@ -85,7 +85,7 @@ This appendix provides some considerations for encoder implementations aiming to
 
 ## Variable block size
 
-Because it is often difficult to find the optimal arrangement of block sizes for maximum compression, most encoders choose to create files with a fixed block size. Because of this many decoder implementations suffer from bugs when handling variable block size streams or do not decode them at all. Furthermore, as is explained in [section addition of blocksize strategy flag](#addition-of-blocksize-strategy-flag), there have been some changes to the way variable block size streams were encoded. Because of this, when maximum compatibility with decoders is desired it is RECOMMENDED to only use fixed block size streams.
+Because it is often difficult to find the optimal arrangement of block sizes for maximum compression, most encoders choose to create files with a fixed block size. Because of this many decoder implementations suffer from bugs when handling variable block size streams or do not decode them at all. Furthermore, as is explained in [section addition of block size strategy flag](#addition-of-block-size-strategy-flag), there have been some changes to the way variable block size streams were encoded. Because of this, when maximum compatibility with decoders is desired it is RECOMMENDED to only use fixed block size streams.
 
 ## 5-bit Rice parameter {#rice-parameter-5-bit}
 
@@ -97,7 +97,7 @@ Escapes Rice partitions are only seldom used as it turned out their use provides
 
 ## Uncommon block size
 
-For unknown reasons some decoders have chosen to support only common block sizes except for the last block. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to only use common blocksizes as listed in section [bocksize bits](#blocksize-bits) for all but the last block.
+For unknown reasons some decoders have chosen to support only common block sizes except for the last block. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to only use common block sizes as listed in section [block size bits](#block-size-bits) for all but the last block.
 
 ## Uncommon bit depth
 
@@ -174,14 +174,14 @@ Start  | Length | Contents        | Description
 0x04+1 | 7 bit  | 0b0000000       | Streaminfo metadata block
 0x05+0 | 3 byte | 0x000022        | Length 34 byte
 
-As the header indicates that this is the last metadata block, the position of the first audio frame can now be calculated as the position of the first byte after the metadata block header + the length of the block, i.e. 8+34 = 42 or 0x2a. As can be seen 0x2a indeed contains the frame sync code for fixed blocksize streams, 0xfff8.
+As the header indicates that this is the last metadata block, the position of the first audio frame can now be calculated as the position of the first byte after the metadata block header + the length of the block, i.e. 8+34 = 42 or 0x2a. As can be seen 0x2a indeed contains the frame sync code for fixed block size streams, 0xfff8.
 
 The streaminfo metadata block contents are broken down in the following table
 
 Start  | Length  | Contents           | Description
 :------|:--------|:-------------------|:-----------------
-0x08+0 | 2 byte  | 0x1000             | Min. blocksize 4096
-0x0a+0 | 2 byte  | 0x1000             | Max. blocksize 4096
+0x08+0 | 2 byte  | 0x1000             | Min. block size 4096
+0x0a+0 | 2 byte  | 0x1000             | Max. block size 4096
 0x0c+0 | 3 byte  | 0x00000f           | Min. frame size 15 byte
 0x0f+0 | 3 byte  | 0x00000f           | Max. frame size 15 byte
 0x12+0 | 20 bit  | 0x0ac4, 0b0100     | Sample rate 44100 Hertz
@@ -190,9 +190,9 @@ Start  | Length  | Contents           | Description
 0x15+4 | 36 bit  | 0b0000, 0x00000001 | Total no. of samples 1
 0x1a   | 16 byte | (...)              | MD5 signature
 
-The minimum and maximum blocksize are both 4096. This was apparently the blocksize the encoder planned to use, but as only 1 interchannel sample was provided, no frames with 4096 samples are actually present in this file.
+The minimum and maximum block size are both 4096. This was apparently the block size the encoder planned to use, but as only 1 interchannel sample was provided, no frames with 4096 samples are actually present in this file.
 
-Note that anywhere a number of samples is mentioned (blocksize, total number of samples, sample rate), interchannel samples are meant.
+Note that anywhere a number of samples is mentioned (block size, total number of samples, sample rate), interchannel samples are meant.
 
 The MD5 sum (starting at 0x1a) is 0x3e84 b418 07dc 6903 0758 6a3d ad1a 2e0f. This will be validated after decoding the samples.
 
@@ -203,17 +203,17 @@ The frame header starts at position 0x2a and is broken down in the following tab
 Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0x2a+0 | 15 bit | 0xff, 0b1111100 | frame sync
-0x2b+7 | 1 bit  | 0b0             | blocksize strategy
-0x2c+0 | 4 bit  | 0b0110          | 8-bit blocksize further down
+0x2b+7 | 1 bit  | 0b0             | block size strategy
+0x2c+0 | 4 bit  | 0b0110          | 8-bit block size further down
 0x2c+4 | 4 bit  | 0b1001          | sample rate 44.1kHz
 0x2d+0 | 4 bit  | 0b0001          | stereo, no decorrelation
 0x2d+4 | 3 bit  | 0b100           | bit depth 16 bit
 0x2d+7 | 1 bit  | 0b0             | mandatory 0 bit
 0x2e+0 | 1 byte | 0x00            | frame number 0
-0x2f+0 | 1 byte | 0x00            | blocksize 1
+0x2f+0 | 1 byte | 0x00            | block size 1
 0x30+0 | 1 byte | 0xbf            | frame header CRC
 
-As the stream is a fixed blocksize stream, the number at 0x2e contains a frame number. As the value is smaller than 128, only 1 byte is used for the encoding.
+As the stream is a fixed block size stream, the number at 0x2e contains a frame number. As the value is smaller than 128, only 1 byte is used for the encoding.
 
 At byte 0x31 the subframe header of the first subframe starts, it is broken down in the following table.
 
@@ -228,7 +228,7 @@ Start  | Length | Contents        | Description
 
 As the wasted bits flag is 1 in this subframe, an unary coded number follows. Starting at 0x32, we see 0b01, which unary codes for 1, meaning we have 2 wasted bits in this subframe.
 
-As this is a verbatim subframe, the subframe only contains unencoded sample values. With a blocksize of 1, it contains only a single sample. The bit depth of the audio is 16 bit, but as the subframe header signals 2 wasted bits, only 14 bits are stored. As no stereo decorrelation is used, a bit depth increase for the side channel is not applicable. So, the next 14 bit (starting at position 0x32+2) contain the unencoded sample coded big-endian, signed two's complement. The value reads 0b011000 11111101, or 6397. This value needs to be shifted left by 2 bits, to account for the wasted bits. The value is then 0b011000 11111101 00, or 25588.
+As this is a verbatim subframe, the subframe only contains unencoded sample values. With a block size of 1, it contains only a single sample. The bit depth of the audio is 16 bit, but as the subframe header signals 2 wasted bits, only 14 bits are stored. As no stereo decorrelation is used, a bit depth increase for the side channel is not applicable. So, the next 14 bit (starting at position 0x32+2) contain the unencoded sample coded big-endian, signed two's complement. The value reads 0b011000 11111101, or 6397. This value needs to be shifted left by 2 bits, to account for the wasted bits. The value is then 0b011000 11111101 00, or 25588.
 
 The second subframe starts at 0x34, it is broken down in the following table.
 
@@ -311,14 +311,14 @@ Most of the streaminfo block, including its header, is the same as in example 1,
 Start  | Length  | Contents           | Description
 :------|:--------|:-------------------|:-----------------
 0x04+0 | 1 bit   | 0b0                | Not the last metadata block
-0x08+0 | 2 byte  | 0x0010             | Min. blocksize 16
-0x0a+0 | 2 byte  | 0x0010             | Max. blocksize 16
+0x08+0 | 2 byte  | 0x0010             | Min. block size 16
+0x0a+0 | 2 byte  | 0x0010             | Max. block size 16
 0x0c+0 | 3 byte  | 0x000017           | Min. frame size 23 byte
 0x0f+0 | 3 byte  | 0x000044           | Max. frame size 68 byte
 0x15+4 | 36 bit  | 0b0000, 0x00000013 | Total no. of samples 19
 0x1a   | 16 byte | (...)              | MD5 signature
 
-This time, the minimum and maximum blocksizes are reflected in the file: there is one block of 16 samples, the last block (which has 3 samples) is not considered for the minimum blocksize. The MD5 signature is 0xd5b0 5649 75e9 8b8d 8b93 0422 757b 8103, this will be verified at the end of this example.
+This time, the minimum and maximum block sizes are reflected in the file: there is one block of 16 samples, the last block (which has 3 samples) is not considered for the minimum block size. The MD5 signature is 0xd5b0 5649 75e9 8b8d 8b93 0422 757b 8103, this will be verified at the end of this example.
 
 ### Seektable
 
@@ -331,7 +331,7 @@ Start  | Length  | Contents           | Description
 0x2b+0 | 3 byte  | 0x000012           | Length 18 byte
 0x2e+0 | 8 byte  | 0x0000000000000000 | Seekpoint to sample 0
 0x36+0 | 8 byte  | 0x0000000000000000 | Seekpoint to offset 0
-0x3e+0 | 2 byte  | 0x0010             | Seekpoint to blocksize 16
+0x3e+0 | 2 byte  | 0x0010             | Seekpoint to block size 16
 
 ### Vorbis comment
 
@@ -368,14 +368,14 @@ The frame header starts at position 0x88 and is broken down in the following tab
 Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0x88+0 | 15 bit | 0xff, 0b1111100 | frame sync
-0x89+7 | 1 bit  | 0b0             | blocksize strategy
-0x8a+0 | 4 bit  | 0b0110          | 8-bit blocksize further down
+0x89+7 | 1 bit  | 0b0             | block size strategy
+0x8a+0 | 4 bit  | 0b0110          | 8-bit block size further down
 0x8a+4 | 4 bit  | 0b1001          | sample rate 44.1kHz
 0x8b+0 | 4 bit  | 0b1001          | right-side stereo
 0x8b+4 | 3 bit  | 0b100           | bit depth 16 bit
 0x8b+7 | 1 bit  | 0b0             | mandatory 0 bit
 0x8c+0 | 1 byte | 0x00            | frame number 0
-0x8d+0 | 1 byte | 0x0f            | blocksize 16
+0x8d+0 | 1 byte | 0x0f            | block size 16
 0x8e+0 | 1 byte | 0x99            | frame header CRC
 
 The first subframe starts at byte 0x8f, it is broken down in the following table excluding the coded residual. As this subframe codes for a side channel, the bit depth is increased by 1 bit from 16 bit to 17 bit. This is most clearly present in the unencoded warm-up sample.
@@ -500,14 +500,14 @@ The frame header starts at position 0xcc and is broken down in the following tab
 Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0xcc+0 | 15 bit | 0xff, 0b1111100 | frame sync
-0xcd+7 | 1 bit  | 0b0             | blocksize strategy
-0xce+0 | 4 bit  | 0b0110          | 8-bit blocksize further down
+0xcd+7 | 1 bit  | 0b0             | block size strategy
+0xce+0 | 4 bit  | 0b0110          | 8-bit block size further down
 0xce+4 | 4 bit  | 0b1001          | sample rate 44.1kHz
 0xcf+0 | 4 bit  | 0b0001          | stereo, no decorrelation
 0xcf+4 | 3 bit  | 0b100           | bit depth 16 bit
 0xcf+7 | 1 bit  | 0b0             | mandatory 0 bit
 0xd0+0 | 1 byte | 0x01            | frame number 1
-0xd1+0 | 1 byte | 0x02            | blocksize 3
+0xd1+0 | 1 byte | 0x02            | block size 3
 0xd2+0 | 1 byte | 0xa4            | frame header CRC
 
 The first subframe starts at 0xd3+0 and is broken down in the following table.
@@ -602,14 +602,14 @@ The frame header starts at position 0x2a and is broken down in the following tab
 Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0x2a+0 | 15 bit | 0xff, 0b1111100 | Frame sync
-0x2b+7 | 1 bit  | 0b0             | Blocksize strategy
-0x2c+0 | 4 bit  | 0b0110          | 8-bit blocksize further down
+0x2b+7 | 1 bit  | 0b0             | Block size strategy
+0x2c+0 | 4 bit  | 0b0110          | 8-bit block size further down
 0x2c+4 | 4 bit  | 0b1000          | Sample rate 32kHz
 0x2d+0 | 4 bit  | 0b0000          | Mono audio (1 channel)
 0x2d+4 | 3 bit  | 0b001           | Bit depth 8 bit
 0x2d+7 | 1 bit  | 0b0             | Mandatory 0 bit
 0x2e+0 | 1 byte | 0x00            | Frame number 0
-0x2f+0 | 1 byte | 0x17            | Blocksize 24
+0x2f+0 | 1 byte | 0x17            | Block size 24
 0x30+0 | 1 byte | 0xe9            | Frame header CRC
 
 The first and only subframe starts at byte 0x31, it is broken down in the following table, without the coded residual.
