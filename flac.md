@@ -21,6 +21,8 @@ FLAC owes much to the many people who have advanced the audio compression field 
 - N. Levinson and J. Durbin; the reference encoder uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients.
 - And of course, [Claude Shannon](https://en.wikipedia.org/wiki/Claude_Shannon)
 
+The FLAC format, the FLAC reference implementation and this document were originally developed by Josh Coalson. While many others have contributed since, this original effort is deeply appreciated.
+
 # Definitions
 
 - **Lossless compression**: reducing the amount of computer storage space needed to store data without needing to remove or irreversibly alter any of this data in doing so. In other words, decompressing losslessly compressed information returns exactly the original data.
