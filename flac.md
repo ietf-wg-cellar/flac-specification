@@ -209,8 +209,8 @@ Data     | Description
 `u(24)`  | The minimum frame size (in bytes) used in the stream. A value of `0` signifies that the value is not known.
 `u(24)`  | The maximum frame size (in bytes) used in the stream. A value of `0` signifies that the value is not known.
 `u(20)`  | Sample rate in Hz. A value of 0 is invalid.
-`u(3)`   | (number of channels)-1. FLAC supports from 1 to 8 channels
-`u(5)`   | (bits per sample)-1. FLAC supports from 4 to 32 bits per sample. Currently the reference encoder and decoders only support up to 24 bits per sample.
+`u(3)`   | (number of channels)-1. FLAC supports from 1 to 8 channels.
+`u(5)`   | (bits per sample)-1. FLAC supports from 4 to 32 bits per sample.
 `u(36)`  | Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1 kHz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
 `u(128)` | MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream. A value of `0` signifies that the value is not known.
 
