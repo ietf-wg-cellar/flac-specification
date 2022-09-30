@@ -317,9 +317,15 @@ Following are 3 examples:
 
 - if a file has a single channel, being a LFE channel, the Vorbis comment field is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x8
 - if a file has 4 channels, being front left, front right, top front left and top front right, the Vorbis comment field is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x5003
-- if an input has 4 channels, being back center, top front center, front center and top rear center in that order, they have to be reordered to front center, back center, top front center and top rear center. The Vorbis comment field added is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x12004.
+- if an input has 4 channels, being back center, top front center, front center and top rear center in that order, they have to be reordered to front center, back center, top front center and top rear center. The Vorbis comment field added is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x12104.
 
 WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MAY be padded with zeros, for example, 0x0008 for a single LFE channel. Parsing of WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MUST be case-insensitive for both the field name and the field contents.
+
+A WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK field of 0x0 can be used to indicate that none of the audio channels of a file correlate with speaker positions. This is the case when audio needs to be decoded into speaker positions (e.g. Ambisonics B-format audio) or when a multitrack recording is contained.
+
+It is possible for a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK field to code for fewer channels than present in the audio. If that is the case, the remaining channels SHOULD not be rendered by a playback application unfamiliar with their purpose. For example, the Ambisonics UHJ format is compatible with stereo playback, its first two channels can be played back on stereo equipment, but all four channels together can be decoded into surround sound. For that example, the Vorbis comment field WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x3 would be set, indicating the first two channels are front left and front right, and other channels do not correlate with speaker positions directly.
+
+In case audio channels not assigned to any speaker are contained and decoding to speaker positions is possible, it is RECOMMENDED to provide metadata on how this decoding should take place in another Vorbis comment field or an application metadata block. This document does not define such metadata.
 
 ## Cuesheet
 
