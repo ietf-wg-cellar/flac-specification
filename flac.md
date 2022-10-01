@@ -171,8 +171,8 @@ The FLAC format specifies a subset of itself as the Subset format. The purpose o
 - The [sample rate bits](#sample-rate-bits) in the frame header MUST be 0b0001-0b1110, i.e. the frame header MUST NOT refer to the streaminfo metadata block to find the sample rate.
 - The [bits depth bits](#bit-depth-bits) in the frame header MUST be 0b001-0b111, i.e. the frame header MUST NOT refer to the streaminfo metadata block to find the bit depth.
 - The stream MUST NOT contain blocks with more than 16384 inter-channel samples, i.e. the maximum blocksize must not be larger than 16384.
-- If the sample rate of the stream is less then or equal to 48000 Hz, the stream MUST NOT contain blocks with more than 4608 inter-channel samples, i.e. the maximum blocksize must not be larger than 4608.
-- If the sample rate of the stream is less then or equal to 48000 Hz, the filter order in linear subframes (see section [linear predictor subframe](#linear-predictor-subframe)) MUST be less than or equal to 12, i.e. the subframe type bits in the subframe header (see [subframe header section](#subframe-header)) MUST NOT be 0b101100-0b111111.
+- Audio with a sample rate less then or equal to 48000 Hz MUST NOT be contained in blocks with more than 4608 inter-channel samples, i.e. the maximum block size used for this audio must not be larger than 4608.
+- Linear prediction subframes (see section [linear predictor subframe](#linear-predictor-subframe)) containing audio with a sample rate less then or equal to 48000 Hz MUST have a predictor order less than or equal to 12, i.e. the subframe type bits in the subframe header (see [subframe header section](#subframe-header)) MUST NOT be 0b101100-0b111111 for this audio.
 - The Rice partition order (see [coded residual section](#coded-residual)) MUST be less than or equal to 8.
 
 # File-level metadata
