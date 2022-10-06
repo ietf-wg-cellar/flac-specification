@@ -447,10 +447,10 @@ Value | Picture type
 
 In case not a picture but an URI is contained in this block, the following points apply:
 
-- In case an URI does not include a protocol specifier, the URI is considered relative to the FLAC file being processed. Such URIs are retrieved with the same protocol as the FLAC file being processed, if the protocol has a concept of relative URIs.
+- The URI can be either in absolute or in relative form. In case an URI is in relative form, it is related to the URI of the FLAC content processed.
 - Applications MUST obtain explicit user approval to retrieve images via remote protocols, or when retrieving a file that is not in the directory of the FLAC file being processed.
-- Applications supporting linked images SHOULD handle unavailability of URIs gracefully. They MAY report unavailability to the user.
-- Applications MAY reject processing linked images for any reason, in particular for security or privacy reasons.
+- Applications supporting linked images MUST handle unavailability of URIs gracefully. They MAY report unavailability to the user.
+- Applications MAY reject processing URIs for any reason, in particular for security or privacy reasons.
 
 # Frame structure
 
