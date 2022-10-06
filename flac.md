@@ -417,7 +417,7 @@ Data      | Description
 `u(32)`   | The length of the picture data in bytes.
 `u(n*8)`  | The binary picture data.
 
-The height, width, colour depth and 'number of colours' fields are for informational purposes only. Applications MUST NOT use them in decoding the picture or deciding how to display them, but MAY use them to decide to process a block or not (e.g. when selecting between different pictures blocks) and MAY show them to the user. In case a picture format has no concept for any of these fields (e.g. vector images do not have a height or width in pixels) or the content of any field is unknown, the affected fields MUST be set to zero.
+The height, width, color depth and 'number of colors' fields are for informational purposes only. Applications MUST NOT use them in decoding the picture or deciding how to display it, but MAY use them to decide to process a block or not (e.g. when selecting between different pictures blocks) and MAY show them to the user. In case a picture has no concept for any of these fields (e.g. vector images may not have a height or width in pixels) or the content of any field is unknown, the affected fields MUST be set to zero.
 
 The following table contains all defined picture types. Values other than those listed in the table are reserved and SHOULD NOT be used. There MAY only be one each of picture type 1 and 2 in a file. In general practice, many FLAC playback devices and software display the contents of a picture metadata block with picture type 3 (front cover) during playback, if present.
 
@@ -445,10 +445,10 @@ Value | Picture type
 19    | Band or artist logotype
 20    | Publisher or studio logotype
 
-In case not a picture but an URI is contained in this block, the following points apply:
+In case not a picture but a URI is contained in this block, the following points apply:
 
 - The URI can be either in absolute or in relative form. In case an URI is in relative form, it is related to the URI of the FLAC content processed.
-- Applications MUST obtain explicit user approval to retrieve images via remote protocols, or when retrieving a file that is not in the directory of the FLAC file being processed.
+- Applications MUST obtain explicit user approval to retrieve images via remote protocols and to retrieve local images not located in the same directory as the FLAC file being processed.
 - Applications supporting linked images MUST handle unavailability of URIs gracefully. They MAY report unavailability to the user.
 - Applications MAY reject processing URIs for any reason, in particular for security or privacy reasons.
 
@@ -739,6 +739,8 @@ As with all compression algorithms, both encoding and decoding can produce an ou
 When metadata is handled, it is RECOMMENDED to either thoroughly test handling of extreme cases or impose reasonable limits beyond the limits of this specification document. For example, a single Vorbis comment metadata block can contain millions of valid fields. It is unlikely such a limit is ever reached except in a potentially malicious file. Likewise the media type and description of a picture metadata block can be millions of characters long, despite there being no reasonable use of such contents. One possible use case for very long character strings is in lyrics, which can be stored in Vorbis comment metadata block fields.
 
 Various kinds of metadata blocks contain length fields or fields counts. While reading a block following these lengths or counts, a decoder MUST make sure higher-level lengths or counts (most importantly the length field of the metadata block itself) are not exceeded. As some of these length fields code string lengths, memory for which must be allocated, it is RECOMMENDED to first verify that a block is valid before allocating memory based on its contents.
+
+Metadata blocks can also contain references, e.g. the picture metadata block can contain a URI. Applications MUST obtain explicit user approval to retrieve resources via remote protocols and to retrieve local resources not located in the same directory as the FLAC file being processed.
 
 Seeking in a FLAC stream that is not in a container relies on the coded number in frame headers and optionally a seektable metadata block. It is RECOMMENDED to employ thorough sanity checks on whether a found coded number or seekpoint is at all possible. Without these checks, seeking might get stuck in an infinite loop when numbers in frames are non-consecutive or otherwise invalid, which could be used in denial of service attacks.
 
