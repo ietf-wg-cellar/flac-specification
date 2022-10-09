@@ -77,6 +77,10 @@ Another change to the specification was deemed necessary during standardization 
 
 One significant addition to the format was the residual coding method using a 5-bit Rice parameter. Prior to publication of this addition in July 2007, there was only one residual coding method specified, a partitioned Rice code with a 4-bit Rice parameter. The range offered by this proved too small when encoding 24-bit PCM, therefore a second residual coding method was specified identical to the first but with a 5-bit Rice parameter.
 
+## Restriction of LPC shift to non-negative values
+
+As stated in section [linear predictor subframe](#linear-predictor-subframe) the predictor right shift is a number signed two's complement, which MUST NOT be negative. This is because right shifting a number by a negative amount is undefined behavior in the C programming language standard. The intended behavior was that a positive number would be a right shift and a negative number a left shift. It turned out that a left shift would only very rarely be of any use. Instead of implementing code to handle left shifts, the FLAC reference encoder was changed in 2007 to not generate files with negative shifts.
+
 # Interoperability considerations
 
 As documented in appendix [past format changes](#past-format-changes), there have been some changes and additions to the FLAC format. Additionally, implementation of certain features of the FLAC format took many years, meaning early decoder implementations could not be tested against files with these features. Finally, many lower-quality FLAC decoders only implement a subset of FLAC features required for playback of the most common FLAC files.
