@@ -99,10 +99,10 @@ The FLAC format has four methods for modeling the input signal:
 
 1. **Linear predictor**. Samples are predicted using past samples and a set of predictor coefficients, the error of this prediction is processed by the residual coder. Compared to a fixed predictor, using a generic linear predictor adds overhead as predictor coefficients need to be stored. Therefore, this method of prediction is best suited for predicting more complex waveforms, where the added overhead is offset by space savings in the residual coding stage resulting from more accurate prediction. A linear predictor in FLAC has two parameters besides the predictor coefficients and the predictor order: the number of bits with which each coefficient is stored (the coefficient precision) and a prediction right shift. A prediction is formed by taking the sum of multiplying each predictor coefficient with the corresponding past sample, and dividing that sum by applying the specified right shift. For more information see the [section on the linear predictor subframe](#linear-predictor-subframe)
 
-A FLAC encoder is free in selecting which method is used to model the input, with the following two exceptions
+A FLAC encoder is free in selecting which method is used to model the input, with the following exceptions:
 
-- A constant subframe can only be used when the signal is constant
-- A linear or a fixed predictor subframe can only be used when all their residual samples are representable in 32-bit signed integers as stated in [section coded residual](#coded-residual). When this is not possible, a verbatim subframe MUST be used.
+- When the samples that need to be stored do not all have the same value (i.e. the signal is not constant), a constant subframe MUST NOT be used,
+- When an encoder is unable to find a fixed or linear predictor of which all residual samples are representable in 32-bit signed integers as stated in [section coded residual](#coded-residual), a verbatim subframe MUST be used.
 
 For more information on fixed and linear predictors, see [@HPL-1999-144] and [@robinson-tr156].
 
