@@ -83,13 +83,17 @@ As documented in appendix [past format changes](#past-format-changes), there hav
 
 This appendix provides some considerations for encoder implementations aiming to create highly compatible files. As this topic is one that might change after this document is finished, consult [this web page](https://github.com/ietf-wg-cellar/flac-specification/wiki/Interoperability-considerations) for more up-to-date information.
 
+## Non-subset streams
+
+As described in section [format subset](#format-subset), FLAC specifies a subset of its capabilities as the Subset format. Certain decoders may choose to only decode FLAC files conforming to the limitations imposed by the Subset. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to stay within the limitations of the FLAC Subset format.
+
 ## Variable block size
 
 Because it is often difficult to find the optimal arrangement of block sizes for maximum compression, most encoders choose to create files with a fixed block size. Because of this many decoder implementations suffer from bugs when handling variable block size streams or do not decode them at all. Furthermore, as is explained in [section addition of block size strategy flag](#addition-of-block-size-strategy-flag), there have been some changes to the way variable block size streams were encoded. Because of this, when maximum compatibility with decoders is desired it is RECOMMENDED to only use fixed block size streams.
 
 ## 5-bit Rice parameter {#rice-parameter-5-bit}
 
-As the addition of the 5-bit Rice parameter as described in [section addition of 5-bit Rice parameter](#addition-of-5-bit-rice-parameter) was quite a few years after the FLAC format was first introduced, some early decoders might not be able to decode files containing such Rice parameters. The introduction of this was specifically aimed at improving compression of 24-bit PCM audio and compression of 16-bit PCM audio only rarely benefits from using a 5-bit Rice parameters. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to only use 4-bit Rice parameters when encoding audio with a bit depth higher than 16 bits.
+As the addition of the 5-bit Rice parameter as described in [section addition of 5-bit Rice parameter](#addition-of-5-bit-rice-parameter) was quite a few years after the FLAC format was first introduced, some early decoders might not be able to decode files containing such Rice parameters. The introduction of this was specifically aimed at improving compression of 24-bit PCM audio and compression of 16-bit PCM audio only rarely benefits from using a 5-bit Rice parameters. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to not use 5-bit Rice parameters when encoding audio with a bit depth of 16 bits or lower.
 
 ## Rice escape code
 
@@ -111,7 +115,7 @@ Most audio is stored in bit depths that are a whole number of bytes, e.g. 8, 16 
 
 FLAC can store these bit depths directly, but because they are uncommon, some decoders are not able to process the resulting files correctly. It is possible to store these formats in a FLAC file with a more common bit depth without sacrificing compression by padding each sample with zero bits to a bit depth that is a whole byte. FLAC will detect these wasted bits. This transformation leaves no ambiguity in how it can be reversed and is thus lossless. See [section wasted bits per sample](#wasted-bits-per-sample) for details.
 
-Therefore, when maximum compatibility with decoders is required, it is RECOMMENDED to pad samples of such audio with zero bits to a bit depth that is a whole number of bytes.
+Therefore, when maximum compatibility with decoders is required, it is RECOMMENDED to pad samples of such audio with zero bits to the bit depth that is the next whole number of bytes.
 
 Besides audio with a 'non-whole byte' bit depth, some decoder implementations have chosen to only accept FLAC files coding for PCM audio with a bit depth of 16 bit. Many implementations support bit depths up to 24 bit but no higher. Consult [this web page](https://github.com/ietf-wg-cellar/flac-specification/wiki/Interoperability-considerations) for more up-to-date information.
 
