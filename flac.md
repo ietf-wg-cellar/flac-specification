@@ -174,7 +174,8 @@ The FLAC format specifies a subset of itself as the Subset format. The purpose o
 - The [bits depth bits](#bit-depth-bits) in the frame header MUST be 0b001-0b111, i.e. the frame header MUST NOT refer to the streaminfo metadata block to find the bit depth.
 - The stream MUST NOT contain blocks with more than 16384 inter-channel samples, i.e. the maximum block size must not be larger than 16384.
 - Audio with a sample rate less than or equal to 48000 Hz MUST NOT be contained in blocks with more than 4608 inter-channel samples, i.e. the maximum block size used for this audio must not be larger than 4608.
-- Linear prediction subframes (see section [linear predictor subframe](#linear-predictor-subframe)) containing audio with a sample rate less than or equal to 48000 Hz MUST have a predictor order less than or equal to 12, i.e. the subframe type bits in the subframe header (see [subframe header section](#subframe-header)) MUST NOT be 0b101100-0b111111.- The Rice partition order (see [coded residual section](#coded-residual)) MUST be less than or equal to 8.
+- Linear prediction subframes (see section [linear predictor subframe](#linear-predictor-subframe)) containing audio with a sample rate less than or equal to 48000 Hz MUST have a predictor order less than or equal to 12, i.e. the subframe type bits in the subframe header (see [subframe header section](#subframe-header)) MUST NOT be 0b101100-0b111111.
+- The Rice partition order (see [coded residual section](#coded-residual)) MUST be less than or equal to 8.
 - The channel ordering MUST be equal to one defined in [the section channels bits](#channels-bits), i.e. the FLAC file MUST NOT need a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag to describe the channel ordering. See [section channel mask](#channel-mask) for details.
 
 # File-level metadata
