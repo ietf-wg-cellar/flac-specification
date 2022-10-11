@@ -188,7 +188,7 @@ Start  | Length  | Contents           | Description
 0x0a+0 | 2 byte  | 0x1000             | Max. block size 4096
 0x0c+0 | 3 byte  | 0x00000f           | Min. frame size 15 byte
 0x0f+0 | 3 byte  | 0x00000f           | Max. frame size 15 byte
-0x12+0 | 20 bit  | 0x0ac4, 0b0100     | Sample rate 44100 Hertz
+0x12+0 | 20 bit  | 0x0ac4, 0b0100     | Sample rate 44100 hertz
 0x14+4 | 3 bit   | 0b001              | 2 channels
 0x14+7 | 5 bit   | 0b01111            | Sample bit depth 16
 0x15+4 | 36 bit  | 0b0000, 0x00000001 | Total no. of samples 1
@@ -592,7 +592,7 @@ Start  | Length  | Contents           | Description
 :------|:--------|:-------------------|:-----------------
 0x0c+0 | 3 byte  | 0x00001f           | Min. frame size 31 byte
 0x0f+0 | 3 byte  | 0x00001f           | Max. frame size 31 byte
-0x12+0 | 20 bit  | 0x07d0, 0x0000     | Sample rate 32000 Hertz
+0x12+0 | 20 bit  | 0x07d0, 0x0000     | Sample rate 32000 hertz
 0x14+4 | 3 bit   | 0b000              | 1 channel
 0x14+7 | 5 bit   | 0b00111            | Sample bit depth 8 bit
 0x15+4 | 36 bit  | 0b0000, 0x00000018 | Total no. of samples 24
