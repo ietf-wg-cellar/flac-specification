@@ -654,7 +654,7 @@ Note that it is possible that the number of bits with which each sample is store
 
 In case a Rice parameter was provided for a certain partition, that partition contains a Rice coded residual. The residual samples, which are signed numbers, are represented by unsigned numbers in the Rice code. For positive numbers, the representation is the number doubled, for negative numbers, the representation is the number multiplied by -2 and has 1 subtracted. This representation of signed numbers is also known as zigzag encoding and the zigzag encoded residual is called the folded residual.
 
-Each folded residual samples is then split in two parts, a most significant part and a least significant part. The Rice parameter at the start of each partition determines where that split lies: it is the number of bits in the least significant part. Each residual sample is then stored by coding the most significant part unary followed by the least significant part binary.
+Each folded residual sample is then split in two parts, a most significant part and a least significant part. The Rice parameter at the start of each partition determines where that split lies: it is the number of bits in the least significant part. Each residual sample is then stored by coding the most significant part unary followed by the least significant part binary.
 
 For example, take a partition with Rice parameter 3 and folded residual sample with 38 as value, which is 0b100110 in binary. The most significant part is 0b100 (4) and is stored unary as 0b00001, the least significant part is 0b110 (6) and stored as is. The Rice code word is thus 0b00001110. The Rice code words for all residual samples in a partition are stored consecutively.
 
