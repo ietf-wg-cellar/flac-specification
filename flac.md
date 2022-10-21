@@ -642,7 +642,7 @@ Each partition contains a certain amount of residual samples. The number of resi
 
 The partition order MUST be so that the blocksize is evenly divisible by the number of partitions. This means for example that for all odd blocksizes, only partition order 0 is allowed.  The partition order also MUST be so that the (blocksize >> partition order) is larger than the predictor order. This means for example that with a blocksize of 4096 and a predictor order of 4, partition order cannot be larger than 9.
 
-Each partition starts with a parameter. In case the coded residual of a subframe is one with 4-bit Rice parameters (see table at the start of this section), the first 4 bits of each partition are either a Rice parameter or an escape code. These 4 bits indicate an escape code if they are 0b1111, otherwise they contain the Rice parameter as an unsigned number. In case the coded residual of the current subframe is one with 5-bit Rice parameters, the first 5 bits indicate an escape code if they are 0b11111, otherwise they contain the Rice parameter as an unsigned number as well.
+Each partition starts with a parameter. In case the coded residual of a subframe is one with 4-bit Rice parameters (see table at the start of this section), the first 4 bits of each partition are either a Rice parameter or an escape code. These 4 bits indicate an escape code if they are 0b1111, otherwise they contain the Rice parameter as an unsigned number. In case the coded residual of the current subframe is one with 5-bit Rice parameters, the first 5 bits of each partition indicate an escape code if they are 0b11111, otherwise they contain the Rice parameter as an unsigned number as well.
 
 #### Escaped partition
 
