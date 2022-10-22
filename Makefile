@@ -1,5 +1,5 @@
 AUTHOR=ietf
-VERSION=05
+VERSION=06
 BASENAME=draft-$(AUTHOR)-cellar-flac-$(VERSION)
 
 all: $(BASENAME).txt $(BASENAME).html $(BASENAME).pdf
