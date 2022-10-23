@@ -79,7 +79,7 @@ One significant addition to the format was the residual coding method using a 5-
 
 ## Restriction of LPC shift to non-negative values
 
-As stated in section [linear predictor subframe](#linear-predictor-subframe), the predictor right shift is a number signed two's complement, which MUST NOT be negative. This is because right shifting a number by a negative amount is undefined behavior in the C programming language standard. The intended behavior was that a positive number would be a right shift and a negative number a left shift. It turned out that a left shift would only very rarely be of any use. Instead of implementing code to handle left shifts, the FLAC reference encoder was changed in 2007 to not generate files with negative shifts.
+As stated in section [linear predictor subframe](#linear-predictor-subframe), the predictor right shift is a number signed two's complement, which MUST NOT be negative. This is because right shifting a number by a negative amount is undefined behavior in the C programming language standard. The intended behavior was that a positive number would be a right shift and a negative number a left shift. The FLAC reference encoder was changed in 2007 to not generate LPC subframes with a negative predictor right shift, as it turned out that the use of such subframes would only very rarely provide any benefit and the decoders that were already widely in use at that point were not able to handle such subframes.
 
 # Interoperability considerations
 
