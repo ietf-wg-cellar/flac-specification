@@ -413,17 +413,17 @@ For CD-DA, an track index point number of 0 corresponds to the track pre-gap. Th
 
 ## Picture
 
-The picture metadata block contains image data of a picture in some way belonging to the audio contained in the FLAC file. Its format is derived from the APIC frame in the ID3v2 specification. However, contrary to the APIC frame in ID3v2, the MIME type and description are prepended with a 4-byte length field instead of being null delimited strings. A FLAC file MAY contain one or more picture metadata blocks.
+The picture metadata block contains image data of a picture in some way belonging to the audio contained in the FLAC file. Its format is derived from the APIC frame in the ID3v2 specification. However, contrary to the APIC frame in ID3v2, the media type and description are prepended with a 4-byte length field instead of being null delimited strings. A FLAC file MAY contain one or more picture metadata blocks.
 
-Note that while the length fields for MIME type, description and picture data are 4 bytes in length and could in theory code for a size up to 4 GiB, the total metadata block size cannot exceed what can be described by the metadata block header, i.e. 16 MiB.
+Note that while the length fields for media type, description and picture data are 4 bytes in length and could in theory code for a size up to 4 GiB, the total metadata block size cannot exceed what can be described by the metadata block header, i.e. 16 MiB.
 
 The structure of a picture metadata block is enumerated in the following table.
 
 Data      | Description
 :---------|:-----------
 `u(32)`   | The picture type according to next table
-`u(32)`   | The length of the MIME type string in bytes.
-`u(n*8)`  | The MIME type string, in printable ASCII characters 0x20-0x7E. The MIME type MAY also be `-->` to signify that the data part is a URL of the picture instead of the picture data itself.
+`u(32)`   | The length of the media type string in bytes.
+`u(n*8)`  | The media type string, in printable ASCII characters 0x20-0x7E. The media type MAY also be `-->` to signify that the data part is a URI of the picture instead of the picture data itself.
 `u(32)`   | The length of the description string in bytes.
 `u(n*8)`  | The description of the picture, in UTF-8.
 `u(32)`   | The width of the picture in pixels.
@@ -432,6 +432,8 @@ Data      | Description
 `u(32)`   | For indexed-color pictures (e.g. GIF), the number of colors used, or `0` for non-indexed pictures.
 `u(32)`   | The length of the picture data in bytes.
 `u(n*8)`  | The binary picture data.
+
+The height, width, color depth and 'number of colors' fields are for informational purposes only. Applications MUST NOT use them in decoding the picture or deciding how to display it, but MAY use them to decide to process a block or not (e.g. when selecting between different pictures blocks) and MAY show them to the user. In case a picture has no concept for any of these fields (e.g. vector images may not have a height or width in pixels) or the content of any field is unknown, the affected fields MUST be set to zero.
 
 The following table contains all defined picture types. Values other than those listed in the table are reserved and SHOULD NOT be used. There MAY only be one each of picture type 1 and 2 in a file. In general practice, many FLAC playback devices and software display the contents of a picture metadata block with picture type 3 (front cover) during playback, if present.
 
@@ -458,6 +460,13 @@ Value | Picture type
 18    | Illustration
 19    | Band or artist logotype
 20    | Publisher or studio logotype
+
+In case not a picture but a URI is contained in this block, the following points apply:
+
+- The URI can be either in absolute or in relative form. In case an URI is in relative form, it is related to the URI of the FLAC content processed.
+- Applications MUST obtain explicit user approval to retrieve images via remote protocols and to retrieve local images not located in the same directory as the FLAC file being processed.
+- Applications supporting linked images MUST handle unavailability of URIs gracefully. They MAY report unavailability to the user.
+- Applications MAY reject processing URIs for any reason, in particular for security or privacy reasons.
 
 # Frame structure
 
@@ -771,6 +780,8 @@ As with all compression algorithms, both encoding and decoding can produce an ou
 When metadata is handled, it is RECOMMENDED to either thoroughly test handling of extreme cases or impose reasonable limits beyond the limits of this specification document. For example, a single Vorbis comment metadata block can contain millions of valid fields. It is unlikely such a limit is ever reached except in a potentially malicious file. Likewise the media type and description of a picture metadata block can be millions of characters long, despite there being no reasonable use of such contents. One possible use case for very long character strings is in lyrics, which can be stored in Vorbis comment metadata block fields.
 
 Various kinds of metadata blocks contain length fields or fields counts. While reading a block following these lengths or counts, a decoder MUST make sure higher-level lengths or counts (most importantly the length field of the metadata block itself) are not exceeded. As some of these length fields code string lengths, memory for which must be allocated, it is RECOMMENDED to first verify that a block is valid before allocating memory based on its contents.
+
+Metadata blocks can also contain references, e.g. the picture metadata block can contain a URI. Applications MUST obtain explicit user approval to retrieve resources via remote protocols and to retrieve local resources not located in the same directory as the FLAC file being processed.
 
 Seeking in a FLAC stream that is not in a container relies on the coded number in frame headers and optionally a seektable metadata block. It is RECOMMENDED to employ thorough sanity checks on whether a found coded number or seekpoint is at all possible. Without these checks, seeking might get stuck in an infinite loop when numbers in frames are non-consecutive or otherwise invalid, which could be used in denial of service attacks.
 
