@@ -563,7 +563,7 @@ A decoder that relies on the coded number during seeking could be vulnerable to 
 
 ### Uncommon block size
 
-If the block size bits defined earlier in this section were 0b0110 or 0b0111 (uncommon block size minus 1 stored), this follows the coded number as either an 8-bit or a 16-bit unsigned number coded big-endian.
+If the block size bits defined earlier in this section were 0b0110 or 0b0111 (uncommon block size minus 1 stored), this follows the coded number as either an 8-bit or a 16-bit unsigned number coded big-endian. A value of 65535 (corresponding to a block size of 65536) is invalid, because such a block size cannot be respresented in the streaminfo metadata block.
 
 ### Uncommon sample rate
 
