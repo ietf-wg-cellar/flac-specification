@@ -222,9 +222,11 @@ Data     | Description
 `u(36)`  | Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1 kHz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
 `u(128)` | MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream. A value of `0` signifies that the value is not known.
 
-The minimum block size is excluding the last block of a FLAC file, which may be smaller. If the minimum block size is equal to the maximum block size, the file contains a fixed block size stream. Note that in case of a stream with a variable block size, the actual maximum block size MAY be smaller than the maximum block size listed in the streaminfo block, and the actual smallest block size excluding the last block MAY be larger than the minimum block size listed in the streaminfo block. This is because the encoder has to write these fields before receiving any input audio data, and cannot know beforehand what block sizes it will use, only between what bounds these will be chosen.
+The minimum block size and the maximum block size MUST be in the 16-65535 range. The minimum block size MUST be equal to or less than the maximum block size.
 
-FLAC specifies a minimum block size of 16 and a maximum block size of 65535, meaning the bit patterns corresponding to the numbers 0-15 in the minimum block size and maximum block size fields are invalid.
+Any frame but the last one MUST have a block size equal to or greater than the minimum block size and MUST have a block size equal to or lesser than the maximum block size. The last frame MUST have a block size equal to or lesser than the maximum block size, it does not have to comply to the minimum block size because the block size of that frame must be able to accommodate for the length of the audio data the stream contains. 
+
+If the minimum block size is equal to the maximum block size, the file contains a fixed block size stream, as the minimum block size excludes the last block. Note that in case of a stream with a variable block size, the actual maximum block size MAY be smaller than the maximum block size listed in the streaminfo block, and the actual smallest block size excluding the last block MAY be larger than the minimum block size listed in the streaminfo block. This is because the encoder has to write these fields before receiving any input audio data, and cannot know beforehand what block sizes it will use, only between what bounds these will be chosen.
 
 The sample rate MUST NOT be 0 when the FLAC file contains audio. A sample rate of 0 MAY be used when non-audio is represented. This is useful if data is encoded that is not along a time axis, or when the sample rate of the data lies outside the range that FLAC can represent in the streaminfo metadata block. In case a sample rate of 0 is used it is RECOMMENDED to store the meaning of the encoded content in a Vorbis comment field or an application metadata block. This document does not define such metadata.
 
@@ -563,7 +565,7 @@ A decoder that relies on the coded number during seeking could be vulnerable to 
 
 ### Uncommon block size
 
-If the block size bits defined earlier in this section were 0b0110 or 0b0111 (uncommon block size minus 1 stored), this follows the coded number as either an 8-bit or a 16-bit unsigned number coded big-endian.
+If the block size bits defined earlier in this section were 0b0110 or 0b0111 (uncommon block size minus 1 stored), this follows the coded number as either an 8-bit or a 16-bit unsigned number coded big-endian. A value of 65535 (corresponding to a block size of 65536) is invalid and MUST NOT be used, because such a block size cannot be represented in the streaminfo metadata block. A value from 0 up to (and including) 14, which corresponds to a block size from 1 to 15, is only valid for the last frame in a stream and MUST NOT be used for any other frame. See also [the section on the streaminfo metadata block](#streaminfo).
 
 ### Uncommon sample rate
 
