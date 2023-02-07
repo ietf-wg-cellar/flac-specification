@@ -232,11 +232,9 @@ The MD5 signature is made by performing an MD5 transformation on the samples of 
 
 ## Padding
 
-The padding metadata block allows for an arbitrary amount of padding. The contents of a padding block have no meaning. This block is useful when it is known that metadata will be edited after encoding; the user can instruct the encoder to reserve a padding block of sufficient size so that when metadata is added, it will simply overwrite the padding (which is relatively quick) instead of having to insert it into the right place in the existing file (which would normally require rewriting the entire file).
+The padding metadata block allows for an arbitrary amount of padding. This block is useful when it is known that metadata will be edited after encoding; the user can instruct the encoder to reserve a padding block of sufficient size so that when metadata is added, it will simply overwrite the padding (which is relatively quick) instead of having to insert it into the right place in the existing file (which would normally require rewriting the entire file).
 
-Data     | Description
-:--------|:-----------
-`u(n)`   | n '0' bits (n MUST be a multiple of 8)
+Note that a padding metadata block MAY have a length of 0 byte, meaning the block consists only of the header. Otherwise, the header is followed by 0x00 bytes, the number of which is defined by the block length.
 
 ## Application
 
@@ -245,7 +243,7 @@ The application metadata block is for use by third-party applications. The only 
 Data     | Description
 :--------|:-----------
 `u(32)`  | Registered application ID. (Visit the [registration page](https://xiph.org/flac/id.html) to register an ID with FLAC.)
-`u(n)`   | Application data (n MUST be a multiple of 8)
+`u(n)`   | Application data (n MUST be a multiple of 8, i.e. a whole number of bytes)
 
 ## Seektable
 
