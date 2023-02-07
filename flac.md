@@ -789,7 +789,7 @@ Seeking in a FLAC stream that is not in a container relies on the coded number i
 
 It is RECOMMENDED to employ fuzz testing combined with different sanitizers on FLAC decoders to find security problems. To improve efficiency of this process, a decoder SHOULD, on decoding, ignore the results of CRC checks during fuzz testing.
 
-See the [FLAC decoder testbench](https://wiki.hydrogenaud.io/index.php?title=FLAC_decoder_testbench) for a non-exhaustive list of FLAC files with extreme configurations which lead to crashes or reboots on some known implementations.
+See the [FLAC decoder testbench](https://github.com/ietf-wg-cellar/flac-test-files) for a non-exhaustive list of FLAC files with extreme configurations which lead to crashes or reboots on some known implementations. Besides providing a starting point for security testing, this set of files can also be used for testing conformance with this specification.
 
 None of the content carried in FLAC is intended to be executable.
 
