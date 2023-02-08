@@ -232,9 +232,11 @@ The MD5 signature is made by performing an MD5 transformation on the samples of 
 
 ## Padding
 
-The padding metadata block allows for an arbitrary amount of padding. This block is useful when it is known that metadata will be edited after encoding; the user can instruct the encoder to reserve a padding block of sufficient size so that when metadata is added, it will simply overwrite the padding (which is relatively quick) instead of having to insert it into the right place in the existing file (which would normally require rewriting the entire file).
+The padding metadata block allows for an arbitrary amount of padding. This block is useful when it is known that metadata will be edited after encoding; the user can instruct the encoder to reserve a padding block of sufficient size so that when metadata is added, it will simply overwrite the padding (which is relatively quick) instead of having to insert it into the right place in the existing file (which would normally require rewriting the entire file). There MAY be one or more padding metadata blocks per FLAC stream.
 
-Note that a padding metadata block MAY have a length of 0 byte, meaning the block consists only of the header. Otherwise, the header is followed by 0x00 bytes, the number of which is defined by the block length.
+Data     | Description
+:--------|:-----------
+`u(n)`   | n '0' bits (n MUST be a multiple of 8, i.e. a whole number of bytes, and MAY be zero)
 
 ## Application
 
