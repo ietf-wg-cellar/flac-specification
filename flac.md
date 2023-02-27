@@ -4,24 +4,13 @@ This document defines the FLAC format. FLAC files and streams can code for pulse
 
 FLAC is able to achieve lossless compression because samples in audio signals tend to be highly correlated with their close neighbors. In contrast with general purpose compressors, which often use dictionaries, do run-length coding or exploit long-term repetition, FLAC removes redundancy solely in the very short term, looking back at most 32 samples.
 
-The coding methods provided by the FLAC format work best on PCM audio signals of which the samples have a signed representation and are centered around zero. Audio signals in which samples have an unsigned representation must be transformed to a signed representation as described in this document in order to achieve reasonable compression. The FLAC format is not suited to compress audio that is not PCM. Pulse-density modulated audio, e.g. DSD, cannot be compressed by FLAC.
+The coding methods provided by the FLAC format work best on PCM audio signals of which the samples have a signed representation and are centered around zero. Audio signals in which samples have an unsigned representation must be transformed to a signed representation as described in this document in order to achieve reasonable compression. The FLAC format is not suited to compress audio that is not PCM.
 
 # Notation and Conventions
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [@!RFC2119] [@!RFC8174] when, and only when, they appear in all capitals, as shown here.
 
-Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. Values expressed as `s(n)` represent signed big-endian integer using `n` bits, signed two's complement. `n` may be expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed may be represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
-
-# Acknowledgments
-
-FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
-
-- [A. J. Robinson](https://web.archive.org/web/20160315141134/http://mi.eng.cam.ac.uk/~ajr/) for his work on Shorten; his paper ([@robinson-tr156]) is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
-- [S. W. Golomb](https://web.archive.org/web/20040215005354/http://csi.usc.edu/faculty/golomb.html) and Robert F. Rice; their universal codes are used by FLAC's entropy coder.
-- N. Levinson and J. Durbin; the reference encoder uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients.
-- And of course, [Claude Shannon](https://en.wikipedia.org/wiki/Claude_Shannon)
-
-The FLAC format, the FLAC reference implementation and this document were originally developed by Josh Coalson. While many others have contributed since, this original effort is deeply appreciated.
+Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. Values expressed as `s(n)` represent signed big-endian integer using `n` bits, signed two's complement. Where necessary `n` is expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed is represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
 
 # Definitions
 
@@ -35,7 +24,7 @@ The FLAC format, the FLAC reference implementation and this document were origin
 
 - **Frame**: A frame header, one or more subframes and a frame footer. It encodes the contents of a corresponding block.
 
-- **Subframe**: An encoded subblock. All subframes within a frame code for the same number of samples. A subframe MAY correspond to a subblock, else it corresponds to either the addition or subtraction of two subblocks, see [section on interchannel decorrelation](#interchannel-decorrelation).
+- **Subframe**: An encoded subblock. All subframes within a frame code for the same number of samples. A subframe correspond to a subblock, the average of two subblocks or the difference between two subblocks, see [section on interchannel decorrelation](#interchannel-decorrelation).
 
 - **Block size**: The total number of samples contained in a block or coded in a frame, divided by the number of channels. In other words, the number of samples in any subblock of a block, or any subframe of a frame. This is also called **interchannel samples**.
 
@@ -55,23 +44,23 @@ The FLAC format, the FLAC reference implementation and this document were origin
 
 # Conceptual overview
 
-Similar to many audio coders, a FLAC file is encoded following the steps below. On decoding a FLAC file, these steps are undone in reverse order, i.e. from bottom to top.
+Similar to many other audio coders, a FLAC file is encoded following the steps below. On decoding a FLAC file, these steps are undone in reverse order, i.e. from bottom to top.
 
-- `Blocking` (see [section on Blocking](#blocking)). The input is split up into many contiguous blocks. With FLAC, the blocks MAY vary in size. The optimal size of the block is usually affected by many factors, including the sample rate, spectral characteristics over time, etc. However, as finding the optimal block size arrangement is a rather complex problem, the FLAC format allows for a constant block size throughout a stream as well.
+- `Blocking` (see [section on Blocking](#blocking)). The input is split up into many contiguous blocks.
 
 - `Interchannel Decorrelation` (see [section on Interchannel Decorrelation](#interchannel-decorrelation)). In the case of stereo streams, the FLAC format allows for transforming the left-right signal into a mid-side signal to remove redundancy, if there is any. Besides coding as left-right and mid-side, it is also possible to code left-side and side-right, whichever ordering results in the highest compression. Choosing between any of these transformation is done independently for each block.
 
-- `Prediction` (see [section on Prediction](#prediction)). To remove redundancy in a signal, a predictor is stored for each subblock or its transformation as formed in the previous step. A predictor consists of a simple mathematical description that can be used, as the name implies, to predict a certain sample from the samples that preceded it. As this prediction is rarely exact, the error of this prediction is passed to the next stage. The predictor of each subblock is completely independent from other subblocks. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. In case no usable predictor can be found for a certain subblock, the signal is stored instead of compressed and the next stage is skipped.
+- `Prediction` (see [section on Prediction](#prediction)). To remove redundancy in a signal, a predictor is stored for each subblock or its transformation as formed in the previous step. A predictor consists of a simple mathematical description that can be used, as the name implies, to predict a certain sample from the samples that preceded it. As this prediction is rarely exact, the error of this prediction is passed to the next stage. The predictor of each subblock is completely independent from other subblocks. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. If no usable predictor can be found for a certain subblock, the signal is stored uncompressed and the next stage is skipped.
 
-- `Residual Coding` (See [section on Residual Coding](#residual-coding)). As the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) MUST be coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC uses Rice coding, a subset of Golomb coding, with either 4-bit or 5-bit parameters to code the residual signal.
+- `Residual Coding` (See [section on Residual Coding](#residual-coding)). As the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) is coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC uses Rice coding, a subset of Golomb coding, with either 4-bit or 5-bit parameters to code the residual signal.
 
 In addition, FLAC specifies a metadata system (see [section on File-level metadata](#file-level-metadata)), which allows arbitrary information about the stream to be included at the beginning of the stream.
 
 ## Blocking
 
-The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that excess bits will be wasted on frame headers. If the block size is too large, the characteristics of the signal may vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, and a maximum block size of 65535 samples. This range covers the optimal size for all of the audio data FLAC supports.
+The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that excess bits will be wasted on frame headers. If the block size is too large, the characteristics of the signal may vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, except for the last block, and a maximum block size of 65535 samples. The last block is allowed to be smaller than 16 samples to be able to match the length of the encoded audio without using padding.
 
-While the block size MAY vary in a FLAC file, it is often difficult to find the optimal arrangement of block sizes for maximum compression. Because of this the FLAC format explicitly stores whether a file has a constant or a variable block size throughout the stream, and stores a block number instead of a sample number to slightly improve compression in case a stream has a constant block size.
+While the block size does not have to be constant in a FLAC file, it is often difficult to find the optimal arrangement of block sizes for maximum compression. Because of this the FLAC format explicitly stores whether a file has a constant or a variable block size throughout the stream, and stores a block number instead of a sample number to slightly improve compression in case a stream has a constant block size.
 
 Blocked data is passed to the predictor stage one subblock at a time. Each subblock is independently coded into a subframe, and the subframes are concatenated into a frame. Because each channel is coded separately, subframes MAY use different predictors, even within a frame.
 
@@ -134,7 +123,7 @@ For more information on fixed and linear predictors, see [@HPL-1999-144] and [@r
 
 ## Residual Coding
 
-In case a subframe uses a predictor to approximate the audio signal, a residual needs to be stored to 'correct' the approximation to the exact value. When an effective predictor is used, the average numerical value of the residual samples is smaller than that of the samples before prediction. While having smaller values on average, it is possible a few 'outlier' residual samples are much larger than any of the original samples. Sometimes these outliers even exceed the range the bit depth of the original audio offers.
+In case a subframe uses a predictor to approximate the audio signal, a residual is stored to 'correct' the approximation to the exact value. When an effective predictor is used, the average numerical value of the residual samples is smaller than that of the samples before prediction. While having smaller values on average, it is possible a few 'outlier' residual samples are much larger than any of the original samples. Sometimes these outliers even exceed the range the bit depth of the original audio offers.
 
 To be able to efficiently code such a stream of relatively small numbers with an occasional outlier, Rice coding (a subset of Golomb coding) is used. Depending on how small the numbers are that have to be coded, a Rice parameter is chosen. The numerical value of each residual sample is split in two parts by dividing it with `2^(Rice parameter)`, creating a quotient and a remainder. The quotient is stored in unary form, the remainder in binary form. If indeed most residual samples are close to zero and the Rice parameter is chosen right, this form of coding, a so-called variable-length code, needs less bits to store than storing the residual in unencoded form.
 
@@ -708,7 +697,7 @@ The reason for this limit is to ensure that decoders can use 32-bit integers whe
 
 ## Frame footer
 
-Following the last subframe is the frame footer. If the last subframe is not byte aligned (i.e. the bits required to store all subframes put together are not divisible by 8), zero bits are added until byte alignment is reached. Following this is a 16-bit CRC, initialized with 0, with polynomial x^16 + x^15 + x^2 + x^0. This CRC covers the whole frame excluding the 16-bit CRC, including the sync code.
+Following the last subframe is the frame footer. If the last subframe is not byte aligned (i.e. the number of bits required to store all subframes put together is not divisible by 8), zero bits are added until byte alignment is reached. Following this is a 16-bit CRC, initialized with 0, with polynomial x^16 + x^15 + x^2 + x^0. This CRC covers the whole frame excluding the 16-bit CRC, including the sync code.
 
 # Container mappings
 
@@ -791,8 +780,6 @@ It is RECOMMENDED to employ fuzz testing combined with different sanitizers on F
 
 See the [FLAC decoder testbench](https://github.com/ietf-wg-cellar/flac-test-files) for a non-exhaustive list of FLAC files with extreme configurations which lead to crashes or reboots on some known implementations. Besides providing a starting point for security testing, this set of files can also be used for testing conformance with this specification.
 
-None of the content carried in FLAC is intended to be executable.
-
 # IANA Considerations
 
 ## Media type registration
@@ -822,3 +809,14 @@ The following information serves as the registration form for the "audio/flac" m
    Change controller: IESG
    Provisional registration? (standards tree only): NO
 ```
+
+# Acknowledgments
+
+FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
+
+- [A. J. Robinson](https://web.archive.org/web/20160315141134/http://mi.eng.cam.ac.uk/~ajr/) for his work on Shorten; his paper ([@robinson-tr156]) is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
+- [S. W. Golomb](https://web.archive.org/web/20040215005354/http://csi.usc.edu/faculty/golomb.html) and Robert F. Rice; their universal codes are used by FLAC's entropy coder.
+- N. Levinson and J. Durbin; the reference encoder uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients.
+- And of course, [Claude Shannon](https://en.wikipedia.org/wiki/Claude_Shannon)
+
+The FLAC format, the FLAC reference implementation and this document were originally developed by Josh Coalson. While many others have contributed since, this original effort is deeply appreciated.
