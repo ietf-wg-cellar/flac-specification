@@ -24,7 +24,7 @@ Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 
 - **Frame**: A frame header, one or more subframes and a frame footer. It encodes the contents of a corresponding block.
 
-- **Subframe**: An encoded subblock. All subframes within a frame code for the same number of samples. A subframe correspond to a subblock, the average of two subblocks or the difference between two subblocks, see [section on interchannel decorrelation](#interchannel-decorrelation).
+- **Subframe**: An encoded subblock. All subframes within a frame code for the same number of samples. A subframe corresponds to a subblock, the average of two subblocks or the difference between two subblocks, see [section on interchannel decorrelation](#interchannel-decorrelation).
 
 - **Block size**: The total number of samples contained in a block or coded in a frame, divided by the number of channels. In other words, the number of samples in any subblock of a block, or any subframe of a frame. This is also called **interchannel samples**.
 
