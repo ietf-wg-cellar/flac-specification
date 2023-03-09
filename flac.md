@@ -795,30 +795,52 @@ None of the content carried in FLAC is intended to be executable.
 
 # IANA Considerations
 
+In accordance with the procedures set forth in [@?RFC4288], this document registers one new media type, "audio/flac", as defined in the following section.
+
 ## Media type registration
 
 The following information serves as the registration form for the "audio/flac" media type. This media type is applicable for FLAC audio packaged in its native container. FLAC audio packaged in another container will take on the media type of its container, for example audio/ogg when packaged in an Ogg container or video/mp4 when packaged in a MP4 container alongside a video track.
 
 ```
    Type name: audio
+
    Subtype name: flac
+
    Required parameters: none
+
    Optional parameters: none
-   Encoding considerations: as per this document
-   Security considerations: see section 12
-   Interoperability considerations: no known concerns
+
+   Encoding considerations: as per THISRFC
+
+   Security considerations: see the security considerations in section 12 of THISRFC
+
+   Interoperability considerations: see the descriptions of past format changes in Appendix B of THISRFC
+
    Published specification: THISRFC
+
    Applications that use this media type: ffmpeg, apache, firefox
+
    Fragment identifier considerations: none
+
    Additional information:
+
      Deprecated alias names for this type: audio/x-flac
+
      Magic number(s): fLaC
+
      File extension(s): flac
+
      Macintosh file type code(s): none
+
    Person & email address to contact for further information: IETF CELLAR WG
+
    Intended usage: COMMON
+
    Restrictions on usage: N/A
+
    Author: IETF CELLAR WG
-   Change controller: IESG
+
+   Change controller: Internet Engineering Task Force (mailto:iesg@ietf.org)
+
    Provisional registration? (standards tree only): NO
 ```
