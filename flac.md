@@ -32,7 +32,23 @@ Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 
 - **Predictor**: a model used to predict samples in an audio signal based on past samples. FLAC uses such predictors to remove redundancy in a signal in order to be able to compress it.
 
-- **Linear predictor**: a predictor using [linear prediction](https://en.wikipedia.org/wiki/Linear_prediction). This is also called **linear predictive coding (LPC)**. With a linear predictor each prediction is a linear combination of past samples, hence the name. A linear predictor has a [causal discrete-time finite impulse response](https://en.wikipedia.org/wiki/Finite_impulse_response).
+- **Linear predictor**: a predictor using linear prediction (see [@LinearPrediction]). This is also called **linear predictive coding (LPC)**. With a linear predictor each prediction is a linear combination of past samples, hence the name. A linear predictor has a causal discrete-time finite impulse response (see [@FIR]).
+
+<reference anchor="LinearPrediction" target="https://en.wikipedia.org/wiki/Linear_prediction">
+  <front>
+    <title>Linear prediction - Wikipedia</title>
+    <author/>
+    <date/>
+  </front>
+</reference>
+
+<reference anchor="FIR" target="https://en.wikipedia.org/wiki/Finite_impulse_response">
+  <front>
+    <title>Finite impulse response - Wikipedia</title>
+    <author/>
+    <date/>
+  </front>
+</reference>
 
 - **Fixed predictor**: a linear predictor in which the model parameters are the same across all FLAC files, and thus not need to be stored.
 
@@ -40,7 +56,15 @@ Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 
 - **Residual**: The audio signal that remains after a predictor has been subtracted from a subblock. If the predictor has been able to remove redundancy from the signal, the samples of the remaining signal (the **residual samples**) will have, on average, a smaller numerical value than the original signal.
 
-- **Rice code**: A [variable-length code](https://en.wikipedia.org/wiki/Variable-length_code) which compresses data by making use of the observation that, after using an effective predictor, most residual samples are closer to zero than the original samples, while still allowing for a small part of the samples to be much larger.
+- **Rice code**: A variable-length code (see [@VarLengthCode]) which compresses data by making use of the observation that, after using an effective predictor, most residual samples are closer to zero than the original samples, while still allowing for a small part of the samples to be much larger.
+
+<reference anchor="VarLengthCode" target="https://en.wikipedia.org/wiki/Variable-length_code">
+  <front>
+    <title>Variable-length code - Wikipedia</title>
+    <author/>
+    <date/>
+  </front>
+</reference>
 
 # Conceptual overview
 
@@ -267,7 +291,17 @@ NOTES
 
 ## Vorbis comment
 
-A Vorbis comment metadata block contains human-readable information coded in UTF-8. The name Vorbis comment points to the fact that the Vorbis codec stores such metadata in almost the same way. A Vorbis comment metadata block consists of a vendor string optionally followed by a number of fields, which are pairs of field names and field contents. Many users refer to these fields as FLAC tags or simply as tags. A FLAC file MUST NOT contain more than one Vorbis comment metadata block.
+A Vorbis comment metadata block contains human-readable information coded in UTF-8. The name Vorbis comment points to the fact that the Vorbis codec stores such metadata in almost the same way, see [@Vorbis]. A Vorbis comment metadata block consists of a vendor string optionally followed by a number of fields, which are pairs of field names and field contents. Many users refer to these fields as FLAC tags or simply as tags. A FLAC file MUST NOT contain more than one Vorbis comment metadata block.
+
+<reference anchor="Vorbis" target="https://xiph.org/vorbis/doc/v-comment.html">
+  <front>
+    <title>Ogg Vorbis I format specification: comment field and header specification</title>
+    <author>
+      <organization>Xiph.Org</organization>
+    </author>
+    <date/>
+  </front>
+</reference>
 
 In a Vorbis comment metadata block, the metadata block header is directly followed by 4 bytes containing the length in bytes of the vendor string as an unsigned number coded little-endian. The vendor string follows UTF-8 coded, and is not terminated in any way.
 
@@ -814,9 +848,46 @@ The following information serves as the registration form for the "audio/flac" m
 
 FLAC owes much to the many people who have advanced the audio compression field so freely. For instance:
 
-- [A. J. Robinson](https://web.archive.org/web/20160315141134/http://mi.eng.cam.ac.uk/~ajr/) for his work on Shorten; his paper ([@robinson-tr156]) is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
-- [S. W. Golomb](https://web.archive.org/web/20040215005354/http://csi.usc.edu/faculty/golomb.html) and Robert F. Rice; their universal codes are used by FLAC's entropy coder.
-- N. Levinson and J. Durbin; the reference encoder uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients.
-- And of course, [Claude Shannon](https://en.wikipedia.org/wiki/Claude_Shannon)
+- A. J. Robinson for his work on Shorten; his paper (see [@robinson-tr156]) is a good starting point on some of the basic methods used by FLAC. FLAC trivially extends and improves the fixed predictors, LPC coefficient quantization, and Rice coding used in Shorten.
+- S. W. Golomb and Robert F. Rice; their universal codes are used by FLAC's entropy coder, see [@Rice].
+- N. Levinson and J. Durbin; the FLAC reference encoder (see [implementation status](#implementation-status)) uses an algorithm developed and refined by them for determining the LPC coefficients from the autocorrelation coefficients, see [@Durbin].
+- And of course, Claude Shannon, see [@Shannon].
+
+<reference anchor="Rice" target="https://ieeexplore.ieee.org/document/1090789">
+    <front>
+        <title>Adaptive Variable-Length Coding for Efficient Compression of Spacecraft Television Data</title>
+        <author initials="RF" surname="Rice" fullname="Robert Rice">
+            <organisation>Jet Propulsion Laboratory, California Institute of Technology, Pasadena, CA, USA</organisation>
+        </author>
+        <author initials="JR" surname="Plaunt">
+            <organisation>Jet Propulsion Laboratory, California Institute of Technology, Pasadena, CA, USA</organisation>
+        </author>
+        <date month="12" year="1971"/>
+    </front>
+    <seriesInfo name="DOI" value="10.1109/TCOM.1971.1090789"/>
+</reference>
+
+<reference anchor="Durbin" target="https://www.jstor.org/stable/1401322">
+    <front>
+        <title>The Fitting of Time-Series Models </title>
+        <author initials="J" surname="Durbin" fullname="James Durbin">
+            <organisation>University of North Carolina</organisation>
+            <organisation>University of London</organisation>
+        </author>
+        <date month="12" year="1959"/>
+    </front>
+    <seriesInfo name="DOI" value="10.2307/1401322"/>
+</reference>
+
+<reference anchor="Shannon" target="https://ieeexplore.ieee.org/document/1697831">
+    <front>
+        <title>Communication in the Presence of Noise</title>
+        <author initials="CE" surname="Shannon" fullname="Claude Shannon">
+            <organisation>Bell Telephone Laboratories, Inc., Murray Hill, NJ, USA</organisation>
+        </author>
+        <date month="01" year="1949"/>
+    </front>
+    <seriesInfo name="DOI" value="10.1109/JRPROC.1949.232969"/>
+</reference>
 
 The FLAC format, the FLAC reference implementation and this document were originally developed by Josh Coalson. While many others have contributed since, this original effort is deeply appreciated.
