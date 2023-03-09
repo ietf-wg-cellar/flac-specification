@@ -228,9 +228,38 @@ Any frame but the last one MUST have a block size equal to or greater than the m
 
 If the minimum block size is equal to the maximum block size, the file contains a fixed block size stream, as the minimum block size excludes the last block. Note that in case of a stream with a variable block size, the actual maximum block size MAY be smaller than the maximum block size listed in the streaminfo block, and the actual smallest block size excluding the last block MAY be larger than the minimum block size listed in the streaminfo block. This is because the encoder has to write these fields before receiving any input audio data, and cannot know beforehand what block sizes it will use, only between what bounds these will be chosen.
 
-The sample rate MUST NOT be 0 when the FLAC file contains audio. A sample rate of 0 MAY be used when non-audio is represented. This is useful if data is encoded that is not along a time axis, or when the sample rate of the data lies outside the range that FLAC can represent in the streaminfo metadata block. In case a sample rate of 0 is used it is RECOMMENDED to store the meaning of the encoded content in a Vorbis comment field or an application metadata block. This document does not define such metadata.
+The sample rate MUST NOT be 0 when the FLAC file contains audio. A sample rate of 0 MAY be used when non-audio is represented. This is useful if data is encoded that is not along a time axis, or when the sample rate of the data lies outside the range that FLAC can represent in the streaminfo metadata block. If a sample rate of 0 is used it is RECOMMENDED to store the meaning of the encoded content in a Vorbis comment field (see [Vorbis comment metadata block](#vorbis-comment) or an application metadata block (see [application metadata block](#application). This document does not define such metadata.
 
-The MD5 signature is made by performing an MD5 transformation on the samples of all channels interleaved, represented in signed, little-endian form. This interleaving is on a per-sample basis, so for a stereo file this means first the first sample of the first channel, then the first sample of the second channel, then the second sample of the first channel etc. Before performing the MD5 transformation, all samples must be byte-aligned. In case the bit depth is not a whole number of bytes, the value of each sample is sign extended to the next whole number of bytes.
+The MD5 signature is made by performing an MD5 transformation on the samples of all channels interleaved, represented in signed, little-endian form. This interleaving is on a per-sample basis, so for a stereo file this means first the first sample of the first channel, then the first sample of the second channel, then the second sample of the first channel etc. Before performing the MD5 transformation, all samples must be byte-aligned. If the bit depth is not a whole number of bytes, the value of each sample is sign extended to the next whole number of bytes.
+
+So, in the case of a 2-channel stream with 6-bit samples, bits will be lined-up as follows.
+
+```
+SSAAAAAASSBBBBBBSSCCCCCC
+^   ^   ^   ^   ^   ^
+|   |   |   |   |  Bits of 2nd sample of 1st channel
+|   |   |   |  Sign extension bits of 2st sample of 2rd channel
+|   |   |  Bits of 1st sample of second channel
+|   |  Sign extension bits of 1st sample of 2nd channel
+|  Bits of 1st sample of 1st channel
+Sign extention bits of 1st sample of 1st channel
+
+```
+
+As another example, in the case of a 1-channel with 12-bit samples, bits are lined-up as follows, showing the little-endian byte order
+
+```
+AAAAAAAASSSSAAAABBBBBBBBSSSSBBBB
+   ^     ^   ^   ^       ^   ^
+   |     |   |   |       |  Most significant 4 bits of 2nd sample
+   |     |   |   | Sign extension bits of 2nd sample
+   |     |   |  Least significant 8 bits of 2nd sample
+   |     |  Most significant 4 bits of 1st sample
+   |    Sign extension bits of 1st sample
+  Least significant 8 bits of 1st sample
+
+```
+
 
 ## Padding
 
