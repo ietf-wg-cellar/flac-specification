@@ -238,7 +238,7 @@ So, in the case of a 2-channel stream with 6-bit samples, bits will be lined-up 
 SSAAAAAASSBBBBBBSSCCCCCC
 ^   ^   ^   ^   ^   ^
 |   |   |   |   |  Bits of 2nd sample of 1st channel
-|   |   |   |  Sign extension bits of 2st sample of 2rd channel
+|   |   |   |  Sign extension bits of 2st sample of 2nd channel
 |   |   |  Bits of 1st sample of second channel
 |   |  Sign extension bits of 1st sample of 2nd channel
 |  Bits of 1st sample of 1st channel
