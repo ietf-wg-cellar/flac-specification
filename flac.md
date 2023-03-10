@@ -239,7 +239,7 @@ SSAAAAAASSBBBBBBSSCCCCCC
 ^   ^   ^   ^   ^   ^
 |   |   |   |   |  Bits of 2nd sample of 1st channel
 |   |   |   |  Sign extension bits of 2nd sample of 2nd channel
-|   |   |  Bits of 1st sample of second channel
+|   |   |  Bits of 1st sample of 2nd channel
 |   |  Sign extension bits of 1st sample of 2nd channel
 |  Bits of 1st sample of 1st channel
 Sign extention bits of 1st sample of 1st channel
