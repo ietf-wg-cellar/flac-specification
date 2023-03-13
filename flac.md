@@ -125,10 +125,10 @@ For more information on fixed and linear predictors, see [@HPL-1999-144] and [@r
     <front>
         <title>Lossless Compression of Digital Audio</title>
         <author initials="M" surname="Hans" fullname="Mat Hans">
-            <organisation>Client and Media Systems Laboratory, HP Laboratories Palo Alto</organisation>
+            <organization>Client and Media Systems Laboratory, HP Laboratories Palo Alto</organization>
         </author>
         <author initials="RW" surname="Schafer" fullname="Ronald W. Schafer">
-            <organisation>Center for Signal &amp; Image Processing at the School of Electrical and Computer Engineering, Georgia Institute of the Technology, Atlanta, Georgia</organisation>
+            <organization>Center for Signal &amp; Image Processing at the School of Electrical and Computer Engineering, Georgia Institute of the Technology, Atlanta, Georgia</organization>
         </author>
         <date month="11" year="1999"/>
     </front>
@@ -139,7 +139,7 @@ For more information on fixed and linear predictors, see [@HPL-1999-144] and [@r
     <front>
         <title>SHORTEN: Simple lossless and near-lossless waveform compression</title>
         <author initials="T" surname="Robinson" fullname="Tony Robinson">
-            <organisation>Cambridge University Engineering Department</organisation>
+            <organization>Cambridge University Engineering Department</organization>
         </author>
         <date month="12" year="1994"/>
     </front>
@@ -169,7 +169,7 @@ Sample rate bits 0b1111                     | [Sample rate bits](#sample-rate-bi
 Uncommon blocksize 65536                    | [Uncommon block size](#uncommon-block-size)
 Predictor coefficient precision bits 0b1111 | [Linear predictor subframe](#linear-predictor-subframe)
 
-All numbers used in a FLAC bitstream are integers, there are no floating-point representations. All numbers are big-endian coded, except the field length used in Vorbis comments (see [Vorbis comment metadata block](#vorbis-comment)), which are little-endian coded. All numbers are unsigned except linear predictor coefficients, the linear prediction shift (see [lineair predictor subframe](#linear-predictor-subframe)) and numbers which directly represent samples, which are signed. None of these restrictions apply to application metadata blocks or to Vorbis comment field contents.
+All numbers used in a FLAC bitstream are integers, there are no floating-point representations. All numbers are big-endian coded, except the field length used in Vorbis comments (see [Vorbis comment metadata block](#vorbis-comment)), which are little-endian coded. All numbers are unsigned except linear predictor coefficients, the linear prediction shift (see [linear predictor subframe](#linear-predictor-subframe)) and numbers which directly represent samples, which are signed. None of these restrictions apply to application metadata blocks or to Vorbis comment field contents.
 
 All samples encoded to and decoded from the FLAC format MUST be in a signed representation.
 
@@ -229,7 +229,7 @@ Value   | Metadata block type
 
 The streaminfo metadata block has information about the whole stream, like sample rate, number of channels, total number of samples, etc. It MUST be present as the first metadata block in the stream. Other metadata blocks MAY follow. There MUST be no more than one streaminfo metadata block per FLAC stream.
 
-If the streaminfo metadata block contains incorrect or incomplete information, decoder behaviour is left unspecified (i.e. up to the decoder implementation). A decoder MAY choose to stop further decoding when the information supplied by the streaminfo metadata block turns out to be incorrect or invalid. A decoder accepting information from the streaminfo block (most significantly the maximum frame size, maximum block size, number of audio channels, number of bits per sample and total number of samples) without doing further checks during decoding of audio frames could be vulnerable to buffer overflows. See also [the section on security considerations](#security-considerations).
+If the streaminfo metadata block contains incorrect or incomplete information, decoder behavior is left unspecified (i.e. up to the decoder implementation). A decoder MAY choose to stop further decoding when the information supplied by the streaminfo metadata block turns out to be incorrect or invalid. A decoder accepting information from the streaminfo block (most significantly the maximum frame size, maximum block size, number of audio channels, number of bits per sample and total number of samples) without doing further checks during decoding of audio frames could be vulnerable to buffer overflows. See also [the section on security considerations](#security-considerations).
 
 Data     | Description
 :--------|:-----------
@@ -453,7 +453,7 @@ The track ISRC (International Standard Recording Code) is a 12-digit alphanumeri
     <front>
         <title>International Standard Recording Code (ISRC) Handbook, 4th edition</title>
         <author>
-            <organisation>International ISRC Registration Authority</organisation>
+            <organization>International ISRC Registration Authority</organization>
         </author>
         <date year="2021"/>
     </front>
@@ -916,10 +916,10 @@ FLAC owes much to the many people who have advanced the audio compression field 
     <front>
         <title>Adaptive Variable-Length Coding for Efficient Compression of Spacecraft Television Data</title>
         <author initials="RF" surname="Rice" fullname="Robert Rice">
-            <organisation>Jet Propulsion Laboratory, California Institute of Technology, Pasadena, CA, USA</organisation>
+            <organization>Jet Propulsion Laboratory, California Institute of Technology, Pasadena, CA, USA</organization>
         </author>
         <author initials="JR" surname="Plaunt">
-            <organisation>Jet Propulsion Laboratory, California Institute of Technology, Pasadena, CA, USA</organisation>
+            <organization>Jet Propulsion Laboratory, California Institute of Technology, Pasadena, CA, USA</organization>
         </author>
         <date month="12" year="1971"/>
     </front>
@@ -930,8 +930,8 @@ FLAC owes much to the many people who have advanced the audio compression field 
     <front>
         <title>The Fitting of Time-Series Models </title>
         <author initials="J" surname="Durbin" fullname="James Durbin">
-            <organisation>University of North Carolina</organisation>
-            <organisation>University of London</organisation>
+            <organization>University of North Carolina</organization>
+            <organization>University of London</organization>
         </author>
         <date month="12" year="1959"/>
     </front>
@@ -942,7 +942,7 @@ FLAC owes much to the many people who have advanced the audio compression field 
     <front>
         <title>Communication in the Presence of Noise</title>
         <author initials="CE" surname="Shannon" fullname="Claude Shannon">
-            <organisation>Bell Telephone Laboratories, Inc., Murray Hill, NJ, USA</organisation>
+            <organization>Bell Telephone Laboratories, Inc., Murray Hill, NJ, USA</organization>
         </author>
         <date month="01" year="1949"/>
     </front>
