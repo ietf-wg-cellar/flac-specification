@@ -28,17 +28,17 @@ To determine the size of the data type needed to calculate either a residual sam
 
 Order | Calculation of residual                              | Sample values summed | Extra bits
 :-----|:-----------------------------------------------------|:---------------------|:-----------
-0     | s(n)                                                 | 1                    | 0
-1     | s(n) - s(n-1)                                        | 2                    | 1
-2     | s(n) - 2 * s(n-1) + s(n-2)                           | 4                    | 2
-3     | s(n) - 3 * s(n-1) + 3 * s(n-2) - s(n-3)              | 8                    | 3
-4     | s(n) - 4 * s(n-1) + 6 * s(n-2) - 4 * s(n-3) + s(n-4) | 16                   | 4
+0     | a(n)                                                 | 1                    | 0
+1     | a(n) - a(n-1)                                        | 2                    | 1
+2     | a(n) - 2 * a(n-1) + a(n-2)                           | 4                    | 2
+3     | a(n) - 3 * a(n-1) + 3 * a(n-2) - a(n-3)              | 8                    | 3
+4     | a(n) - 4 * a(n-1) + 6 * a(n-2) - 4 * a(n-3) + a(n-4) | 16                   | 4
 
 Where
 
 - n is the number of the sample being predicted
-- s(n) is the sample being predicted
-- s(n-1) is the sample before the one being predicted, s(n-2) is the sample before that etc.
+- a(n) is the sample being predicted
+- a(n-1) is the sample before the one being predicted, a(n-2) is the sample before that etc.
 
 For subframes with a linear predictor, calculation is a little more complicated. Each prediction is a sum of several multiplications. Each of these multiply a sample value with a predictor coefficient. The extra bits needed can be calculated by adding the predictor coefficient precision (in bits) to the bit depth of the audio samples. As both are signed numbers and only one 'sign bit' is necessary, 1 bit can be subtracted. To account for the summing of these multiplications, the log base 2 of the predictor order rounded up is added.
 
