@@ -168,6 +168,7 @@ Minimum and maximum block sizes smaller than 16 in streaminfo metadata block | [
 Sample rate bits 0b1111                     | [Sample rate bits](#sample-rate-bits)
 Uncommon blocksize 65536                    | [Uncommon block size](#uncommon-block-size)
 Predictor coefficient precision bits 0b1111 | [Linear predictor subframe](#linear-predictor-subframe)
+Negative predictor right shift              | [Linear predictor subframe](#linear-predictor-subframe)
 
 All numbers used in a FLAC bitstream are integers, there are no floating-point representations. All numbers are big-endian coded, except the field length used in Vorbis comments (see [Vorbis comment metadata block](#vorbis-comment)), which are little-endian coded. All numbers are unsigned except linear predictor coefficients, the linear prediction shift (see [linear predictor subframe](#linear-predictor-subframe)) and numbers which directly represent samples, which are signed. None of these restrictions apply to application metadata blocks or to Vorbis comment field contents.
 
