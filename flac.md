@@ -361,7 +361,7 @@ For a more comprehensive list of possible field names, [the list of tags used in
 
 ### Channel mask
 
-Besides fields containing information about the work itself, one field is defined for technical reasons, of which the field name is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK. This field contains information on which channels the file contains. Use of this field is RECOMMENDED if these differ from the (default) channels defined in [the section channels bits](#channels-bits).
+Besides fields containing information about the work itself, one field is defined for technical reasons, of which the field name is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK. This field is used to communicate that the channels in a file differ from the default channels defined in [the section channels bits](#channels-bits). For example, by default a FLAC file containing two channels is interpreted to contain a left and right channel, but with this field it is possible to describe different channel contents.
 
 The channel mask consists of flag bits indicating which channels are present, stored in a hexadecimal representation preceded by 0x. The flags only signal which channels are present, not in which order, so if a file has to be encoded in which channels are ordered differently, they have to be reordered. Please note that a file in which the channel order is defined through the WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK is not streamable, i.e. non-subset, as the field is not found in each frame header. The mask bits can be found in the following table
 
@@ -580,7 +580,7 @@ Value   | Sample rate
 
 ### Channels bits
 
-The next 4 bits (the first 4 bits of the fourth byte of each frame), referred to as the channels bits, code for both the number of channels of the audio as well as any stereo decorrelation used according to the following table.
+The next 4 bits (the first 4 bits of the fourth byte of each frame), referred to as the channels bits, contain both the number of channels of the audio as well as any stereo decorrelation used according to the following table.
 
 If a channel lay-out different than the ones listed in the following table is used, this can be signaled with a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag in a Vorbis comment metadata block, see [the section channel mask](#channel-mask) for details. For details on the way left/side, right/side and mid/side stereo are coded, see [the section on interchannel decorrelation](#interchannel-decorrelation).
 
@@ -601,7 +601,7 @@ Value           | Channels
 
 ### Bit depth bits
 
-The next 3 bits code (bits 5, 6 and 7 of each fourth byte of each frame) for the bit depth of the audio according to the following table.
+The next 3 bits (bits 5, 6 and 7 of each fourth byte of each frame) contain the bit depth of the audio according to the following table.
 
 Value   | Bit depth
 :-------|:-----------
