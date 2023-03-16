@@ -546,11 +546,13 @@ The next bit is reserved and MUST be zero.
 
 ### Coded number
 
-Following the reserved bit (starting at the fifth byte of the frame) is either a sample or a frame number, which will be referred to as the coded number. When dealing with variable block size streams, the sample number of the first sample in the frame is encoded. When the file contains a fixed block size stream, the frame number is encoded. The coded number is stored in a variable length code like UTF-8, but extended to a maximum of 36 bits unencoded, 7 byte encoded. When a frame number is encoded, the value MUST NOT be larger than what fits a value 31 bits unencoded or 6 byte encoded. Please note that most general purpose UTF-8 encoders and decoders will not be able to handle these extended codes.
+Following the reserved bit (starting at the fifth byte of the frame) is either a sample or a frame number, which will be referred to as the coded number. When dealing with variable block size streams, the sample number of the first sample in the frame is encoded. When the file contains a fixed block size stream, the frame number is encoded.
 
-In case the coded number is a frame number, it MUST be equal to the number of frames preceding the current frame. In case the coded number is a sample number, it MUST be equal to the number of samples preceding the current frame. In a stream where these requirements are not met, seeking is not (reliably) possible.
+The coded number is stored in a variable length code like UTF-8, but extended to a maximum of 36 bits unencoded, 7 byte encoded. When a frame number is encoded, the value MUST NOT be larger than what fits a value 31 bits unencoded or 6 byte encoded. This means the 'unrestricted' form of UTF-8 is used as defined in [@!RFC2279], and not the form defined in [@!RFC3629], which supersedes it. Please note that as most general purpose UTF-8 encoders and decoders follow [@!RFC3629], they will not be able to handle these extended codes. Furthermore, while UTF-8 as specified by [@!RFC2279] and [@!RFC3629] is specifically used to encode characters, FLAC specifically uses it to encode numbers instead. To encode or decode a coded number, follow the procedures of section 2 of [@!RFC2279], but instead of using an UCS-4 character code point, use a frame or sample number.
 
-A decoder that relies on the coded number during seeking could be vulnerable to buffer overflows or getting stuck in an infinite loop in case it seeks in a stream where the coded numbers are non-consecutive or otherwise invalid. See also [the section on security considerations](#security-considerations).
+If the coded number is a frame number, it MUST be equal to the number of frames preceding the current frame. If the coded number is a sample number, it MUST be equal to the number of samples preceding the current frame. In a stream where these requirements are not met, seeking is not (reliably) possible.
+
+A decoder that relies on the coded number during seeking could be vulnerable to buffer overflows or getting stuck in an infinite loop if it seeks in a stream where the coded numbers are non-consecutive or otherwise invalid. See also [the section on security considerations](#security-considerations).
 
 ### Uncommon block size
 
