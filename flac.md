@@ -548,9 +548,39 @@ The next bit is reserved and MUST be zero.
 
 Following the reserved bit (starting at the fifth byte of the frame) is either a sample or a frame number, which will be referred to as the coded number. When dealing with variable block size streams, the sample number of the first sample in the frame is encoded. When the file contains a fixed block size stream, the frame number is encoded.
 
-The coded number is stored in a variable length code like UTF-8, but extended to a maximum of 36 bits unencoded, 7 byte encoded. When a frame number is encoded, the value MUST NOT be larger than what fits a value 31 bits unencoded or 6 byte encoded. This means the 'unrestricted' form of UTF-8 is used as defined in [@!RFC2279], and not the form defined in [@!RFC3629], which supersedes it. Please note that as most general purpose UTF-8 encoders and decoders follow [@!RFC3629], they will not be able to handle these extended codes. Furthermore, while UTF-8 as specified by [@!RFC2279] and [@!RFC3629] is specifically used to encode characters, FLAC specifically uses it to encode numbers instead. To encode or decode a coded number, follow the procedures of section 2 of [@!RFC2279], but instead of using an UCS-4 character code point, use a frame or sample number.
+The coded number is stored in a variable length code like UTF-8 as defined [@!RFC3629], but extended to a maximum of 36 bits unencoded, 7 byte encoded.
+
+When a frame number is encoded, the value MUST NOT be larger than what fits a value 31 bits unencoded or 6 byte encoded. Please note that as most general purpose UTF-8 encoders and decoders follow [@!RFC3629], they will not be able to handle these extended codes. Furthermore, while UTF-8 is specifically used to encode characters, FLAC specifically uses it to encode numbers instead. To encode or decode a coded number, follow the procedures of section 3 of [@!RFC3629], but instead of using a character number, use a frame or sample number, and instead of the table in section 3 of [@!RFC3629], use the extended table below.
+
+Number range (hexadecimal)          | Octet sequence (binary)
+:-----------------------------------|:--------------------------------------------------------------
+0000 0000 0000 -<br/>0000 0000 007F | 0xxxxxxx
+0000 0000 0080 -<br/>0000 0000 07FF | 110xxxxx 10xxxxxx
+0000 0000 0800 -<br/>0000 0000 FFFF | 1110xxxx 10xxxxxx 10xxxxxx
+0000 0001 0000 -<br/>0000 001F FFFF | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+0000 0020 0000 -<br/>0000 03FF FFFF | 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+0000 0400 0000 -<br/>0000 7FFF FFFF | 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+0000 8000 0000 -<br/>000F FFFF FFFF | 11111110 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 
 If the coded number is a frame number, it MUST be equal to the number of frames preceding the current frame. If the coded number is a sample number, it MUST be equal to the number of samples preceding the current frame. In a stream where these requirements are not met, seeking is not (reliably) possible.
+
+For example, a frame that belongs to a variable block size stream and has exactly 51 billion samples preceding it, has its coded number constructed as follows.
+
+```
+Octets 1-5
+0b11111110 0b10101111 0b10011111 0b10110101 0b10100011
+               ^^^^^^     ^^^^^^     ^^^^^^     ^^^^^^
+                 |          |          |      Bits 18-13
+                 |          |      Bits 24-19
+                 |      Bits 30-25
+             Bits 36-31
+
+Octets 6-7
+0b10111000 0b10000000
+    ^^^^^^     ^^^^^^
+      |       Bits 6-1
+  Bits 12-7
+```
 
 A decoder that relies on the coded number during seeking could be vulnerable to buffer overflows or getting stuck in an infinite loop if it seeks in a stream where the coded numbers are non-consecutive or otherwise invalid. See also [the section on security considerations](#security-considerations).
 
