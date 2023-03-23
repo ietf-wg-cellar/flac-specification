@@ -5,7 +5,7 @@
 
 In order to maintain lossless behavior, all arithmetic used in encoding and decoding sample values MUST be done with integer data types to eliminate the possibility of introducing rounding errors associated with floating-point arithmetic. Use of floating-point representations in analysis (e.g. finding a good predictor or Rice parameter) is not a concern, as long as the process of using the found predictor and Rice parameter to encode audio samples is implemented with only integer math.
 
-Furthermore, the possibility of integer overflow MUST be eliminated by using data types large enough to never overflow. Choosing a 64-bit signed data type for all arithmetic involving sample values would make sure the possibility for overflow is eliminated, but usually smaller data types are chosen for increased performance, especially in embedded devices. This section will provide guidelines for choosing the right data type in each step of encoding and decoding FLAC files.
+Furthermore, the possibility of integer overflow can be eliminated by using large enough data types. Choosing a 64-bit signed data type for all arithmetic involving sample values would make sure the possibility for overflow is eliminated, but usually smaller data types are chosen for increased performance, especially in embedded devices. This section provides guidelines for choosing the right data type in each step of encoding and decoding FLAC files.
 
 ## Determining necessary data type size
 To find the smallest data type size that is guaranteed not to overflow for a certain sequence of arithmetic operations, the combination of values producing the largest possible result should be considered.
@@ -24,7 +24,7 @@ Most FLAC decoders store decoded (subframe) samples as 32-bit values, which is s
 ## Prediction
 A prediction (which is used to calculate the residual on encoding or added to the residual to calculate the sample value on decoding) is formed by multiplying and summing preceding sample values. In order to eliminate the possibility of integer overflow, the combination of preceding sample values and predictor coefficients producing the largest possible value should be considered.
 
-To determine the size of the data type needed to calculate either a residual sample (on encoding) or an audio sample value (on decoding) in a fixed predictor subframe, the maximal possible value for these is calculated [as described in the previous subsection](#determining-necessary-data-type-size) in the following table. For example: if a frame codes for 16-bit audio and has some form of stereo decorrelation, the subframe coding for the side channel would need 16+1+3 bits in case a third order fixed predictor is used.
+To determine the size of the data type needed to calculate either a residual sample (on encoding) or an audio sample value (on decoding) in a fixed predictor subframe, the maximal possible value for these is calculated [as described in the previous subsection](#determining-necessary-data-type-size) in the following table. For example: if a frame codes for 16-bit audio and has some form of stereo decorrelation, the subframe coding for the side channel would need 16+1+3 bits if a third order fixed predictor is used.
 
 Order | Calculation of residual                              | Sample values summed | Extra bits
 :-----|:-----------------------------------------------------|:---------------------|:-----------
@@ -67,7 +67,7 @@ The FLAC format was first specified in December 2000 and the bitstream format wa
 
 ## Addition of block size strategy flag
 
-Perhaps the largest backwards incompatible change to the specification was published in July 2007. Before this change, variable block size streams were not explicitly marked as such by a flag bit in the frame header. A decoder had two ways to detect a variable block size stream, either by comparing the minimum and maximum block size in the STREAMINFO metadata block (which are equal in case of a fixed block size stream), or, in case a decoder did not receive a STREAMINFO metadata block, by detecting a change of block size during a stream, which could in theory not happen at all. As the meaning of the coded number in the frame header depends on whether or not a stream is variable block size, this presented a problem: the meaning of the coded number could not be reliably determined. To fix this problem, one of the reserved bits was changed to be used as a block size strategy flag. [See also the section frame header](#frame-header).
+Perhaps the largest backwards incompatible change to the specification was published in July 2007. Before this change, variable block size streams were not explicitly marked as such by a flag bit in the frame header. A decoder had two ways to detect a variable block size stream, either by comparing the minimum and maximum block size in the STREAMINFO metadata block (which are equal in case of a fixed block size stream), or, if a decoder did not receive a STREAMINFO metadata block, by detecting a change of block size during a stream, which could in theory not happen at all. As the meaning of the coded number in the frame header depends on whether or not a stream is variable block size, this presented a problem: the meaning of the coded number could not be reliably determined. To fix this problem, one of the reserved bits was changed to be used as a block size strategy flag. [See also the section frame header](#frame-header).
 
 Along with the addition of a new flag, the meaning of the [block size bits](#block-size-bits) was subtly changed. Initially, block size bits 0b0001-0b0101 and 0b1000-0b1111 could only be used for fixed block size streams, while 0b0110 and 0b0111 could be used for both fixed block size and variable block size streams. With the change these restrictions were lifted and 0b0001-0b1111 are now used for both variable block size and fixed block size streams.
 
@@ -91,23 +91,23 @@ This appendix provides some considerations for encoder implementations aiming to
 
 ## Non-subset streams
 
-As described in section [format subset](#format-subset), FLAC specifies a subset of its capabilities as the Subset format. Certain decoders may choose to only decode FLAC files conforming to the limitations imposed by the Subset. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to stay within the limitations of the FLAC Subset format.
+As described in section [format subset](#format-subset), FLAC specifies a subset of its capabilities as the Subset format. Certain decoders may choose to only decode FLAC files conforming to the limitations imposed by the Subset. Therefore, maximum compatibility with decoders is achieved when the limitations of the FLAC Subset format are followed when creating FLAC files.
 
 ## Variable block size
 
-Because it is often difficult to find the optimal arrangement of block sizes for maximum compression, most encoders choose to create files with a fixed block size. Because of this many decoder implementations suffer from bugs when handling variable block size streams or do not decode them at all. Furthermore, as is explained in [section addition of block size strategy flag](#addition-of-block-size-strategy-flag), there have been some changes to the way variable block size streams were encoded. Because of this, when maximum compatibility with decoders is desired it is RECOMMENDED to only use fixed block size streams.
+Because it is often difficult to find the optimal arrangement of block sizes for maximum compression, most encoders choose to create files with a fixed block size. Because of this many decoder implementations receive minimal use when handling variable block size streams, and this can reveal bugs, or reveal that implementations do not decode them at all. Furthermore, as is explained in [section addition of block size strategy flag](#addition-of-block-size-strategy-flag), there have been some changes to the way variable block size streams were encoded. Because of this, maximum compatibility with decoders is achieved when FLAC files are created using fixed block size streams.
 
 ## 5-bit Rice parameter {#rice-parameter-5-bit}
 
-As the addition of the 5-bit Rice parameter as described in [section addition of 5-bit Rice parameter](#addition-of-5-bit-rice-parameter) was quite a few years after the FLAC format was first introduced, some early decoders might not be able to decode files containing such Rice parameters. The introduction of this was specifically aimed at improving compression of 24-bit PCM audio and compression of 16-bit PCM audio only rarely benefits from using a 5-bit Rice parameters. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to not use 5-bit Rice parameters when encoding audio with a bit depth of 16 bits or lower.
+As the addition of the 5-bit Rice parameter as described in [section addition of 5-bit Rice parameter](#addition-of-5-bit-rice-parameter) was quite a few years after the FLAC format was first introduced, some early decoders might not be able to decode files containing such Rice parameters. The introduction of this was specifically aimed at improving compression of 24-bit PCM audio and compression of 16-bit PCM audio only rarely benefits from using a 5-bit Rice parameters. Therefore, maximum compatibility with decoders is achieved when FLAC files containing audio with a bit depth of 16 bits or lower are created without any use of 5-bit Rice parameters.
 
 ## Rice escape code
 
-Escapes Rice partitions are only seldom used as it turned out their use provides only very small compression improvement. As many encoders therefore do not use these by default or are not capable of producing them at all, it is likely many decoder implementation are not able to decode them correctly. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to not use escaped Rice partitions.
+Escapes Rice partitions are only seldom used as it turned out their use provides only very small compression improvement. As many encoders therefore do not use these by default or are not capable of producing them at all, it is likely many decoder implementation are not able to decode them correctly. Therefore, maximum compatibility with decoders is achieved when FLAC files are created without any use of escaped Rice partitions.
 
 ## Uncommon block size
 
-For unknown reasons some decoders have chosen to support only common block sizes except for the last block. Therefore, when maximum compatibility with decoders is desired it is RECOMMENDED to only use common block sizes as listed in section [block size bits](#block-size-bits) for all but the last block.
+For unknown reasons some decoders have chosen to support only common block sizes except for the last block. Therefore, maximum compatibility with decoders is achieved when creating FLAC files using common block sizes as listed in section [block size bits](#block-size-bits) for all but the last block.
 
 ## Uncommon bit depth
 
@@ -121,7 +121,7 @@ Most audio is stored in bit depths that are a whole number of bytes, e.g. 8, 16 
 
 FLAC can store these bit depths directly, but because they are uncommon, some decoders are not able to process the resulting files correctly. It is possible to store these formats in a FLAC file with a more common bit depth without sacrificing compression by padding each sample with zero bits to a bit depth that is a whole byte. FLAC will detect these wasted bits. This transformation leaves no ambiguity in how it can be reversed and is thus lossless. See [section wasted bits per sample](#wasted-bits-per-sample) for details.
 
-Therefore, when maximum compatibility with decoders is required, it is RECOMMENDED to pad samples of such audio with zero bits to the bit depth that is the next whole number of bytes.
+Therefore, maximum compatibility with decoders is achieved when FLAC files are created by padding samples of such audio with zero bits to the bit depth that is the next whole number of bytes.
 
 Besides audio with a 'non-whole byte' bit depth, some decoder implementations have chosen to only accept FLAC files coding for PCM audio with a bit depth of 16 bit. Many implementations support bit depths up to 24 bit but no higher. Consult [this web page](https://github.com/ietf-wg-cellar/flac-specification/wiki/Interoperability-considerations) for more up-to-date information.
 
@@ -133,11 +133,11 @@ From a non-exhaustive inquiry, it seems that a non-negligible amount of players,
 
 # Examples
 
-This informational appendix contains short example FLAC files which are decoded step by step. These examples provide a more engaging way to understand the FLAC format than the formal specification. The text explaining these examples assumes the reader has at least cursory read the specification and that the reader refers to the specification for explanation of the terminology used. These examples mostly focus on the lay-out of several metadata blocks and subframe types and the implications of certain aspects (for example wasted bits and stereo decorrelation) on this lay-out.
+This informational appendix contains short example FLAC files which are decoded step by step. These examples provide a more engaging way to understand the FLAC format than the formal specification. The text explaining these examples assumes the reader has at least cursorily read the specification and that the reader refers to the specification for explanation of the terminology used. These examples mostly focus on the lay-out of several metadata blocks and subframe types and the implications of certain aspects (for example wasted bits and stereo decorrelation) on this lay-out.
 
 The examples feature files generated by various FLAC encoders. These are presented in hexadecimal or binary format, followed by tables and text referring to various features by their starting bit positions in these representations. Each starting position (shortened to 'start' in the tables) is a hexadecimal byte position and a start bit within that byte, separated by a plus sign. Counts for these start at zero. For example, a feature starting at the 3rd bit of the 17th byte is referred to as starting at 0x10+2. The files that are explored in these examples can be found at https://github.com/ietf-wg-cellar/flac-specification.
 
-All data in this appendix has been thoroughly verified. However, as this appendix is informational, in case any information here conflicts with statements in the formal specification, the latter takes precedence.
+All data in this appendix has been thoroughly verified. However, as this appendix is informational, if any information here conflicts with statements in the formal specification, the latter takes precedence.
 
 ## Decoding example 1
 
