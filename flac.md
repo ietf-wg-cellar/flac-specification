@@ -582,7 +582,7 @@ Value   | Sample rate
 
 The next 4 bits (the first 4 bits of the fourth byte of each frame), referred to as the channels bits, contain both the number of channels of the audio as well as any stereo decorrelation used according to the following table.
 
-If a channel lay-out different than the ones listed in the following table is used, this can be signaled with a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag in a Vorbis comment metadata block, see [the section channel mask](#channel-mask) for details. For details on the way left/side, right/side and mid/side stereo are coded, see [the section on interchannel decorrelation](#interchannel-decorrelation).
+If a channel lay-out different than the ones listed in the following table is used, this can be signaled with a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag in a Vorbis comment metadata block, see [the section channel mask](#channel-mask) for details. Note that even when such a different channel lay-out is specified with a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK and the channel ordering in the following table is overriden, the channels bits still contain the actual number of channel coded in the frame. For details on the way left/side, right/side and mid/side stereo are coded, see [the section on interchannel decorrelation](#interchannel-decorrelation).
 
 Value           | Channels
 :---------------|:-----------
@@ -594,9 +594,9 @@ Value           | Channels
 0b0101          | 6 channels: front left, front right, front center, LFE, back/surround left, back/surround right
 0b0110          | 7 channels: front left, front right, front center, LFE, back center, side left, side right
 0b0111          | 8 channels: front left, front right, front center, LFE, back left, back right, side left, side right
-0b1000          | 2 channels, stored as left/side stereo
-0b1001          | 2 channels, stored as right/side stereo
-0b1010          | 2 channels, stored as mid/side stereo
+0b1000          | 2 channels, left, right, stored as left/side stereo
+0b1001          | 2 channels, left, right, stored as right/side stereo
+0b1010          | 2 channels, left, right, stored as mid/side stereo
 0b1011 - 0b1111 | reserved
 
 ### Bit depth bits
