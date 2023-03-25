@@ -161,6 +161,7 @@ The FLAC format uses two forms of Rice coding, which only differ in the number o
 
 FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding or skip data encoded using methods they do not recognize. Apart from reserved patterns, the format specifies invalid patterns in certain places, meaning that the patterns MUST NOT appear in any bitstream. These invalid patterns are usually used to make the synchronization mechanism more robust. They are listed in the following table.
 
+{anchor="tableinvalidpatterns"}
 Description                                 | Reference
 :-------------------------------------------|:------------
 Metadata block type 127                     | [Metadata block header](#metadata-block-header)
@@ -177,6 +178,13 @@ All samples encoded to and decoded from the FLAC format MUST be in a signed repr
 There are several ways to convert unsigned sample representations to signed sample representations, but the coding methods provided by the FLAC format work best on audio signals of which the numerical values of the samples are centered around zero, i.e. have no DC offset. In most unsigned audio formats, signals are centered around halfway the range of the unsigned integer type used. If that is the case, all sample representations SHOULD be converted by first copying the number to a signed integer with sufficient range and then subtracting half of the range of the unsigned integer type, which should result in a signal with samples centered around 0.
 
 Unary coding in a FLAC bitstream is done with zero bits terminated with a one bit, e.g. the number 5 is coded unary as 0b000001. This prevents the frame sync code from appearing in unary coded numbers.
+
+When a FLAC file contains invalid data, decoder behavior is left unspecified. A decoder MAY choose to stop decoding on encountering such invalid data. Examples of such invalid data are
+
+- One or more decoded sample values exceeds the range offered by the bit depth as coded for that frame. E.g. in a frame with a bit depth of 8 bits, any samples not in the inclusive range from -128 to 127 are invalid.
+- The number of wasted bits (see section [wasted bits per sample](wasted-bits-per-sample)) of a subframe is such that the bit depth of that subframe (see section [constant subframe](#constant-subframe) for a description of subframe bit depth) equals zero or is negative
+- A frame header CRC (see section [frame header CRC](#frame-header-crc)) or frame footer CRC (see section [frame footer](#frame-footer)) does not validate
+- One of the invalid bit patterns described in table (#tableinvalidpatterns, use counter) above is used
 
 # Format lay-out
 
@@ -662,7 +670,7 @@ Certain file formats, like AIFF, can store audio samples with a bit depth that i
 
 The wasted bits-per-sample flag in a subframe header is set to 1 if such wasted bits are present in that subframe. If this is the case, the number of wasted bits-per-sample (k) minus 1 follows the flag in an unary encoding. For example, if k is 3, 0b001 follows. If k = 0, the wasted bits-per-sample flag is 0 and no unary coded k follows.
 
-If k is not equal to 0, samples are coded ignoring k least-significant bits. For example, if the preceding frame header specified a sample size of 16 bits per sample and k is 3, samples in the subframe are coded as 13 bits per sample. A decoder MUST add k least-significant zero bits by shifting left (padding) after decoding a subframe sample. If the frame has left/side, right/side or mid/side stereo, a decoder MUST perform padding on the subframes before decorrelating the channels to left and right.
+If k is not equal to 0, samples are coded ignoring k least-significant bits. For example, if a frame not employing stereo decorrelation specifies a sample size of 16 bits per sample in the frame header and k of a subframe is 3, samples in the subframe are coded as 13 bits per sample. For more details, see [section constant subframe](#constant-subframe) on how the bit depth of a subframe is calculated. A decoder MUST add k least-significant zero bits by shifting left (padding) after decoding a subframe sample. If the frame has left/side, right/side or mid/side stereo, a decoder MUST perform padding on the subframes before decorrelating the channels to left and right. The number of wasted bits per sample MUST be such that the resulting number of bits per sample (of which the calculation is explained in [section constant subframe](#constant-subframe)) is larger than zero.
 
 Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed, as to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like lossyWAV that enable users to improve compression of their files by a lossless audio codec in a non-lossless way. Because of this the number of wasted bits k MAY change between frames and MAY differ between subframes. If the number of wasted bits changes halfway a subframe (e.g. the first part has 2 wasted bits and the second part has 4 wasted bits) the subframe uses the lowest common denominator, as otherwise it bits would be discarded and the process would not be lossless.
 
