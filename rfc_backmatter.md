@@ -24,7 +24,7 @@ Most FLAC decoders store decoded (subframe) samples as 32-bit values, which is s
 ## Prediction
 A prediction (which is used to calculate the residual on encoding or added to the residual to calculate the sample value on decoding) is formed by multiplying and summing preceding sample values. In order to eliminate the possibility of integer overflow, the combination of preceding sample values and predictor coefficients producing the largest possible value should be considered.
 
-To determine the size of the data type needed to calculate either a residual sample (on encoding) or an audio sample value (on decoding) in a fixed predictor subframe, the maximal possible value for these is calculated [as described in the previous subsection](#determining-necessary-data-type-size) in the following table. For example: if a frame codes for 16-bit audio and has some form of stereo decorrelation, the subframe coding for the side channel would need 16+1+3 bits if a third order fixed predictor is used.
+To determine the size of the data type needed to calculate either a residual sample (on encoding) or an audio sample value (on decoding) in a fixed predictor subframe, the maximal possible value for these is calculated as described in the [section determining necessary data type size](#determining-necessary-data-type-size) in the following table. For example: if a frame codes for 16-bit audio and has some form of stereo decorrelation, the subframe coding for the side channel would need 16+1+3 bits if a third order fixed predictor is used.
 
 Order | Calculation of residual                              | Sample values summed | Extra bits
 :-----|:-----------------------------------------------------|:---------------------|:-----------
