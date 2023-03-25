@@ -182,7 +182,7 @@ Unary coding in a FLAC bitstream is done with zero bits terminated with a one bi
 When a FLAC file contains invalid data, decoder behavior is left unspecified. A decoder MAY choose to stop decoding on encountering such invalid data. Examples of such invalid data are
 
 - One or more decoded sample values exceeds the range offered by the bit depth as coded for that frame. E.g. in a frame with a bit depth of 8 bits, any samples not in the inclusive range from -128 to 127 are invalid.
-- The number of wasted bits (see section [wasted bits per sample](wasted-bits-per-sample)) of a subframe is such that the bit depth of that subframe (see section [constant subframe](#constant-subframe) for a description of subframe bit depth) equals zero or is negative
+- The number of wasted bits (see section [wasted bits per sample](#wasted-bits-per-sample)) of a subframe is such that the bit depth of that subframe (see section [constant subframe](#constant-subframe) for a description of subframe bit depth) equals zero or is negative
 - A frame header CRC (see section [frame header CRC](#frame-header-crc)) or frame footer CRC (see section [frame footer](#frame-footer)) does not validate
 - One of the invalid bit patterns described in table (#tableinvalidpatterns, use counter) above is used
 
