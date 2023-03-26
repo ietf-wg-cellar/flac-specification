@@ -91,7 +91,7 @@ This appendix provides some considerations for encoder implementations aiming to
 
 ## Streamable subset
 
-As described in section [streamable subset](#streamable-subset), FLAC specifies a subset of its capabilities as the FLAC streamable subset. Certain decoders may choose to only decode FLAC files conforming to the limitations imposed by thestreamable subset. Therefore, maximum compatibility with decoders is achieved when the limitations of the FLAC streamable subset are followed when creating FLAC files.
+As described in section [streamable subset](#streamable-subset), FLAC specifies a subset of its capabilities as the FLAC streamable subset. Certain decoders may choose to only decode FLAC files conforming to the limitations imposed by the streamable subset. Therefore, maximum compatibility with decoders is achieved when the limitations of the FLAC streamable subset are followed when creating FLAC files.
 
 ## Variable block size
 
