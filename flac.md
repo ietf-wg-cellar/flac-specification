@@ -678,19 +678,19 @@ Five different fixed predictors are defined in the following table, one for each
 Order | Prediction                                    | Derivation
 :-----|:----------------------------------------------|:----------------------------------------
 0     | 0                                             | N/A
-1     | s(n-1)                                        | N/A
-2     | 2 * s(n-1) - s(n-2)                           | s(n-1) + s'(n-1)
-3     | 3 * s(n-1) - 3 * s(n-2) + s(n-3)              | s(n-1) + s'(n-1) + s''(n-1)
-4     | 4 * s(n-1) - 6 * s(n-2) + 4 * s(n-3) - s(n-4) | s(n-1) + s'(n-1) + s''(n-1) + s'''(n-1)
+1     | a(n-1)                                        | N/A
+2     | 2 * a(n-1) - a(n-2)                           | a(n-1) + a'(n-1)
+3     | 3 * a(n-1) - 3 * a(n-2) + a(n-3)              | a(n-1) + a'(n-1) + a''(n-1)
+4     | 4 * a(n-1) - 6 * a(n-2) + 4 * a(n-3) - a(n-4) | a(n-1) + a'(n-1) + a''(n-1) + a'''(n-1)
 
 Where
 
 - n is the number of the sample being predicted
-- s(n) is the sample being predicted
-- s(n-1) is the sample before the one being predicted
-- s'(n-1) is the difference between the previous sample and the sample before that, i.e. s(n-1) - s(n-2). This is the closest available first-order discrete derivative
-- s''(n-1) is s'(n-1) - s'(n-2) or the closest available second-order discrete derivative
-- s'''(n-1) is s''(n-1) - s''(n-2) or the closest available third-order discrete derivative
+- a(n) is the sample being predicted
+- a(n-1) is the sample before the one being predicted
+- a'(n-1) is the difference between the previous sample and the sample before that, i.e. a(n-1) - a(n-2). This is the closest available first-order discrete derivative
+- a''(n-1) is a'(n-1) - a'(n-2) or the closest available second-order discrete derivative
+- a'''(n-1) is a''(n-1) - a''(n-2) or the closest available third-order discrete derivative
 
 As a predictor makes use of samples preceding the sample that is predicted, it can only be used when enough samples are known. As each subframe in FLAC is coded completely independently, the first few samples in each subframe cannot be predicted. Therefore, a number of so-called warm-up samples equal to the predictor order is stored. These are stored unencoded, bypassing the predictor and residual coding stage. See [section on Constant subframe](#constant-subframe) on how samples are stored unencoded. The table below defines how a fixed predictor subframe appears in the bitstream
 
