@@ -131,6 +131,8 @@ Many FLAC audio players are unable to render multi-channel audio or audio with a
 
 From a non-exhaustive inquiry, it seems that a non-negligible amount of players, among those especially hardware players, does not support audio with 3 or more channels or sample rates other than those considered common, see [section sample rate bits](#sample-rate-bits).
 
+For those players that do support and are able to render multi-channel audio, many do not parse and use the WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag (see [section channel mask](#channel-mask)). This too is a interoperability consideration that cannot be satisfied without sacrificing the lossless nature of the FLAC format.
+
 # Examples
 
 This informational appendix contains short example FLAC files which are decoded step by step. These examples provide a more engaging way to understand the FLAC format than the formal specification. The text explaining these examples assumes the reader has at least cursorily read the specification and that the reader refers to the specification for explanation of the terminology used. These examples mostly focus on the lay-out of several metadata blocks and subframe types and the implications of certain aspects (for example wasted bits and stereo decorrelation) on this lay-out.
