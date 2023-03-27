@@ -85,7 +85,7 @@ As stated in section [linear predictor subframe](#linear-predictor-subframe), th
 
 # Interoperability considerations
 
-As documented in appendix [past format changes](#past-format-changes), there have been some changes and additions to the FLAC format. Additionally, implementation of certain features of the FLAC format took many years, meaning early decoder implementations could not be tested against files with these features. Finally, many lower-quality FLAC decoders only implement a subset of FLAC features (not necessarily the same subset as defined by the streamble subset, see [section streamble subset](#streamable-subset)) required for playback of the most common FLAC files.
+As documented in appendix [past format changes](#past-format-changes), there have been some changes and additions to the FLAC format. Additionally, implementation of certain features of the FLAC format took many years, meaning early decoder implementations could not be tested against files with these features. Finally, many lower-quality FLAC decoders only implement enough features required for playback of the most common FLAC files.
 
 This appendix provides some considerations for encoder implementations aiming to create highly compatible files. As this topic is one that might change after this document is finished, consult [this web page](https://github.com/ietf-wg-cellar/flac-specification/wiki/Interoperability-considerations) for more up-to-date information.
 
