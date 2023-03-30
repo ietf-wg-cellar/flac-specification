@@ -404,7 +404,7 @@ WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK fields MAY be padded with zeros, for example
 
 A WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK field of 0x0 can be used to indicate that none of the audio channels of a file correlate with speaker positions. This is the case when audio needs to be decoded into speaker positions (e.g. Ambisonics B-format audio) or when a multitrack recording is contained.
 
-It is possible for a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK field to code for fewer channels than present in the audio. If that is the case, the remaining channels SHOULD not be rendered by a playback application unfamiliar with their purpose. For example, the Ambisonics UHJ format is compatible with stereo playback, its first two channels can be played back on stereo equipment, but all four channels together can be decoded into surround sound. For that example, the Vorbis comment field WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x3 would be set, indicating the first two channels are front left and front right, and other channels do not correlate with speaker positions directly.
+It is possible for a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK field to code for fewer channels than present in the audio. If that is the case, the remaining channels SHOULD NOT be rendered by a playback application unfamiliar with their purpose. For example, the Ambisonics UHJ format is compatible with stereo playback, its first two channels can be played back on stereo equipment, but all four channels together can be decoded into surround sound. For that example, the Vorbis comment field WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK=0x3 would be set, indicating the first two channels are front left and front right, and other channels do not correlate with speaker positions directly.
 
 If audio channels not assigned to any speaker are contained and decoding to speaker positions is possible, it is RECOMMENDED to provide metadata on how this decoding should take place in another Vorbis comment field or an application metadata block. This document does not define such metadata.
 
@@ -844,7 +844,7 @@ If an audio stream is encoded where audio properties (sample rate, number of cha
 
 ## Matroska mapping
 
-The Matroska container format is defined in [@!I-D.ietf-cellar-matroska]. The codec ID (EBML path `\Segment\Tracks\TrackEntry\CodecID`) assigned to signal tracks carrying FLAC data is `A_FLAC` in ASCII. All FLAC data before the first audio frame (i.e. the `fLaC` ASCII signature and all metadata blocks) is stored as CodecPrivate data (EBML path `\Segment\Tracks\TrackEntry\CodecPrivate`).
+The Matroska container format is defined in [@?I-D.ietf-cellar-matroska]. The codec ID (EBML path `\Segment\Tracks\TrackEntry\CodecID`) assigned to signal tracks carrying FLAC data is `A_FLAC` in ASCII. All FLAC data before the first audio frame (i.e. the `fLaC` ASCII signature and all metadata blocks) is stored as CodecPrivate data (EBML path `\Segment\Tracks\TrackEntry\CodecPrivate`).
 
 Each FLAC frame (including all of its subframes) is treated as a single frame in the Matroska context.
 
@@ -876,7 +876,7 @@ A list of other implementations and an overview of which parts of the format the
 
 Like any other codec (such as [@?RFC6716]), FLAC should not be used with insecure ciphers or cipher modes that are vulnerable to known plaintext attacks. Some of the header bits as well as the padding are easily predictable.
 
-Implementations of the FLAC codec need to take appropriate security considerations into account. Those related to denial of service are outlined in Section 2.1 of [@!RFC4732]. It is extremely important for the decoder to be robust against malformed payloads. Payloads that do not conform to this specification **MUST NOT** cause the decoder to overrun its allocated memory or to take an excessive amount of resources to decode. An overrun in allocated memory could lead to arbitrary code execution by an attacker. The same applies to the encoder, even though problems in encoders are typically rarer. Malformed audio streams **MUST NOT** cause the encoder to misbehave because this would allow an attacker to attack transcoding gateways.
+Implementations of the FLAC codec need to take appropriate security considerations into account, as outlined in [@?RFC4732]. It is extremely important for the decoder to be robust against malformed payloads. Payloads that do not conform to this specification **MUST NOT** cause the decoder to overrun its allocated memory or to take an excessive amount of resources to decode. An overrun in allocated memory could lead to arbitrary code execution by an attacker. The same applies to the encoder, even though problems in encoders are typically rarer. Malformed audio streams **MUST NOT** cause the encoder to misbehave because this would allow an attacker to attack transcoding gateways.
 
 As with all compression algorithms, both encoding and decoding can produce an output much larger than the input. In case of decoding, the most extreme possible case of this is a frame with eight constant subframes of block size 65535 and coding for 32-bit PCM. This frame is only 49 byte in size, but codes for more than 2 megabyte of uncompressed PCM data. For encoding, it is possible to have an even larger size increase, although such behavior is generally considered faulty. This happens if the encoder chooses a rice parameter that does not fit with the residual that has to be encoded. In such a case, very long unary coded symbols can appear, in the most extreme case more than 4 gigabyte per sample. Decoder and encoder implementors are advised to take precautions to prevent excessive resource utilization in such cases.
 
@@ -894,7 +894,7 @@ See the [FLAC decoder testbench](https://github.com/ietf-wg-cellar/flac-test-fil
 
 # IANA Considerations
 
-In accordance with the procedures set forth in [@?RFC4288], this document registers one new media type, "audio/flac", as defined in the following section.
+In accordance with the procedures set forth in [@?RFC6838], this document registers one new media type, "audio/flac", as defined in the following section.
 
 ## Media type registration
 
