@@ -620,9 +620,9 @@ The next bit is reserved and MUST be zero.
 
 Following the reserved bit (starting at the fifth byte of the frame) is either a sample or a frame number, which will be referred to as the coded number. When dealing with variable block size streams, the sample number of the first sample in the frame is encoded. When the file contains a fixed block size stream, the frame number is encoded.
 
-The coded number is stored in a variable length code like UTF-8 as defined [@!RFC3629], but extended to a maximum of 36 bits unencoded, 7 byte encoded.
+The coded number is stored in a variable length code like UTF-8 as defined in [@!RFC3629], but extended to a maximum of 36 bits unencoded, 7 byte encoded.
 
-When a frame number is encoded, the value MUST NOT be larger than what fits a value 31 bits unencoded or 6 byte encoded. Please note that as most general purpose UTF-8 encoders and decoders follow [@!RFC3629], they will not be able to handle these extended codes. Furthermore, while UTF-8 is specifically used to encode characters, FLAC specifically uses it to encode numbers instead. To encode or decode a coded number, follow the procedures of section 3 of [@!RFC3629], but instead of using a character number, use a frame or sample number, and instead of the table in section 3 of [@!RFC3629], use the extended table below.
+When a frame number is encoded, the value MUST NOT be larger than what fits a value 31 bits unencoded or 6 byte encoded. Please note that as most general purpose UTF-8 encoders and decoders follow [@!RFC3629], they will not be able to handle these extended codes. Furthermore, while UTF-8 is specifically used to encode characters, FLAC uses it to encode numbers instead. To encode or decode a coded number, follow the procedures of section 3 of [@!RFC3629], but instead of using a character number, use a frame or sample number, and instead of the table in section 3 of [@!RFC3629], use the extended table below.
 
 Number range (hexadecimal)          | Octet sequence (binary)
 :-----------------------------------|:--------------------------------------------------------------
