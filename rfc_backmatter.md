@@ -89,7 +89,7 @@ As documented in appendix [past format changes](#past-format-changes), there hav
 
 This appendix provides some considerations for encoder implementations aiming to create highly compatible files. As this topic is one that might change after this document is finished, consult [this web page](https://github.com/ietf-wg-cellar/flac-specification/wiki/Interoperability-considerations) for more up-to-date information.
 
-## Streamable subset
+## Features outside of streamable subset
 
 As described in section [streamable subset](#streamable-subset), FLAC specifies a subset of its capabilities as the FLAC streamable subset. Certain decoders may choose to only decode FLAC files conforming to the limitations imposed by the streamable subset. Therefore, maximum compatibility with decoders is achieved when the limitations of the FLAC streamable subset are followed when creating FLAC files.
 
