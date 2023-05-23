@@ -133,6 +133,12 @@ From a non-exhaustive inquiry, it seems that a non-negligible amount of players,
 
 For those players that do support and are able to render multi-channel audio, many do not parse and use the WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag (see [section channel mask](#channel-mask)). This too is a interoperability consideration that cannot be satisfied without sacrificing the lossless nature of the FLAC format.
 
+## Changing audio properties mid-stream
+
+Each FLAC frame header stores the audio sample rate, number of bits per sample and number of channels independently of the streaminfo metadata block and other frame headers. This was done to permit multicasting of FLAC files but it also allows these properties to change mid-stream. However, many FLAC decoders do not handle such changes, as few other formats are capable of holding such streams and changing playback properties during playback is often not possible without interrupting playback. Also, as explained in [section frame structure](#frame-structure), using this feature of FLAC results in various practical problems.
+
+However, even when storing an audio stream with changing properties in FLAC encapsulated in a container capable of handling such changes, as recommended in [section frame structure](#frame-structure), many decoders are not able to decode such a stream correctly. Therefore, maximum compatibility with decoders is achieved when FLAC files are created with a single set of audio properties, in which the properties coded in the streaminfo metadata block (see [section streaminfo](#streaminfo)) and the properties coded in all frame headers (see [section frame header](#frame-header)) are the same. This can be achieved by splitting up an input stream with changing audio properties at the point where these properties change.
+
 # Examples
 
 This informational appendix contains short example FLAC files which are decoded step by step. These examples provide a more engaging way to understand the FLAC format than the formal specification. The text explaining these examples assumes the reader has at least cursorily read the specification and that the reader refers to the specification for explanation of the terminology used. These examples mostly focus on the lay-out of several metadata blocks and subframe types and the implications of certain aspects (for example wasted bits and stereo decorrelation) on this lay-out.
