@@ -119,9 +119,11 @@ Most audio is stored in bit depths that are a whole number of bytes, e.g. 8, 16 
 - 8-bit µ-law can be losslessly converted to 14 bit (Linear) PCM
 - 8-bit A-law can be losslessly converted to 13 bit (Linear) PCM
 
-The FLAC format can contain these bit depths directly, but because they are uncommon, some decoders are not able to process the resulting files correctly. It is possible to store these formats in a FLAC file with a more common bit depth without sacrificing compression by padding each sample with zero bits to a bit depth that is a whole byte. The FLAC format can efficiently compress these wasted bits. This transformation leaves no ambiguity in how it can be reversed and is thus lossless. See [section wasted bits per sample](#wasted-bits-per-sample) for details.
+The FLAC format can contain these bit depths directly, but because they are uncommon, some decoders are not able to process the resulting files correctly. It is possible to store these formats in a FLAC file with a more common bit depth without sacrificing compression by padding each sample with zero bits to a bit depth that is a whole byte. The FLAC format can efficiently compress these wasted bits. See [section wasted bits per sample](#wasted-bits-per-sample) for details.
 
 Therefore, maximum compatibility with decoders is achieved when FLAC files are created by padding samples of such audio with zero bits to the bit depth that is the next whole number of bytes.
+
+In cases where the original signal is already padded, this operation cannot be reversed losslessly without knowing the original bit depth. To leave no ambiguity, the original bit depth needs to be stored, for example in a vorbis comment field, by storing the header of the original file or in a description of the file. The choice of a suitable method is left to the implementer.
 
 Besides audio with a 'non-whole byte' bit depth, some decoder implementations have chosen to only accept FLAC files coding for PCM audio with a bit depth of 16 bit. Many implementations support bit depths up to 24 bit but no higher. Consult [this web page](https://github.com/ietf-wg-cellar/flac-specification/wiki/Interoperability-considerations) for more up-to-date information.
 
