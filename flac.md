@@ -171,7 +171,7 @@ Uncommon blocksize 65536                    | [Uncommon block size](#uncommon-bl
 Predictor coefficient precision bits 0b1111 | [Linear predictor subframe](#linear-predictor-subframe)
 Negative predictor right shift              | [Linear predictor subframe](#linear-predictor-subframe)
 
-All numbers used in a FLAC bitstream are integers, there are no floating-point representations. All numbers are big-endian coded, except the field length used in Vorbis comments (see [Vorbis comment metadata block](#vorbis-comment)), which are little-endian coded. All numbers are unsigned except linear predictor coefficients, the linear prediction shift (see [linear predictor subframe](#linear-predictor-subframe)) and numbers which directly represent samples, which are signed. None of these restrictions apply to application metadata blocks or to Vorbis comment field contents.
+All numbers used in a FLAC bitstream are integers, there are no floating-point representations. All numbers are big-endian coded, except the field lengths used in Vorbis comments (see [Vorbis comment metadata block](#vorbis-comment)), which are little-endian coded. All numbers are unsigned except linear predictor coefficients, the linear prediction shift (see [linear predictor subframe](#linear-predictor-subframe)) and numbers which directly represent samples, which are signed. None of these restrictions apply to application metadata blocks or to Vorbis comment field contents.
 
 All samples encoded to and decoded from the FLAC format MUST be in a signed representation.
 
