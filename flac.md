@@ -886,7 +886,7 @@ Various kinds of metadata blocks contain length fields or fields counts. While r
 
 Metadata blocks can also contain references, e.g. the picture metadata block can contain a URI. Applications MUST obtain explicit user approval to retrieve resources via remote protocols and to retrieve local resources not located in the same directory as the FLAC file being processed.
 
-Seeking in a FLAC stream that is not in a container relies on the coded number in frame headers and optionally a seektable metadata block. Parsers MUST employ thorough sanity checks on whether a found coded number or seekpoint is at all possible. Without these checks, seeking might get stuck in an infinite loop when numbers in frames are non-consecutive or otherwise not valid, which could be used in denial of service attacks.
+Seeking in a FLAC stream that is not in a container relies on the coded number in frame headers and optionally a seektable metadata block. Parsers MUST employ thorough checks on whether a found coded number or seekpoint is at all possible. Without these checks, seeking might get stuck in an infinite loop when numbers in frames are non-consecutive or otherwise not valid, which could be used in denial of service attacks.
 
 Implementors are advised to employ fuzz testing combined with different sanitizers on FLAC decoders to find security problems. Ignoring the results of CRC checks improves the efficiency of decoder fuzz testing.
 
@@ -898,7 +898,7 @@ In accordance with the procedures set forth in [@?RFC6838], this document regist
 
 ## Media type registration
 
-The following information serves as the registration form for the "audio/flac" media type. This media type is applicable for FLAC audio packaged in its native container. FLAC audio packaged in another container will take on the media type of its container, for example audio/ogg when packaged in an Ogg container or video/mp4 when packaged in a MP4 container alongside a video track.
+The following information serves as the registration form for the "audio/flac" media type. This media type is applicable for FLAC audio that is not packaged in a container as described in [section container mappings](#container-mappings). FLAC audio packaged in such a container will take on the media type of that container, for example audio/ogg when packaged in an Ogg container or video/mp4 when packaged in a MP4 container alongside a video track.
 
 ```
    Type name: audio
