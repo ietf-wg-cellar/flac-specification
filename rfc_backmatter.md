@@ -103,7 +103,7 @@ As the addition of the 5-bit Rice parameter as described in [section addition of
 
 ## Rice escape code
 
-Escapes Rice partitions are only seldom used as it turned out their use provides only very small compression improvement. As many encoders therefore do not use these by default or are not capable of producing them at all, it is likely many decoder implementation are not able to decode them correctly. Therefore, maximum compatibility with decoders is achieved when FLAC files are created without any use of escaped Rice partitions.
+Escaped Rice partitions are only seldom used as it turned out their use provides only very small compression improvement. As many encoders therefore do not use these by default or are not capable of producing them at all, it is likely many decoder implementation are not able to decode them correctly. Therefore, maximum compatibility with decoders is achieved when FLAC files are created without any use of escaped Rice partitions.
 
 ## Uncommon block size
 
