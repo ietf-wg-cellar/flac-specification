@@ -7,12 +7,14 @@ In order to maintain lossless behavior, all arithmetic used in encoding and deco
 
 Furthermore, the possibility of integer overflow can be eliminated by using large enough data types. Choosing a 64-bit signed data type for all arithmetic involving sample values would make sure the possibility for overflow is eliminated, but usually smaller data types are chosen for increased performance, especially in embedded devices. This section provides guidelines for choosing the right data type in each step of encoding and decoding FLAC files.
 
+In this appendix, signed data types are signed two's complement.
+
 ## Determining necessary data type size
 To find the smallest data type size that is guaranteed not to overflow for a certain sequence of arithmetic operations, the combination of values producing the largest possible result should be considered.
 
 If for example two 16-bit signed integers are added, the largest possible result forms if both values are the largest number that can be represented with a 16-bit signed integer. To store the result, an signed integer data type with at least 17 bits is needed. Similarly, when adding 4 of these values, 18 bits are needed, when adding 8, 19 bits are needed etc. In general, the number of bits necessary when adding numbers together is increased by the log base 2 of the number of values rounded up to the nearest integer. So, when adding 18 unknown values stored in 8 bit signed integers, we need a signed integer data type of at least 13 bits to store the result, as the log base 2 of 18 rounded up is 5.
 
-In case of multiplication, the number of bits needed for the result is the size of the first variable plus the size of the second variable, but counting only one sign bit if working with signed data types. If for example a 16-bit signed integer is multiplied by a 16-bit signed integer, the result needs at least 31 bits to store without overflowing.
+In case of multiplication, the number of bits needed for the result is the size of the first variable plus the size of the second variable. If for example a 16-bit signed integer is multiplied by a 16-bit signed integer, the result needs at least 32 bits to store without overflowing. To show this in practice, the largest signed value that can be stored in 4 bit is -8. -8 * -8 is 64, which needs at least 8 bits (signed) to store.
 
 ## Stereo decorrelation
 When stereo decorrelation is used, the side channel will have one extra bit of bit depth, see  [section on Interchannel Decorrelation](#interchannel-decorrelation).
@@ -40,9 +42,9 @@ Where
 - a(n) is the sample being predicted
 - a(n-1) is the sample before the one being predicted, a(n-2) is the sample before that etc.
 
-For subframes with a linear predictor, calculation is a little more complicated. Each prediction is a sum of several multiplications. Each of these multiply a sample value with a predictor coefficient. The extra bits needed can be calculated by adding the predictor coefficient precision (in bits) to the bit depth of the audio samples. As both are signed numbers and only one 'sign bit' is necessary, 1 bit can be subtracted. To account for the summing of these multiplications, the log base 2 of the predictor order rounded up is added.
+For subframes with a linear predictor, calculation is a little more complicated. Each prediction is a sum of several multiplications. Each of these multiply a sample value with a predictor coefficient. The extra bits needed can be calculated by adding the predictor coefficient precision (in bits) to the bit depth of the audio samples. To account for the summing of these multiplications, the log base 2 of the predictor order rounded up is added.
 
-For example, if the sample bit depth of the source is 24, the current subframe encodes a side channel (see the [section on interchannel decorrelation](#interchannel-decorrelation)), the predictor order is 12 and the predictor coefficient precision is 15 bits, the minimum required size of the used signed integer data type is at least (24 + 1) + (15 - 1) + ceil(log2(12)) = 43 bits. As another example, with a side-channel subframe bit depth of 16, a predictor order of 8 and a predictor coefficient precision of 12 bits, the minimum required size of the used signed integer data type is (16 + 1) + (12 - 1)  + ceil(log2(8)) = 31 bits.
+For example, if the sample bit depth of the source is 24, the current subframe encodes a side channel (see the [section on interchannel decorrelation](#interchannel-decorrelation)), the predictor order is 12 and the predictor coefficient precision is 15 bits, the minimum required size of the used signed integer data type is at least (24 + 1) + 15 + ceil(log2(12)) = 44 bits. As another example, with a side-channel subframe bit depth of 16, a predictor order of 8 and a predictor coefficient precision of 12 bits, the minimum required size of the used signed integer data type is (16 + 1) + 12 + ceil(log2(8)) = 32 bits.
 
 ## Residual
 
@@ -50,7 +52,7 @@ As stated in the section [coded residual](#coded-residual), an encoder must make
 
 For the residual of a fixed predictor, the maximum size of a residual was already calculated in the previous section. However, for a linear predictor, the prediction is shifted right by a certain amount. The number of bits needed for the residual is the number of bits calculated in the previous section, reduced by the prediction right shift, increased by one bit to account for the subtraction of the prediction from the current sample on encoding.
 
-Taking the last example of the previous section, where 31 bits were needed for the prediction, the required data type size for the residual samples in case of a right shift of 10 bits would be 31 - 10 + 1 = 22 bits, which means it is not necessary to check whether the residuals fit a 32-bit signed integer.
+Taking the last example of the previous section, where 31 bits were needed for the prediction, the required data type size for the residual samples in case of a right shift of 10 bits would be 32 - 10 + 1 = 23 bits, which means it is not necessary to check whether the residuals fit a 32-bit signed integer.
 
 As another example, when encoding 32-bit PCM with fixed predictors, all predictor orders must be checked. While the 0-order fixed predictor is guaranteed to have residuals that fit a 32-bit signed int, it might produce a residual being the most negative representable value of that 32-bit signed int.
 
