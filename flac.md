@@ -151,7 +151,7 @@ For more information on fixed and linear predictors, see [@HPL-1999-144] and [@r
 
 If a subframe uses a predictor to approximate the audio signal, a residual is stored to 'correct' the approximation to the exact value. When an effective predictor is used, the average numerical value of the residual samples is smaller than that of the samples before prediction. While having smaller values on average, it is possible a few 'outlier' residual samples are much larger than any of the original samples. Sometimes these outliers even exceed the range the bit depth of the original audio offers.
 
-To be able to efficiently code such a stream of relatively small numbers with an occasional outlier, Rice coding (a subset of Golomb coding) is used. Depending on how small the numbers are that have to be coded, a Rice parameter is chosen. The numerical value of each residual sample is split in two parts by dividing it with `2^(Rice parameter)`, creating a quotient and a remainder. The quotient is stored in unary form, the remainder in binary form. If indeed most residual samples are close to zero and the Rice parameter is chosen right, this form of coding, a so-called variable-length code, needs less bits to store than storing the residual in unencoded form.
+To be able to efficiently code such a stream of relatively small numbers with an occasional outlier, Rice coding (a subset of Golomb coding) is used. Depending on how small the numbers are that have to be coded, a Rice parameter is chosen. The numerical value of each residual sample is split in two parts by dividing it with `2^(Rice parameter)`, creating a quotient and a remainder. The quotient is stored in unary form, the remainder in binary form. If indeed most residual samples are close to zero and a suitable Rice parameter is chosen, this form of coding, a so-called variable-length code, needs less bits to store than storing the residual in unencoded form.
 
 As Rice codes can only handle unsigned numbers, signed numbers are zigzag encoded to a so-called folded residual. For more information see section [coded residual](#coded-residual) for a more thorough explanation.
 
@@ -161,9 +161,9 @@ The FLAC format uses two forms of Rice coding, which only differ in the number o
 
 # Format principles
 
-FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding or skip data encoded using methods they do not recognize. Apart from reserved patterns, the format specifies invalid patterns in certain places, meaning that the patterns MUST NOT appear in any bitstream. These invalid patterns are usually used to make the synchronization mechanism more robust. They are listed in the following table.
+FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding or skip data encoded using methods they do not recognize. Apart from reserved patterns, the format specifies forbidden patterns in certain places, meaning that the patterns MUST NOT appear in any bitstream. They are listed in the following table.
 
-{anchor="tableinvalidpatterns"}
+{anchor="tableforbiddenpatterns"}
 Description                                 | Reference
 :-------------------------------------------|:------------
 Metadata block type 127                     | [Metadata block header](#metadata-block-header)
@@ -181,12 +181,12 @@ There are several ways to convert unsigned sample representations to signed samp
 
 Unary coding in a FLAC bitstream is done with zero bits terminated with a one bit, e.g. the number 5 is coded unary as 0b000001. This prevents the frame sync code from appearing in unary coded numbers.
 
-When a FLAC file contains invalid data, decoder behavior is left unspecified. A decoder MAY choose to stop decoding on encountering such invalid data. Examples of such invalid data are
+When a FLAC file contains data that is forbidden or otherwise not valid, decoder behavior is left unspecified. A decoder MAY choose to stop decoding on encountering such data. Examples of such data are
 
-- One or more decoded sample values exceeds the range offered by the bit depth as coded for that frame. E.g. in a frame with a bit depth of 8 bits, any samples not in the inclusive range from -128 to 127 are invalid.
+- One or more decoded sample values exceeds the range offered by the bit depth as coded for that frame. E.g. in a frame with a bit depth of 8 bits, any samples not in the inclusive range from -128 to 127 are not valid
 - The number of wasted bits (see section [wasted bits per sample](#wasted-bits-per-sample)) used by a subframe is such that the bit depth of that subframe (see section [constant subframe](#constant-subframe) for a description of subframe bit depth) equals zero or is negative
 - A frame header CRC (see section [frame header CRC](#frame-header-crc)) or frame footer CRC (see section [frame footer](#frame-footer)) does not validate
-- One of the invalid bit patterns described in table (#tableinvalidpatterns, use counter) above is used
+- One of the forbidden bit patterns described in table (#tableforbiddenpatterns, use counter) above is used
 
 # Format lay-out
 
@@ -221,7 +221,7 @@ At the start of a FLAC file or stream, following the `fLaC` ASCII file signature
 
 ## Metadata block header
 
-Each metadata block starts with a 4 byte header. The first bit in this header flags whether a metadata block is the last one, it is a 0 when other metadata blocks follow, otherwise it is a 1. The 7 remaining bits of the first header byte contain the type of the metadata block as an unsigned number between 0 and 126 according to the following table. A value of 127 (i.e. 0b1111111) is invalid. The three bytes that follow code for the size of the metadata block in bytes excluding the 4 header bytes as an unsigned number coded big-endian.
+Each metadata block starts with a 4 byte header. The first bit in this header flags whether a metadata block is the last one, it is a 0 when other metadata blocks follow, otherwise it is a 1. The 7 remaining bits of the first header byte contain the type of the metadata block as an unsigned number between 0 and 126 according to the following table. A value of 127 (i.e. 0b1111111) is forbidden. The three bytes that follow code for the size of the metadata block in bytes excluding the 4 header bytes as an unsigned number coded big-endian.
 
 Value   | Metadata block type
 :-------|:-----------
@@ -233,14 +233,14 @@ Value   | Metadata block type
 5       | Cuesheet
 6       | Picture
 7 - 126 | reserved
-127     | invalid, to avoid confusion with a frame sync code
+127     | forbidden, to avoid confusion with a frame sync code
 
 
 ## Streaminfo
 
 The streaminfo metadata block has information about the whole stream, like sample rate, number of channels, total number of samples, etc. It MUST be present as the first metadata block in the stream. Other metadata blocks MAY follow. There MUST be no more than one streaminfo metadata block per FLAC stream.
 
-If the streaminfo metadata block contains incorrect or incomplete information, decoder behavior is left unspecified (i.e. up to the decoder implementation). A decoder MAY choose to stop further decoding when the information supplied by the streaminfo metadata block turns out to be incorrect or invalid. A decoder accepting information from the streaminfo block (most significantly the maximum frame size, maximum block size, number of audio channels, number of bits per sample and total number of samples) without doing further checks during decoding of audio frames could be vulnerable to buffer overflows. See also [the section on security considerations](#security-considerations).
+If the streaminfo metadata block contains incorrect or incomplete information, decoder behavior is left unspecified (i.e. up to the decoder implementation). A decoder MAY choose to stop further decoding when the information supplied by the streaminfo metadata block turns out to be incorrect or contains forbidden values. A decoder accepting information from the streaminfo block (most significantly the maximum frame size, maximum block size, number of audio channels, number of bits per sample and total number of samples) without doing further checks during decoding of audio frames could be vulnerable to buffer overflows. See also [the section on security considerations](#security-considerations).
 
 Data     | Description
 :--------|:-----------
@@ -252,7 +252,7 @@ Data     | Description
 `u(3)`   | (number of channels)-1. FLAC supports from 1 to 8 channels.
 `u(5)`   | (bits per sample)-1. FLAC supports from 4 to 32 bits per sample.
 `u(36)`  | Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1 kHz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
-`u(128)` | MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when the error does not result in an invalid bitstream. A value of `0` signifies that the value is not known.
+`u(128)` | MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when, despite the error, the bitstream itself is valid. A value of `0` signifies that the value is not known.
 
 The minimum block size and the maximum block size MUST be in the 16-65535 range. The minimum block size MUST be equal to or less than the maximum block size.
 
@@ -295,7 +295,7 @@ AAAAAAAASSSSAAAABBBBBBBBSSSSBBBB
 
 ## Padding
 
-The padding metadata block allows for an arbitrary amount of padding. This block is useful when it is known that metadata will be edited after encoding; the user can instruct the encoder to reserve a padding block of sufficient size so that when metadata is added, it will simply overwrite the padding (which is relatively quick) instead of having to insert it into the right place in the existing file (which would normally require rewriting the entire file). There MAY be one or more padding metadata blocks per FLAC stream.
+The padding metadata block allows for an arbitrary amount of padding. This block is useful when it is known that metadata will be edited after encoding; the user can instruct the encoder to reserve a padding block of sufficient size so that when metadata is added, it will simply overwrite the padding (which is relatively quick) instead of having to insert it into the existing file (which would normally require rewriting the entire file). There MAY be one or more padding metadata blocks per FLAC stream.
 
 Data     | Description
 :--------|:-----------
@@ -586,7 +586,7 @@ Value   | Sample rate
 0b1100  | uncommon sample rate in kHz stored as an 8-bit number
 0b1101  | uncommon sample rate in Hz stored as a 16-bit number
 0b1110  | uncommon sample rate in Hz divided by 10, stored as a 16-bit number
-0b1111  | invalid
+0b1111  | forbidden
 
 ### Channels bits
 
@@ -664,11 +664,11 @@ Octets 6-7
   Bits 12-7
 ```
 
-A decoder that relies on the coded number during seeking could be vulnerable to buffer overflows or getting stuck in an infinite loop if it seeks in a stream where the coded numbers are non-consecutive or otherwise invalid. See also [the section on security considerations](#security-considerations).
+A decoder that relies on the coded number during seeking could be vulnerable to buffer overflows or getting stuck in an infinite loop if it seeks in a stream where the coded numbers are non-consecutive or otherwise not valid. See also [the section on security considerations](#security-considerations).
 
 ### Uncommon block size
 
-If the block size bits defined earlier in this section were 0b0110 or 0b0111 (uncommon block size minus 1 stored), this follows the coded number as either an 8-bit or a 16-bit unsigned number coded big-endian. A value of 65535 (corresponding to a block size of 65536) is invalid and MUST NOT be used, because such a block size cannot be represented in the streaminfo metadata block. A value from 0 up to (and including) 14, which corresponds to a block size from 1 to 15, is only valid for the last frame in a stream and MUST NOT be used for any other frame. See also [the section on the streaminfo metadata block](#streaminfo).
+If the block size bits defined earlier in this section were 0b0110 or 0b0111 (uncommon block size minus 1 stored), this follows the coded number as either an 8-bit or a 16-bit unsigned number coded big-endian. A value of 65535 (corresponding to a block size of 65536) is forbidden and MUST NOT be used, because such a block size cannot be represented in the streaminfo metadata block. A value from 0 up to (and including) 14, which corresponds to a block size from 1 to 15, is only valid for the last frame in a stream and MUST NOT be used for any other frame. See also [the section on the streaminfo metadata block](#streaminfo).
 
 ### Uncommon sample rate
 
@@ -759,7 +759,7 @@ The table below defines how a linear predictor subframe appears in the bitstream
 Data             | Description
 :----------------|:-----------
 `s(n)`           | Unencoded warm-up samples (n = subframe's bits-per-sample \* lpc order).
-`u(4)`           | (Predictor coefficient precision in bits)-1 (NOTE: 0b1111 is invalid).
+`u(4)`           | (Predictor coefficient precision in bits)-1 (NOTE: 0b1111 is forbidden).
 `s(5)`           | Prediction right shift needed in bits.
 `s(n)`           | Unencoded predictor coefficients (n = predictor coefficient precision \* lpc order).
 `Coded residual` | Encoded residual
@@ -888,7 +888,7 @@ Various kinds of metadata blocks contain length fields or fields counts. While r
 
 Metadata blocks can also contain references, e.g. the picture metadata block can contain a URI. Applications MUST obtain explicit user approval to retrieve resources via remote protocols and to retrieve local resources not located in the same directory as the FLAC file being processed.
 
-Seeking in a FLAC stream that is not in a container relies on the coded number in frame headers and optionally a seektable metadata block. Parsers MUST employ thorough sanity checks on whether a found coded number or seekpoint is at all possible. Without these checks, seeking might get stuck in an infinite loop when numbers in frames are non-consecutive or otherwise invalid, which could be used in denial of service attacks.
+Seeking in a FLAC stream that is not in a container relies on the coded number in frame headers and optionally a seektable metadata block. Parsers MUST employ thorough checks on whether a found coded number or seekpoint is at all possible. Without these checks, seeking might get stuck in an infinite loop when numbers in frames are non-consecutive or otherwise not valid, which could be used in denial of service attacks.
 
 Implementors are advised to employ fuzz testing combined with different sanitizers on FLAC decoders to find security problems. Ignoring the results of CRC checks improves the efficiency of decoder fuzz testing.
 
@@ -900,7 +900,7 @@ In accordance with the procedures set forth in [@?RFC6838], this document regist
 
 ## Media type registration
 
-The following information serves as the registration form for the "audio/flac" media type. This media type is applicable for FLAC audio packaged in its native container. FLAC audio packaged in another container will take on the media type of its container, for example audio/ogg when packaged in an Ogg container or video/mp4 when packaged in a MP4 container alongside a video track.
+The following information serves as the registration form for the "audio/flac" media type. This media type is applicable for FLAC audio that is not packaged in a container as described in [section container mappings](#container-mappings). FLAC audio packaged in such a container will take on the media type of that container, for example audio/ogg when packaged in an Ogg container or video/mp4 when packaged in a MP4 container alongside a video track.
 
 ```
 Type name: audio
