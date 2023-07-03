@@ -48,11 +48,11 @@ For example, if the sample bit depth of the source is 24, the current subframe e
 
 ## Residual
 
-As stated in the section [coded residual](#coded-residual), an encoder must make sure residual samples are representable by a 32-bit integer, signed two's complement, excluding the most negative value. Continuing as in the previous section, it is possible to calculate when residual samples already implicitly fit and when an additional check is needed. This implicit fit is achieved when residuals would fit a theoretical 31-bit signed int, as that satisfies both mentioned criteria.
+As stated in the section [coded residual](#coded-residual), an encoder must make sure residual samples are representable by a 32-bit integer, signed two's complement, excluding the most negative value. Continuing as in the previous section, it is possible to calculate when residual samples already implicitly fit and when an additional check is needed. This implicit fit is achieved when residuals would fit a theoretical 31-bit signed int, as that satisfies both mentioned criteria. When this implicit fit is not achieved, all residual values must be calculated and checked individually.
 
 For the residual of a fixed predictor, the maximum size of a residual was already calculated in the previous section. However, for a linear predictor, the prediction is shifted right by a certain amount. The number of bits needed for the residual is the number of bits calculated in the previous section, reduced by the prediction right shift, increased by one bit to account for the subtraction of the prediction from the current sample on encoding.
 
-Taking the last example of the previous section, where 31 bits were needed for the prediction, the required data type size for the residual samples in case of a right shift of 10 bits would be 32 - 10 + 1 = 23 bits, which means it is not necessary to check whether the residuals fit a 32-bit signed integer.
+Taking the last example of the previous section, where 32 bits were needed for the prediction, the required data type size for the residual samples in case of a right shift of 10 bits would be 32 - 10 + 1 = 23 bits, which means it is not necessary to perform the aforementioned check.
 
 As another example, when encoding 32-bit PCM with fixed predictors, all predictor orders must be checked. While the 0-order fixed predictor is guaranteed to have residuals that fit a 32-bit signed int, it might produce a residual being the most negative representable value of that 32-bit signed int.
 
@@ -67,9 +67,9 @@ This informational appendix documents what changes were made to the FLAC format 
 
 The FLAC format was first specified in December 2000 and the bitstream format was considered frozen with the release of FLAC (the reference encoder/decoder) 1.0 in July 2001. Only changes made since this first stable release are considered in this appendix. Changes made to the FLAC streamble subset definition (see [section streamable subset](#streamable-subset)) are not considered.
 
-## Addition of block size strategy flag
+## Addition of blocking strategy bit
 
-Perhaps the largest backwards incompatible change to the specification was published in July 2007. Before this change, variable block size streams were not explicitly marked as such by a flag bit in the frame header. A decoder had two ways to detect a variable block size stream, either by comparing the minimum and maximum block size in the STREAMINFO metadata block (which are equal in case of a fixed block size stream), or, if a decoder did not receive a STREAMINFO metadata block, by detecting a change of block size during a stream, which could in theory not happen at all. As the meaning of the coded number in the frame header depends on whether or not a stream is variable block size, this presented a problem: the meaning of the coded number could not be reliably determined. To fix this problem, one of the reserved bits was changed to be used as a block size strategy flag. [See also the section frame header](#frame-header).
+Perhaps the largest backwards incompatible change to the specification was published in July 2007. Before this change, variable block size streams were not explicitly marked as such by a flag bit in the frame header. A decoder had two ways to detect a variable block size stream, either by comparing the minimum and maximum block size in the STREAMINFO metadata block (which are equal in case of a fixed block size stream), or, if a decoder did not receive a STREAMINFO metadata block, by detecting a change of block size during a stream, which could in theory not happen at all. As the meaning of the coded number in the frame header depends on whether or not a stream is variable block size, this presented a problem: the meaning of the coded number could not be reliably determined. To fix this problem, one of the reserved bits was changed to be used as a blocking strategy bit. [See also the section frame header](#frame-header).
 
 Along with the addition of a new flag, the meaning of the [block size bits](#block-size-bits) was subtly changed. Initially, block size bits 0b0001-0b0101 and 0b1000-0b1111 could only be used for fixed block size streams, while 0b0110 and 0b0111 could be used for both fixed block size and variable block size streams. With the change these restrictions were lifted and 0b0001-0b1111 are now used for both variable block size and fixed block size streams.
 
@@ -97,7 +97,7 @@ As described in section [streamable subset](#streamable-subset), FLAC specifies 
 
 ## Variable block size
 
-Because it is often difficult to find the optimal arrangement of block sizes for maximum compression, most encoders choose to create files with a fixed block size. Because of this many decoder implementations receive minimal use when handling variable block size streams, and this can reveal bugs, or reveal that implementations do not decode them at all. Furthermore, as is explained in [section addition of block size strategy flag](#addition-of-block-size-strategy-flag), there have been some changes to the way variable block size streams were encoded. Because of this, maximum compatibility with decoders is achieved when FLAC files are created using fixed block size streams.
+Because it is often difficult to find the optimal arrangement of block sizes for maximum compression, most encoders choose to create files with a fixed block size. Because of this many decoder implementations receive minimal use when handling variable block size streams, and this can reveal bugs, or reveal that implementations do not decode them at all. Furthermore, as is explained in [section addition of blocking strategy bit](#addition-of-blocking-strategy-bit), there have been some changes to the way variable block size streams were encoded. Because of this, maximum compatibility with decoders is achieved when FLAC files are created using fixed block size streams.
 
 ## 5-bit Rice parameter {#rice-parameter-5-bit}
 
@@ -141,7 +141,7 @@ For those players that do support and are able to render multi-channel audio, ma
 
 Each FLAC frame header stores the audio sample rate, number of bits per sample and number of channels independently of the streaminfo metadata block and other frame headers. This was done to permit multicasting of FLAC files but it also allows these properties to change mid-stream. However, many FLAC decoders do not handle such changes, as few other formats are capable of holding such streams and changing playback properties during playback is often not possible without interrupting playback. Also, as explained in [section frame structure](#frame-structure), using this feature of FLAC results in various practical problems.
 
-However, even when storing an audio stream with changing properties in FLAC encapsulated in a container capable of handling such changes, as recommended in [section frame structure](#frame-structure), many decoders are not able to decode such a stream correctly. Therefore, maximum compatibility with decoders is achieved when FLAC files are created with a single set of audio properties, in which the properties coded in the streaminfo metadata block (see [section streaminfo](#streaminfo)) and the properties coded in all frame headers (see [section frame header](#frame-header)) are the same. This can be achieved by splitting up an input stream with changing audio properties at the points where these properties change.
+However, even when storing an audio stream with changing properties in FLAC encapsulated in a container capable of handling such changes, as recommended in [section frame structure](#frame-structure), many decoders are not able to decode such a stream correctly. Therefore, maximum compatibility with decoders is achieved when FLAC files are created with a single set of audio properties, in which the properties coded in the streaminfo metadata block (see [section streaminfo](#streaminfo)) and the properties coded in all frame headers (see [section frame header](#frame-header)) are the same. This can be achieved by splitting up an input stream with changing audio properties at the points where these properties change into separate streams or files.
 
 # Examples
 
@@ -225,7 +225,7 @@ The frame header starts at position 0x2a and is broken down in the following tab
 Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0x2a+0 | 15 bit | 0xff, 0b1111100 | frame sync
-0x2b+7 | 1 bit  | 0b0             | block size strategy
+0x2b+7 | 1 bit  | 0b0             | blocking strategy
 0x2c+0 | 4 bit  | 0b0110          | 8-bit block size further down
 0x2c+4 | 4 bit  | 0b1001          | sample rate 44.1kHz
 0x2d+0 | 4 bit  | 0b0001          | stereo, no decorrelation
@@ -237,7 +237,7 @@ Start  | Length | Contents        | Description
 
 As the stream is a fixed block size stream, the number at 0x2e contains a frame number. As the value is smaller than 128, only 1 byte is used for the encoding.
 
-At byte 0x31 the subframe header of the first subframe starts, it is broken down in the following table.
+At byte 0x31 the first subframe starts, it is broken down in the following table.
 
 Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
@@ -390,7 +390,7 @@ The frame header starts at position 0x88 and is broken down in the following tab
 Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0x88+0 | 15 bit | 0xff, 0b1111100 | frame sync
-0x89+7 | 1 bit  | 0b0             | block size strategy
+0x89+7 | 1 bit  | 0b0             | blocking strategy
 0x8a+0 | 4 bit  | 0b0110          | 8-bit block size further down
 0x8a+4 | 4 bit  | 0b1001          | sample rate 44.1kHz
 0x8b+0 | 4 bit  | 0b1001          | right-side stereo
@@ -522,7 +522,7 @@ The frame header starts at position 0xcc and is broken down in the following tab
 Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0xcc+0 | 15 bit | 0xff, 0b1111100 | frame sync
-0xcd+7 | 1 bit  | 0b0             | block size strategy
+0xcd+7 | 1 bit  | 0b0             | blocking strategy
 0xce+0 | 4 bit  | 0b0110          | 8-bit block size further down
 0xce+4 | 4 bit  | 0b1001          | sample rate 44.1kHz
 0xcf+0 | 4 bit  | 0b0001          | stereo, no decorrelation
@@ -624,7 +624,7 @@ The frame header starts at position 0x2a and is broken down in the following tab
 Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0x2a+0 | 15 bit | 0xff, 0b1111100 | Frame sync
-0x2b+7 | 1 bit  | 0b0             | Block size strategy
+0x2b+7 | 1 bit  | 0b0             | blocking strategy
 0x2c+0 | 4 bit  | 0b0110          | 8-bit block size further down
 0x2c+4 | 4 bit  | 0b1000          | Sample rate 32kHz
 0x2d+0 | 4 bit  | 0b0000          | Mono audio (1 channel)
