@@ -12,6 +12,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. Values expressed as `s(n)` represent signed big-endian integer using `n` bits, signed two's complement. Where necessary `n` is expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed is represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
 
+While the FLAC format can store digital audio as well as other digital signals, this document uses terminology specific to digital audio. The use of more generic terminology was deemed less clear, so a reader interested in non-audio use of the FLAC format is expected to make the translation from audio-specific terms to more generic terminology.
+
 # Definitions
 
 - **Lossless compression**: reducing the amount of computer storage space needed to store data without needing to remove or irreversibly alter any of this data in doing so. In other words, decompressing losslessly compressed information returns exactly the original data.
@@ -24,7 +26,7 @@ Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits.
 
 - **Frame**: A frame header, one or more subframes and a frame footer. It encodes the contents of a corresponding block.
 
-- **Subframe**: An encoded subblock. All subframes within a frame code for the same number of samples. A subframe corresponds to a subblock, the average of two subblocks or the difference between two subblocks, see [section on interchannel decorrelation](#interchannel-decorrelation).
+- **Subframe**: An encoded subblock. All subframes within a frame code for the same number of samples. When interchannel decorrelation is used, a subframe can correspond to either the (per-sample) average of two subblocks or the (per-sample) difference between two subblocks, instead of to a subblock directly, see [section on interchannel decorrelation](#interchannel-decorrelation).
 
 - **Block size**: The total number of samples contained in a block or coded in a frame, divided by the number of channels. In other words, the number of samples in any subblock of a block, or any subframe of a frame. This is also called **interchannel samples**.
 
@@ -82,7 +84,7 @@ In addition, FLAC specifies a metadata system (see [section on File-level metada
 
 ## Blocking
 
-The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that excess bits will be wasted on frame headers. If the block size is too large, the characteristics of the signal may vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, except for the last block, and a maximum block size of 65535 samples. The last block is allowed to be smaller than 16 samples to be able to match the length of the encoded audio without using padding.
+The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that a disproportionate amount of bytes will be spent on frame headers. If the block size is too large, the characteristics of the signal may vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, except for the last block, and a maximum block size of 65535 samples. The last block is allowed to be smaller than 16 samples to be able to match the length of the encoded audio without using padding.
 
 While the block size does not have to be constant in a FLAC file, it is often difficult to find the optimal arrangement of block sizes for maximum compression. Because of this the FLAC format explicitly stores whether a file has a constant or a variable block size throughout the stream, and stores a block number instead of a sample number to slightly improve compression if a stream has a constant block size.
 
@@ -182,7 +184,7 @@ Unary coding in a FLAC bitstream is done with zero bits terminated with a one bi
 When a FLAC file contains data that is forbidden or otherwise not valid, decoder behavior is left unspecified. A decoder MAY choose to stop decoding on encountering such data. Examples of such data are
 
 - One or more decoded sample values exceeds the range offered by the bit depth as coded for that frame. E.g. in a frame with a bit depth of 8 bits, any samples not in the inclusive range from -128 to 127 are not valid
-- The number of wasted bits (see section [wasted bits per sample](#wasted-bits-per-sample)) of a subframe is such that the bit depth of that subframe (see section [constant subframe](#constant-subframe) for a description of subframe bit depth) equals zero or is negative
+- The number of wasted bits (see section [wasted bits per sample](#wasted-bits-per-sample)) used by a subframe is such that the bit depth of that subframe (see section [constant subframe](#constant-subframe) for a description of subframe bit depth) equals zero or is negative
 - A frame header CRC (see section [frame header CRC](#frame-header-crc)) or frame footer CRC (see section [frame footer](#frame-footer)) does not validate
 - One of the forbidden bit patterns described in table (#tableforbiddenpatterns, use counter) above is used
 
@@ -694,20 +696,20 @@ Value               | Subframe type
 0b001101 - 0b011111 | reserved
 0b100000 - 0b111111 | Subframe with a linear predictor of order v-31, i.e. 1 through 32 (inclusive)
 
-Following the subframe type bits is a bit that flags whether the subframe has any wasted bits. If it is 0, the subframe doesn't have any wasted bits and the subframe header is complete. If it is 1, the subframe does have wasted bits and the number of wasted bits follows unary coded.
+Following the subframe type bits is a bit that flags whether the subframe uses any wasted bits (see [section wasted-bits-per-sample](#wasted-bits-per-sample)). If it is 0, the subframe doesn't use any wasted bits and the subframe header is complete. If it is 1, the subframe does use wasted bits and the number of used wasted bits follows unary coded.
 
 ### Wasted bits per sample
 
-Certain file formats, like AIFF, can store audio samples with a bit depth that is not an integer number of bytes by padding them with least significant zero bits to a bit depth that is an integer number of bytes. For example, shifting a 14-bit sample right by 2 pads it to a 16-bit sample, which then has two zero least-significant bits. In this specification, these least-significant zero bits are referred to as wasted bits-per-sample or simply wasted bits. They are wasted in a sense that they contain no information, but are stored anyway.
+Most uncompressed audio file formats can only store store audio samples with a bit depth that is an integer number of bytes. Samples of which the bit depth is not an integer number of bytes are usually stored in such formats by padding them with least significant zero bits to a bit depth that is an integer number of bytes. For example, shifting a 14-bit sample right by 2 pads it to a 16-bit sample, which then has two zero least-significant bits. In this specification, these least-significant zero bits are referred to as wasted bits-per-sample or simply wasted bits. They are wasted in a sense that they contain no information, but are stored anyway.
 
-The wasted bits-per-sample flag in a subframe header is set to 1 if such wasted bits are present in that subframe. If this is the case, the number of wasted bits-per-sample (k) minus 1 follows the flag in an unary encoding. For example, if k is 3, 0b001 follows. If k = 0, the wasted bits-per-sample flag is 0 and no unary coded k follows.
+The FLAC format can optionally take advantage of these wasted bits by signalling their presence and coding the subframe without them. To do this, the wasted bits-per-sample flag in a subframe header is set to 0 and the number of wasted bits-per-sample (k) minus 1 follows the flag in an unary encoding. For example, if k is 3, 0b001 follows. If k = 0, the wasted bits-per-sample flag is 0 and no unary coded k follows. In this document, if a subframe header signals a certain number of wasted bits, it is said it 'uses' these wasted bits.
 
-If k is not equal to 0, samples are coded ignoring k least-significant bits. For example, if a frame not employing stereo decorrelation specifies a sample size of 16 bits per sample in the frame header and k of a subframe is 3, samples in the subframe are coded as 13 bits per sample. For more details, see [section constant subframe](#constant-subframe) on how the bit depth of a subframe is calculated. A decoder MUST add k least-significant zero bits by shifting left (padding) after decoding a subframe sample. If the frame has left/side, right/side or mid/side stereo, a decoder MUST perform padding on the subframes before decorrelating the channels to left and right. The number of wasted bits per sample MUST be such that the resulting number of bits per sample (of which the calculation is explained in [section constant subframe](#constant-subframe)) is larger than zero.
+If a subframe uses wasted bits (i.e. k is not equal to 0), samples are coded ignoring k least-significant bits. For example, if a frame not employing stereo decorrelation specifies a sample size of 16 bits per sample in the frame header and k of a subframe is 3, samples in the subframe are coded as 13 bits per sample. For more details, see [section constant subframe](#constant-subframe) on how the bit depth of a subframe is calculated. A decoder MUST add k least-significant zero bits by shifting left (padding) after decoding a subframe sample. If the frame has left/side, right/side or mid/side stereo, a decoder MUST perform padding on the subframes before decorrelating the channels to left and right. The number of wasted bits per sample MUST be such that the resulting number of bits per sample (of which the calculation is explained in [section constant subframe](#constant-subframe)) is larger than zero.
 
-Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed, as to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like lossyWAV that enable users to improve compression of their files by a lossless audio codec in a non-lossless way. Because of this the number of wasted bits k MAY change between frames and MAY differ between subframes. If the number of wasted bits changes halfway a subframe (e.g. the first part has 2 wasted bits and the second part has 4 wasted bits) the subframe uses the lowest common denominator, as otherwise it bits would be discarded and the process would not be lossless.
+Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed, as to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like lossyWAV that enable users to improve compression of their files by a lossless audio codec in a non-lossless way. Because of this the number of wasted bits k MAY change between frames and MAY differ between subframes. If the number of wasted bits changes halfway a subframe (e.g. the first part has 2 wasted bits and the second part has 4 wasted bits) the subframe uses the lowest number of wasted bits, as otherwise non-zero bits would be discarded and the process would not be lossless.
 
 ### Constant subframe
-In a constant subframe only a single sample is stored. This sample is stored as an integer number coded big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the [bit depth as coded in the frame header](#bit-depth-bits), minus the number of [wasted bits coded in the subframe header](#wasted-bits-per-sample). If a subframe is a side subframe (see the [section on interchannel decorrelation](#interchannel-decorrelation)), the bit depth of that subframe is increased by 1 bit.
+In a constant subframe only a single sample is stored. This sample is stored as an integer number coded big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the [bit depth as coded in the frame header](#bit-depth-bits), minus the number of [wasted bits coded in the subframe header](#wasted-bits-per-sample) used. If a subframe is a side subframe (see the [section on interchannel decorrelation](#interchannel-decorrelation)), the bit depth of that subframe is increased by 1 bit.
 
 ### Verbatim subframe
 A verbatim subframe stores all samples unencoded in sequential order. See [section on Constant subframe](#constant-subframe) on how a sample is stored unencoded. The number of samples that need to be stored in a subframe is given by the block size in the frame header.
@@ -901,47 +903,55 @@ In accordance with the procedures set forth in [@?RFC6838], this document regist
 The following information serves as the registration form for the "audio/flac" media type. This media type is applicable for FLAC audio that is not packaged in a container as described in [section container mappings](#container-mappings). FLAC audio packaged in such a container will take on the media type of that container, for example audio/ogg when packaged in an Ogg container or video/mp4 when packaged in a MP4 container alongside a video track.
 
 ```
-   Type name: audio
+Type name: audio
 
-   Subtype name: flac
+Subtype name: flac
 
-   Required parameters: none
+Required parameters: none
 
-   Optional parameters: none
+Optional parameters: none
 
-   Encoding considerations: as per THISRFC
+Encoding considerations: as per THISRFC
 
-   Security considerations: see the security considerations in section 12 of THISRFC
+Security considerations: see the security considerations in section
+12 of THISRFC
 
-   Interoperability considerations: see the descriptions of past format changes in Appendix B of THISRFC
+Interoperability considerations: see the descriptions of past format
+changes in Appendix B of THISRFC
 
-   Published specification: THISRFC
+Published specification: THISRFC
 
-   Applications that use this media type: ffmpeg, apache, firefox
+Applications that use this media type: ffmpeg, apache, firefox
 
-   Fragment identifier considerations: none
+Fragment identifier considerations: none
 
-   Additional information:
+Additional information:
 
-     Deprecated alias names for this type: audio/x-flac
+  Deprecated alias names for this type: audio/x-flac
 
-     Magic number(s): fLaC
+  Magic number(s): fLaC
 
-     File extension(s): flac
+  File extension(s): flac
 
-     Macintosh file type code(s): none
+  Macintosh file type code(s): none
 
-   Person & email address to contact for further information: IETF CELLAR WG
+  Uniform Type Identifier: org.xiph.flac conforms to public.audio
 
-   Intended usage: COMMON
+  Windows Clipboard Format Name: audio/flac
 
-   Restrictions on usage: N/A
+Person & email address to contact for further information:
+IETF CELLAR WG cellar@ietf.org
 
-   Author: IETF CELLAR WG
+Intended usage: COMMON
 
-   Change controller: Internet Engineering Task Force (mailto:iesg@ietf.org)
+Restrictions on usage: N/A
 
-   Provisional registration? (standards tree only): NO
+Author: IETF CELLAR WG
+
+Change controller: Internet Engineering Task Force
+(mailto:iesg@ietf.org)
+
+Provisional registration? (standards tree only): NO
 ```
 
 # Acknowledgments
