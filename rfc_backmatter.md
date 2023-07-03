@@ -119,9 +119,11 @@ Most audio is stored in bit depths that are a whole number of bytes, e.g. 8, 16 
 - 8-bit µ-law can be losslessly converted to 14 bit (Linear) PCM
 - 8-bit A-law can be losslessly converted to 13 bit (Linear) PCM
 
-FLAC can store these bit depths directly, but because they are uncommon, some decoders are not able to process the resulting files correctly. It is possible to store these formats in a FLAC file with a more common bit depth without sacrificing compression by padding each sample with zero bits to a bit depth that is a whole byte. FLAC will detect these wasted bits. This transformation leaves no ambiguity in how it can be reversed and is thus lossless. See [section wasted bits per sample](#wasted-bits-per-sample) for details.
+The FLAC format can contain these bit depths directly, but because they are uncommon, some decoders are not able to process the resulting files correctly. It is possible to store these formats in a FLAC file with a more common bit depth without sacrificing compression by padding each sample with zero bits to a bit depth that is a whole byte. The FLAC format can efficiently compress these wasted bits. See [section wasted bits per sample](#wasted-bits-per-sample) for details.
 
 Therefore, maximum compatibility with decoders is achieved when FLAC files are created by padding samples of such audio with zero bits to the bit depth that is the next whole number of bytes.
+
+In cases where the original signal is already padded, this operation cannot be reversed losslessly without knowing the original bit depth. To leave no ambiguity, the original bit depth needs to be stored, for example in a vorbis comment field, by storing the header of the original file or in a description of the file. The choice of a suitable method is left to the implementer.
 
 Besides audio with a 'non-whole byte' bit depth, some decoder implementations have chosen to only accept FLAC files coding for PCM audio with a bit depth of 16 bit. Many implementations support bit depths up to 24 bit but no higher. Consult [this web page](https://github.com/ietf-wg-cellar/flac-specification/wiki/Interoperability-considerations) for more up-to-date information.
 
@@ -233,14 +235,14 @@ Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0x31+0 | 1 bit  | 0b0             | mandatory 0 bit
 0x31+1 | 6 bit  | 0b000001        | verbatim subframe
-0x31+7 | 1 bit  | 0b1             | wasted bits present
-0x32+0 | 2 bit  | 0b01            | 2 wasted bits
+0x31+7 | 1 bit  | 0b1             | wasted bits used
+0x32+0 | 2 bit  | 0b01            | 2 wasted bits used
 0x32+2 | 14 bit | 0b011000, 0xfd  | 14-bit unencoded sample
 
 
-As the wasted bits flag is 1 in this subframe, an unary coded number follows. Starting at 0x32, we see 0b01, which unary codes for 1, meaning we have 2 wasted bits in this subframe.
+As the wasted bits flag is 1 in this subframe, an unary coded number follows. Starting at 0x32, we see 0b01, which unary codes for 1, meaning this subframe uses 2 wasted bits.
 
-As this is a verbatim subframe, the subframe only contains unencoded sample values. With a block size of 1, it contains only a single sample. The bit depth of the audio is 16 bit, but as the subframe header signals 2 wasted bits, only 14 bits are stored. As no stereo decorrelation is used, a bit depth increase for the side channel is not applicable. So, the next 14 bit (starting at position 0x32+2) contain the unencoded sample coded big-endian, signed two's complement. The value reads 0b011000 11111101, or 6397. This value needs to be shifted left by 2 bits, to account for the wasted bits. The value is then 0b011000 11111101 00, or 25588.
+As this is a verbatim subframe, the subframe only contains unencoded sample values. With a block size of 1, it contains only a single sample. The bit depth of the audio is 16 bit, but as the subframe header signals the use of 2 wasted bits, only 14 bits are stored. As no stereo decorrelation is used, a bit depth increase for the side channel is not applicable. So, the next 14 bit (starting at position 0x32+2) contain the unencoded sample coded big-endian, signed two's complement. The value reads 0b011000 11111101, or 6397. This value needs to be shifted left by 2 bits, to account for the wasted bits. The value is then 0b011000 11111101 00, or 25588.
 
 The second subframe starts at 0x34, it is broken down in the following table.
 
@@ -248,11 +250,11 @@ Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0x34+0 | 1 bit  | 0b0             | mandatory 0 bit
 0x34+1 | 6 bit  | 0b000001        | verbatim subframe
-0x34+7 | 1 bit  | 0b1             | wasted bits present
-0x35+0 | 4 bit  | 0b0001          | 4 wasted bits
+0x34+7 | 1 bit  | 0b1             | wasted bits used
+0x35+0 | 4 bit  | 0b0001          | 4 wasted bits used
 0x35+4 | 12 bit | 0b0010, 0x8b    | 12-bit unencoded sample
 
-Here the wasted bits flag is also one, but the unary coded number that follows it is 4 bit long, indicating 4 wasted bits. This means the sample is stored in 12 bits. The sample value is 0b0010 10001011, or 651. This value now has to be shifted left by 4 bits, i.e. 0b0010 10001011 0000 or 10416.
+Here the wasted bits flag is also one, but the unary coded number that follows it is 4 bit long, indicating the use of 4 wasted bits. This means the sample is stored in 12 bits. The sample value is 0b0010 10001011, or 651. This value now has to be shifted left by 4 bits, i.e. 0b0010 10001011 0000 or 10416.
 
 At this point, we would do stereo decorrelation if that was applicable.
 
@@ -396,7 +398,7 @@ Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0x8f+0 | 1 bit  | 0b0             | mandatory 0 bit
 0x8f+1 | 6 bit  | 0b001001        | fixed subframe, 1st order
-0x8f+7 | 1 bit  | 0b0             | no wasted bits present
+0x8f+7 | 1 bit  | 0b0             | no wasted bits used
 0x90+0 | 17 bit | 0x0867, 0b0     | unencoded warm-up sample
 
 The coded residual is broken down in the following table. All quotients are unary coded, all remainders are stored unencoded with a number of bits specified by the Rice parameter.
@@ -528,7 +530,7 @@ Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0xd3+0 | 1 bit  | 0b0             | mandatory 0 bit
 0xd3+1 | 6 bit  | 0b000001        | verbatim subframe
-0xd3+7 | 1 bit  | 0b0             | no wasted bits present
+0xd3+7 | 1 bit  | 0b0             | no wasted bits used
 0xd4+0 | 16 bit | 0xc382          | 16-bit unencoded sample
 0xd6+0 | 16 bit | 0xc40b          | 16-bit unencoded sample
 0xd8+0 | 16 bit | 0xc14a          | 16-bit unencoded sample
@@ -539,13 +541,13 @@ Start  | Length | Contents          | Description
 :------|:-------|:------------------|:-----------------
 0xda+0 | 1 bit  | 0b0               | mandatory 0 bit
 0xda+1 | 6 bit  | 0b000001          | verbatim subframe
-0xda+7 | 1 bit  | 0b1               | wasted bits present
-0xdb+0 | 1 bit  | 0b1               | 1 wasted bit
+0xda+7 | 1 bit  | 0b1               | wasted bits used
+0xdb+0 | 1 bit  | 0b1               | 1 wasted bit used
 0xdb+1 | 15 bit | 0b110111001001000 | 15-bit unencoded sample
 0xdd+0 | 15 bit | 0b110111010000001 | 15-bit unencoded sample
 0xde+7 | 15 bit | 0b110110110011111 | 15-bit unencoded sample
 
-As this subframe has wasted bits, the 15-bit unencoded samples need to be shifted left by 1 bit. For example, sample 1 is stored as -4536 and becomes -9072 after shifting left 1 bit.
+As this subframe uses wasted bits, the 15-bit unencoded samples need to be shifted left by 1 bit. For example, sample 1 is stored as -4536 and becomes -9072 after shifting left 1 bit.
 
 As the last subframe does not end on byte alignment, 2 padding bits are added before the 2 byte frame CRC follows at 0xe1+0.
 
@@ -630,7 +632,7 @@ Start  | Length | Contents        | Description
 :------|:-------|:----------------|:-----------------
 0x31+0 | 1 bit  | 0b0             | Mandatory 0 bit
 0x31+1 | 6 bit  | 0b100010        | Linear prediction subframe, 3rd order
-0x31+7 | 1 bit  | 0b0             | No wasted bits present
+0x31+7 | 1 bit  | 0b0             | No wasted bits used
 0x32+0 | 8 bit  | 0x00            | Unencoded warm-up sample 0
 0x33+0 | 8 bit  | 0x4f            | Unencoded warm-up sample 79
 0x34+0 | 8 bit  | 0x6f            | Unencoded warm-up sample 111
