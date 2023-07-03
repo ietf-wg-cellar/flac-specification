@@ -161,7 +161,7 @@ The FLAC format uses two forms of Rice coding, which only differ in the number o
 
 # Format principles
 
-FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding or skip data encoded using methods they do not recognize. Apart from reserved patterns, the format specifies forbidden patterns in certain places, meaning that the patterns MUST NOT appear in any bitstream. These patterns are usually defined as forbidden to make the synchronization mechanism more robust. They are listed in the following table.
+FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding or skip data encoded using methods they do not recognize. Apart from reserved patterns, the format specifies forbidden patterns in certain places, meaning that the patterns MUST NOT appear in any bitstream. They are listed in the following table.
 
 {anchor="tableforbiddenpatterns"}
 Description                                 | Reference
