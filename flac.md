@@ -161,7 +161,7 @@ The FLAC format uses two forms of Rice coding, which only differ in the number o
 
 # Format principles
 
-FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding or skip data encoded using methods they do not recognize. Apart from reserved patterns, the format specifies forbidden patterns in certain places, meaning that the patterns MUST NOT appear in any bitstream. They are listed in the following table.
+FLAC has no format version information, but it does contain reserved space in several places. Future versions of the format MAY use this reserved space safely without breaking the format of older streams. Older decoders MAY choose to abort decoding when encountering data encoded using methods they do not recognize. Apart from reserved patterns, the format specifies forbidden patterns in certain places, meaning that the patterns MUST NOT appear in any bitstream. They are listed in the following table.
 
 {anchor="tableforbiddenpatterns"}
 Description                                 | Reference
@@ -799,7 +799,7 @@ Each folded residual sample is then split in two parts, a most significant part 
 
 For example, take a partition with Rice parameter 3 containing a folded residual sample with 38 as value, which is 0b100110 in binary. The most significant part is 0b100 (4) and is stored unary as 0b00001, the least significant part is 0b110 (6) and stored as is. The Rice code word is thus 0b00001110. The Rice code words for all residual samples in a partition are stored consecutively.
 
-To decode a Rice code word, zero bits must be counted until encountering a one bit, after which a number of bits given by the Rice parameter must be read. The count of zero bits is shifted left by the Rice parameter (i.e. multiplied by 2 raised to the power Rice parameter) and bitwise ORed with (i.e. added to) the read value. This is the folded residual value. An even folded residual value is shifted right 1 bit (i.e. divided by two) to get the (unfolded) residual value. An odd folded residual value is gets shifted right 1 bit and all bits flipped (1 added to and divided by -2) to get the (unfolded) residual value, subject to negative numbers being signed two's complement on the decoding machine.
+To decode a Rice code word, zero bits must be counted until encountering a one bit, after which a number of bits given by the Rice parameter must be read. The count of zero bits is shifted left by the Rice parameter (i.e. multiplied by 2 raised to the power Rice parameter) and bitwise ORed with (i.e. added to) the read value. This is the folded residual value. An even folded residual value is shifted right 1 bit (i.e. divided by two) to get the (unfolded) residual value. An odd folded residual value is shifted right 1 bit and then has all bits flipped (1 added to and divided by -2) to get the (unfolded) residual value, subject to negative numbers being signed two's complement on the decoding machine.
 
 [Appendix examples](#examples) shows decoding of a complete coded residual.
 
@@ -894,6 +894,8 @@ Implementors are advised to employ fuzz testing combined with different sanitize
 
 See the [FLAC decoder testbench](https://github.com/ietf-wg-cellar/flac-test-files) for a non-exhaustive list of FLAC files with extreme configurations which lead to crashes or reboots on some known implementations. Besides providing a starting point for security testing, this set of files can also be used for testing conformance with this specification.
 
+FLAC files may contain executable code, although the FLAC format is not designed for it and it is uncommon. One use case where FLAC is occasionally used to store executable code is when compressing images of mixed mode CDs, which contain both audio and non-audio data, of which the non-audio portion can contain executable code.
+
 # IANA Considerations
 
 In accordance with the procedures set forth in [@?RFC6838], this document registers one new media type, "audio/flac", as defined in the following section.
@@ -907,9 +909,9 @@ Type name: audio
 
 Subtype name: flac
 
-Required parameters: none
+Required parameters: N/A
 
-Optional parameters: none
+Optional parameters: N/A
 
 Encoding considerations: as per THISRFC
 
