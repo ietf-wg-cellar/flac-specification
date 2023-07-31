@@ -10,7 +10,7 @@ The coding methods provided by the FLAC format work best on PCM audio signals of
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [@!RFC2119] [@!RFC8174] when, and only when, they appear in all capitals, as shown here.
 
-Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. Values expressed as `s(n)` represent signed big-endian integer using `n` bits, signed two's complement. Where necessary `n` is expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed is represented with an ellipsis, such as `u(m...n)`. The name of a value followed by an asterisk `*` indicates zero or more occurrences of the value. The name of a value followed by a plus sign `+` indicates one or more occurrences of the value.
+Values expressed as `u(n)` represent unsigned big-endian integer using `n` bits. Values expressed as `s(n)` represent signed big-endian integer using `n` bits, signed two's complement. Where necessary `n` is expressed as an equation using `*` (multiplication), `/` (division), `+` (addition), or `-` (subtraction). An inclusive range of the number of bits expressed is represented with an ellipsis, such as `u(m...n)`.
 
 While the FLAC format can store digital audio as well as other digital signals, this document uses terminology specific to digital audio. The use of more generic terminology was deemed less clear, so a reader interested in non-audio use of the FLAC format is expected to make the translation from audio-specific terms to more generic terminology.
 
@@ -316,9 +316,9 @@ The seektable metadata block can be used to store seek points. It is possible to
 
 Each seek point takes 18 bytes, so a seek table with 1% resolution within a stream adds less than 2 kilobyte of data. The number of seek points is implied by the metadata header 'length' field, i.e. equal to length / 18. There is also a special 'placeholder' seekpoint which will be ignored by decoders but which can be used to reserve space for future seek point insertion.
 
-Data         | Description
-:------------|:-----------
-`SEEKPOINT`+ | One or more seek points.
+Data       | Description
+:----------|:-----------
+Seekpoints | Zero or more seek points as defined in [section seekpoint](#seekpoint).
 
 A seektable is generally not usable for seeking in a FLAC file embedded in a container, as such containers usually interleave FLAC data with other data and the offsets used in seekpoints are those of an unmuxed FLAC stream. Also, containers often provide their own seeking methods. It is however possible to store the seektable in the container along with other metadata when muxing a FLAC file, so this stored seektable can be restored on demuxing the FLAC stream into a standalone FLAC file.
 
