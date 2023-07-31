@@ -28,7 +28,9 @@ While the FLAC format can store digital audio as well as other digital signals, 
 
 - **Subframe**: An encoded subblock. All subframes within a frame code for the same number of samples. When interchannel decorrelation is used, a subframe can correspond to either the (per-sample) average of two subblocks or the (per-sample) difference between two subblocks, instead of to a subblock directly, see [section on interchannel decorrelation](#interchannel-decorrelation).
 
-- **Block size**: The total number of samples contained in a block or coded in a frame, divided by the number of channels. In other words, the number of samples in any subblock of a block, or any subframe of a frame. This is also called **interchannel samples**.
+- **Interchannel samples**: A sample count that applies to all channels. For example, one second of 44.1 kHz audio has 44100 interchannel samples, meaning each channel has that number of samples.
+
+- **Block size**: The number of interchannel samples contained in a block or coded in a frame.
 
 - **Bit depth** or **bits per sample**: the number of bits used to contain each sample. This MUST be the same for all subblocks in a block but MAY be different for different subframes in a frame because of [interchannel decorrelation](#interchannel-decorrelation).
 
@@ -74,7 +76,7 @@ Similar to many other audio coders, a FLAC file is encoded following the steps b
 
 - `Blocking` (see [section on Blocking](#blocking)). The input is split up into many contiguous blocks.
 
-- `Interchannel Decorrelation` (see [section on Interchannel Decorrelation](#interchannel-decorrelation)). In the case of stereo streams, the FLAC format allows for transforming the left-right signal into a mid-side signal to remove redundancy, if there is any. Besides coding as left-right and mid-side, it is also possible to code left-side and side-right, whichever ordering results in the highest compression. Choosing between any of these transformation is done independently for each block.
+- `Interchannel Decorrelation` (see [section on Interchannel Decorrelation](#interchannel-decorrelation)). In the case of stereo streams, the FLAC format allows for transforming the left-right signal into a mid-side signal, a left-side signal or a side-right signal to remove redundancy between channels. Choosing between any of these transformation is done independently for each block.
 
 - `Prediction` (see [section on Prediction](#prediction)). To remove redundancy in a signal, a predictor is stored for each subblock or its transformation as formed in the previous step. A predictor consists of a simple mathematical description that can be used, as the name implies, to predict a certain sample from the samples that preceded it. As this prediction is rarely exact, the error of this prediction is passed to the next stage. The predictor of each subblock is completely independent from other subblocks. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need be included in the compressed stream. If no usable predictor can be found for a certain subblock, the signal is stored uncompressed and the next stage is skipped.
 
@@ -87,8 +89,6 @@ In addition, FLAC specifies a metadata system (see [section on File-level metada
 The size used for blocking the audio data has a direct effect on the compression ratio. If the block size is too small, the resulting large number of frames mean that a disproportionate amount of bytes will be spent on frame headers. If the block size is too large, the characteristics of the signal may vary so much that the encoder will be unable to find a good predictor. In order to simplify encoder/decoder design, FLAC imposes a minimum block size of 16 samples, except for the last block, and a maximum block size of 65535 samples. The last block is allowed to be smaller than 16 samples to be able to match the length of the encoded audio without using padding.
 
 While the block size does not have to be constant in a FLAC file, it is often difficult to find the optimal arrangement of block sizes for maximum compression. Because of this the FLAC format explicitly stores whether a file has a constant or a variable block size throughout the stream, and stores a block number instead of a sample number to slightly improve compression if a stream has a constant block size.
-
-Blocked data is passed to the predictor stage one subblock at a time. Each subblock is independently coded into a subframe, and the subframes are concatenated into a frame. Because each channel is coded separately, subframes MAY use different predictors, even within a frame.
 
 ## Interchannel Decorrelation
 
@@ -209,8 +209,8 @@ The FLAC format specifies a subset of itself as the FLAC streamable subset. The 
 
 - The [sample rate bits](#sample-rate-bits) in the frame header MUST be 0b0001-0b1110, i.e. the frame header MUST NOT refer to the streaminfo metadata block to describe the sample rate.
 - The [bits depth bits](#bit-depth-bits) in the frame header MUST be 0b001-0b111, i.e. the frame header MUST NOT refer to the streaminfo metadata block to describe the bit depth.
-- The stream MUST NOT contain blocks with more than 16384 inter-channel samples, i.e. the maximum block size must not be larger than 16384.
-- Audio with a sample rate less than or equal to 48000 Hz MUST NOT be contained in blocks with more than 4608 inter-channel samples, i.e. the maximum block size used for this audio must not be larger than 4608.
+- The stream MUST NOT contain blocks with more than 16384 interchannel samples, i.e. the maximum block size must not be larger than 16384.
+- Audio with a sample rate less than or equal to 48000 Hz MUST NOT be contained in blocks with more than 4608 interchannel samples, i.e. the maximum block size used for this audio must not be larger than 4608.
 - Linear prediction subframes (see section [linear predictor subframe](#linear-predictor-subframe)) containing audio with a sample rate less than or equal to 48000 Hz MUST have a predictor order less than or equal to 12, i.e. the subframe type bits in the subframe header (see [subframe header section](#subframe-header)) MUST NOT be 0b101100-0b111111.
 - The Rice partition order (see [coded residual section](#coded-residual)) MUST be less than or equal to 8.
 - The channel ordering MUST be equal to one defined in [the section channels bits](#channels-bits), i.e. the FLAC file MUST NOT need a WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag to describe the channel ordering. See [section channel mask](#channel-mask) for details.
@@ -251,7 +251,7 @@ Data     | Description
 `u(20)`  | Sample rate in Hz.
 `u(3)`   | (number of channels)-1. FLAC supports from 1 to 8 channels.
 `u(5)`   | (bits per sample)-1. FLAC supports from 4 to 32 bits per sample.
-`u(36)`  | Total samples in stream. 'Samples' means inter-channel sample, i.e. one second of 44.1 kHz audio will have 44100 samples regardless of the number of channels. A value of zero here means the number of total samples is unknown.
+`u(36)`  | Total number of interchannel samples in stream. A value of zero here means the number of total samples is unknown.
 `u(128)` | MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when, despite the error, the bitstream itself is valid. A value of `0` signifies that the value is not known.
 
 The minimum block size and the maximum block size MUST be in the 16-65535 range. The minimum block size MUST be equal to or less than the maximum block size.
@@ -320,7 +320,7 @@ Data       | Description
 :----------|:-----------
 Seekpoints | Zero or more seek points as defined in [section seekpoint](#seekpoint).
 
-A seektable is generally not usable for seeking in a FLAC file embedded in a container, as such containers usually interleave FLAC data with other data and the offsets used in seekpoints are those of an unmuxed FLAC stream. Also, containers often provide their own seeking methods. It is however possible to store the seektable in the container along with other metadata when muxing a FLAC file, so this stored seektable can be restored on demuxing the FLAC stream into a standalone FLAC file.
+A seektable is generally not usable for seeking in a FLAC file embedded in a container (see [section container mappings](#container-mappings)), as such containers usually interleave FLAC data with other data and the offsets used in seekpoints are those of an unmuxed FLAC stream. Also, containers often provide their own seeking methods. It is however possible to store the seektable in the container along with other metadata when muxing a FLAC file, so this stored seektable can be restored on demuxing the FLAC stream into a standalone FLAC file.
 
 ### Seekpoint
 Data     | Description
@@ -412,7 +412,7 @@ If audio channels not assigned to any speaker are contained and decoding to spea
 
 ## Cuesheet
 
-To either store the track and index point structure of a CD-DA along with its audio or to provide a mechanism to store locations of interest within a FLAC file, a cuesheet metadata block can be used. Certain aspects of this metadata block follow directly from the CD-DA specification, called Red Book, which is standardized as [@IEC.60908.1999]. For more information on the function and history of these aspects, please refer to [@IEC.60908.1999].
+To either store the track and index point structure of a Compact Disc Digital Audio (CD-DA) along with its audio or to provide a mechanism to store locations of interest within a FLAC file, a cuesheet metadata block can be used. Certain aspects of this metadata block follow directly from the CD-DA specification, called Red Book, which is standardized as [@IEC.60908.1999]. For more information on the function and history of these aspects, please refer to [@IEC.60908.1999].
 
 <reference anchor="IEC.60908.1999">
     <front>
@@ -431,7 +431,7 @@ Data              | Description
 :-----------------|:-----------
 `u(128*8)`        | Media catalog number, in ASCII printable characters 0x20-0x7E.
 `u(64)`           | Number of lead-in samples.
-`u(1)`            | `1` if the cuesheet corresponds to a Compact Disc, else `0`.
+`u(1)`            | `1` if the cuesheet corresponds to a CD-DA, else `0`.
 `u(7+258*8)`      | Reserved. All bits MUST be set to zero.
 `u(8)`            | Number of tracks in this cuesheet.
 Cuesheet tracks   | A number of structures as specified in the [section cuesheet track](#cuesheet-track) equal to the number of tracks specified previously.
@@ -554,7 +554,7 @@ Each frame MUST start on a byte boundary and starts with the 15-bit frame sync c
 
 ### Block size bits
 
-Following the frame sync code and block size strategy bit are 4 bits (the first 4 bits of the third byte of each frame) referred to as the block size bits. Their value relates to the block size according to the following table, where v is the value of the 4 bits as an unsigned number. If the block size bits code for an uncommon block size, this is stored after the coded number, see [section uncommon block size](#uncommon-block-size).
+Following the frame sync code and blocking strategy bit are 4 bits (the first 4 bits of the third byte of each frame) referred to as the block size bits. Their value relates to the block size according to the following table, where v is the value of the 4 bits as an unsigned number. If the block size bits code for an uncommon block size, this is stored after the coded number, see [section uncommon block size](#uncommon-block-size).
 
 Value           | Block size
 :---------------|:-----------
@@ -628,7 +628,7 @@ The next bit is reserved and MUST be zero.
 
 ### Coded number
 
-Following the reserved bit (starting at the fifth byte of the frame) is either a sample or a frame number, which will be referred to as the coded number. When dealing with variable block size streams, the sample number of the first sample in the frame is encoded. When the file contains a fixed block size stream, the frame number is encoded.
+Following the reserved bit (starting at the fifth byte of the frame) is either a sample or a frame number, which will be referred to as the coded number. When dealing with variable block size streams, the sample number of the first sample in the frame is encoded. When the file contains a fixed block size stream, the frame number is encoded. See [section frame header](#frame-header) on the blocking strategy bit which signals whether a stream is a fixed block size stream or a variable block size stream. Also see [section addition of blocking strategy bit](#addition-of-blocking-strategy-bit).
 
 The coded number is stored in a variable length code like UTF-8 as defined in [@!RFC3629], but extended to a maximum of 36 bits unencoded, 7 byte encoded.
 
@@ -739,7 +739,7 @@ As a predictor makes use of samples preceding the sample that is predicted, it c
 Data             | Description
 :----------------|:-----------
 `s(n)`           | Unencoded warm-up samples (n = subframe's bits-per-sample \* predictor order).
-`Coded residual` | Encoded residual
+Coded residual   | Coded residual as defined in [section coded residual](#coded-residual)
 
 As the fixed predictors are specified, they do not have to be stored. The fixed predictor order, which is stored in the subframe header, specifies which predictor is used.
 
@@ -762,7 +762,7 @@ Data             | Description
 `u(4)`           | (Predictor coefficient precision in bits)-1 (NOTE: 0b1111 is forbidden).
 `s(5)`           | Prediction right shift needed in bits.
 `s(n)`           | Unencoded predictor coefficients (n = predictor coefficient precision \* lpc order).
-`Coded residual` | Encoded residual
+Coded residual   | Coded residual as defined in [section coded residual](#coded-residual)
 
 See [section on Constant subframe](#constant-subframe) on how the warm-up samples are stored unencoded. The unencoded predictor coefficients are stored the same way as the warm-up samples, but the number of bits needed for each coefficient is defined by the predictor coefficient precision. While the prediction right shift is signed two's complement, this number MUST NOT be negative, see section [past changes](#restriction-of-lpc-shift-to-non-negative-values) for an explanation why this is.
 
@@ -838,7 +838,7 @@ Following the first packet are one or more header packets, each of which contain
 
 Following the header packets are audio packets. Each audio packet contains a single FLAC frame. The first audio packet MUST start on a new Ogg page, i.e. the last metadata block MUST finish its page before any audio packets are encapsulated.
 
-The granule position of all pages containing header packets MUST be 0, for pages containing audio packets the granule position is the number of the last sample contained by the last completed packet in the frame. The sample numbering considers inter-channel samples. If a page contains no packet end (e.g. when page only contains the start of a large packet, which continues on the next page) then the granule position is set to the maximum value possible i.e. `0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF`.
+The granule position of all pages containing header packets MUST be 0, for pages containing audio packets the granule position is the number of the last sample contained by the last completed packet in the frame. The sample numbering considers interchannel samples. If a page contains no packet end (e.g. when page only contains the start of a large packet, which continues on the next page) then the granule position is set to the maximum value possible i.e. `0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF`.
 
 The granule position of the first audio data page with a completed packet MAY be larger than the number of samples contained in packets that complete on that page. In other words, the apparent sample number of the first sample in the stream following from the granule position and the audio data MAY be larger than 0. This allows for example a server to cast a live stream to several clients which joined at different moments, without rewriting the granule position for each client.
 
