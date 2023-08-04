@@ -854,7 +854,16 @@ If an audio stream is encoded where audio properties (sample rate, number of cha
 
 ## ISO Base Media File Format (MP4) mapping
 
-The full encapsulation definition of FLAC audio in MP4 files was deemed too extensive to include in this document. A definition document can be found at https://github.com/xiph/flac/blob/master/doc/isoflac.txt The definition document is summarized here.
+The full encapsulation definition of FLAC audio in MP4 files was deemed too extensive to include in this document. A definition document can be found at [@FLAC-in-MP4-specification]. The definition document is summarized here.
+
+<reference anchor="FLAC-in-MP4-specification" target=" https://github.com/xiph/flac/blob/master/doc/isoflac.txt">
+    <front>
+        <title>Encapsulation of FLAC in ISO Base Media File Format</title>
+        <author initials="C" surname="Montgomery" fullname="Christopher Montgomery" />
+        <date month="07" year="2022"/>
+    </front>
+    <refcontent>commit 78d85dd</refcontent>
+</reference>
 
 The sample entry code is 'fLaC'. The channelcount and samplesize fields in the sample entry follow the values found in the FLAC stream. The samplerate field can be different, because FLAC can carry audio with much higher sample rates than can be coded for in the sample entry. When possible, the samplerate field should contain the sample rate as found in the FLAC stream, shifted left by 16 bits to get the 16.16 fixed point representation of the samplerate field. When the FLAC stream contains a sample rate higher than can be coded, the samplerate field contains the greatest expressible regular division of the sample rate, e.g., 48000 for sample rates of 96 kHz and 192 kHz or 44100 for a sample rate of 88200 Hz. When the FLAC stream contains audio with an unusual sample rate that has no regular division, the maximum value of 65535.0 Hz is used. As FLAC streams with a high sample rate are common, a parser or decoder MUST read the value from the FLAC streaminfo metadata block or a frame header to determine the actual sample rate. The sample entry contains one 'FLAC specific box' with code 'dfLa'.
 
@@ -872,7 +881,14 @@ A reference encoder and decoder implementation of the FLAC format exists, known 
 
 Another completely independent implementation of both encoder and decoder of the FLAC format is available in libavcodec, maintained by FFmpeg, licensed under LGPL 2.1 or later. It can be found at https://ffmpeg.org/
 
-A list of other implementations and an overview of which parts of the format they implement can be found here: https://github.com/ietf-wg-cellar/flac-specification/wiki/Implementations
+A list of other implementations and an overview of which parts of the format they implement can be found at [@FLAC-wiki-implementations].
+
+<reference anchor="FLAC-wiki-implementations" target="https://github.com/ietf-wg-cellar/flac-specification/wiki/Implementations">
+    <front>
+        <title>FLAC specification wiki: Implementations</title>
+        <author/>
+    </front>
+</reference>
 
 # Security Considerations
 
@@ -892,7 +908,16 @@ Seeking in a FLAC stream that is not in a container relies on the coded number i
 
 Implementors are advised to employ fuzz testing combined with different sanitizers on FLAC decoders to find security problems. Ignoring the results of CRC checks improves the efficiency of decoder fuzz testing.
 
-See the [FLAC decoder testbench](https://github.com/ietf-wg-cellar/flac-test-files) for a non-exhaustive list of FLAC files with extreme configurations that lead to crashes or reboots on some known implementations. Besides providing a starting point for security testing, this set of files can also be used to test conformance with this specification.
+See [@FLAC-decoder-testbench] for a non-exhaustive list of FLAC files with extreme configurations that lead to crashes or reboots on some known implementations. Besides providing a starting point for security testing, this set of files can also be used to test conformance with this specification.
+
+<reference anchor="FLAC-decoder-testbench" target="https://github.com/ietf-wg-cellar/flac-test-files">
+    <front>
+        <title>FLAC decoder testbench</title>
+        <author/>
+        <date month="08" year="2023"/>
+    </front>
+    <refcontent>commit aa7b0c6</refcontent>
+</reference>
 
 FLAC files may contain executable code, although the FLAC format is not designed for it and it is uncommon. One use case where FLAC is occasionally used to store executable code is when compressing images of mixed mode CDs, which contain both audio and non-audio data, of which the non-audio portion can contain executable code.
 
