@@ -283,12 +283,12 @@ As another example, in the case of a 1-channel with 12-bit samples, bits are lin
 ```
 AAAAAAAASSSSAAAABBBBBBBBSSSSBBBB
    ^     ^   ^   ^       ^   ^
-   |     |   |   |       |  most-significant 4 bits of 2nd sample
+   |     |   |   |       |  Most-significant 4 bits of 2nd sample
    |     |   |   | Sign extension bits of 2nd sample
-   |     |   |  least-significant 8 bits of 2nd sample
-   |     |  most-significant 4 bits of 1st sample
+   |     |   |  Least-significant 8 bits of 2nd sample
+   |     |  Most-significant 4 bits of 1st sample
    |    Sign extension bits of 1st sample
-  least-significant 8 bits of 1st sample
+  Least-significant 8 bits of 1st sample
 
 ```
 
