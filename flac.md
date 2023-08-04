@@ -834,7 +834,7 @@ Data     | Description
 
 The number of header packets MAY be 0, which means the number of packets that follow is unknown. This first packet MUST NOT share a Ogg page with any other packets. This means the first page of an logical stream of FLAC-in-Ogg is always 79 bytes.
 
-Following the first packet are one or more header packets, each of which contains a single metadata block. The first of these packets SHOULD be a vorbis comment metadata block, for historic reasons. This is contrary to unencapsulated FLAC streams, where the order of metadata blocks is not important except for the streaminfo block and where a vorbis comment metadata block is optional.
+Following the first packet are one or more header packets, each of which contains a single metadata block. The first of these packets SHOULD be a Vorbis comment metadata block, for historic reasons. This is contrary to unencapsulated FLAC streams, where the order of metadata blocks is not important except for the streaminfo block and where a Vorbis comment metadata block is optional.
 
 Following the header packets are audio packets. Each audio packet contains a single FLAC frame. The first audio packet MUST start on a new Ogg page, i.e. the last metadata block MUST finish its page before any audio packets are encapsulated.
 
