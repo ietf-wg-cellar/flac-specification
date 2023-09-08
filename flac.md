@@ -361,7 +361,7 @@ Note that the Vorbis comment as used in Vorbis allows for on the order of 2\^64 
 
 ### Standard field names
 
-Except for the one defined in [section channel mask](#channel-mask), no standard field names are defined. In general, most FLAC playback devices and software recognize the following field names:
+Only one standard field name is defined; the channel mask field, in section channel mask [section channel mask](#channel-mask). In general, most FLAC playback devices and software recognize the following field names:
 
 - Title: name of the current work.
 - Artist: name of the artist generally responsible for the current work. For orchestral works, this is usually the composer; otherwise, it is often the performer.
