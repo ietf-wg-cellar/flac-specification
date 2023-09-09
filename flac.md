@@ -875,6 +875,8 @@ Each FLAC frame is a single sample in the context of MP4 files.
 
 # Implementation status
 
+Note to RFC Editor - please remove this entire section before publication, as well as the reference to RFC 7942.
+
 This section records the status of known implementations of the FLAC format, and is based on a proposal described in [@?RFC7942]. Please note that the listing of any individual implementation here does not imply endorsement by the IETF. Furthermore, no effort has been spent to verify the information presented here that was supplied by IETF contributors. This is not intended as, and must not be construed to be, a catalog of available implementations or their features.  Readers are advised to note that other implementations may exist.
 
 A reference encoder and decoder implementation of the FLAC format exists, known as libFLAC, maintained by Xiph.Org. It can be found at https://xiph.org/flac/ Note that while all libFLAC components are licensed under 3-clause BSD, the flac and metaflac command line tools often supplied together with libFLAC are licensed under GPL.
@@ -923,7 +925,7 @@ FLAC files may contain executable code, although the FLAC format is not designed
 
 # IANA Considerations
 
-In accordance with the procedures set forth in [@?RFC6838], this document registers one new media type, "audio/flac", as defined in the following section.
+This document registers one new media type, "audio/flac", as defined in the following section.
 
 ## Media type registration
 
