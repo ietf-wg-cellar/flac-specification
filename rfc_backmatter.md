@@ -226,13 +226,13 @@ Start  | Length   | Contents           | Description
 0x14+4 | 3 bits   | 0b001              | 2 channels
 0x14+7 | 5 bits   | 0b01111            | Sample bit depth 16
 0x15+4 | 36 bits  | 0b0000, 0x00000001 | Total no. of samples 1
-0x1a   | 16 bytes | (...)              | MD5 signature
+0x1a   | 16 bytes | (...)              | MD5 checksum
 
 The minimum and maximum block size are both 4096. This was apparently the block size the encoder planned to use, but as only 1 interchannel sample was provided, no frames with 4096 samples are actually present in this file.
 
 Note that anywhere a number of samples is mentioned (block size, total number of samples, sample rate), interchannel samples are meant.
 
-The MD5 sum (starting at 0x1a) is 0x3e84 b418 07dc 6903 0758 6a3d ad1a 2e0f. This will be validated after decoding the samples.
+The MD5 checksum (starting at 0x1a) is 0x3e84 b418 07dc 6903 0758 6a3d ad1a 2e0f. This will be validated after decoding the samples.
 
 ### Audio frames
 
@@ -284,7 +284,7 @@ At this point, we would undo stereo decorrelation if that was applicable.
 
 As the last subframe ends byte-aligned, no padding bits follow it. The next 2 bytes, starting at 0x38, contain the frame CRC. As this is the only frame in the file, the file ends with the CRC.
 
-To validate the MD5, we line up the samples interleaved, byte-aligned, little endian, signed two's complement. The first sample, with value 25588, translates to 0xf463, the second sample, with value 10416,  translates to 0xb028. When MD5 summing 0xf463b028, we get the MD5 sum found in the header, so decoding was lossless.
+To validate the MD5 checksum, we line up the samples interleaved, byte-aligned, little endian, signed two's complement. The first sample, with value 25588, translates to 0xf463, the second sample, with value 10416,  translates to 0xb028. When doing the MD5 transformation on 0xf463b028, we get the MD5 checksum found in the header, so decoding was lossless.
 
 ## Decoding example 2
 
@@ -354,9 +354,9 @@ Start  | Length   | Contents           | Description
 0x0c+0 | 3 bytes  | 0x000017           | Min. frame size 23 byte
 0x0f+0 | 3 bytes  | 0x000044           | Max. frame size 68 byte
 0x15+4 | 36 bits  | 0b0000, 0x00000013 | Total no. of samples 19
-0x1a   | 16 bytes | (...)              | MD5 signature
+0x1a   | 16 bytes | (...)              | MD5 checksum
 
-This time, the minimum and maximum block sizes are reflected in the file: there is one block of 16 samples, the last block (which has 3 samples) is not considered for the minimum block size. The MD5 signature is 0xd5b0 5649 75e9 8b8d 8b93 0422 757b 8103, this will be verified at the end of this example.
+This time, the minimum and maximum block sizes are reflected in the file: there is one block of 16 samples, the last block (which has 3 samples) is not considered for the minimum block size. The MD5 checksum is 0xd5b0 5649 75e9 8b8d 8b93 0422 757b 8103, this will be verified at the end of this example.
 
 ### Seektable
 
@@ -577,7 +577,7 @@ As the last subframe does not end on byte alignment, 2 padding bits are added be
 
 ### MD5 checksum verification
 
-All samples in the file have been decoded, we can now verify the MD5 sum. All sample values must be interleaved and stored signed, coded little-endian. The result of this follows in groups of 12 samples (i.e., 6 interchannel samples) per line.
+All samples in the file have been decoded, we can now verify the MD5 checksum. All sample values must be interleaved and stored signed, coded little-endian. The result of this follows in groups of 12 samples (i.e., 6 interchannel samples) per line.
 
 ```
 0x8428 B617 7946 3129 5E3A 2722 D445 D128 0B3D B723 EB45 DF28
@@ -586,7 +586,7 @@ All samples in the file have been decoded, we can now verify the MD5 sum. All sa
 0x4AC1 3EDB
 ```
 
-The MD5sum of this is indeed the same as the one found in the streaminfo metadata block.
+The MD5 checksum of this is indeed the same as the one found in the streaminfo metadata block.
 
 
 ## Decoding example 3
@@ -630,7 +630,7 @@ Start  | Length   | Contents           | Description
 0x14+4 | 3 bits   | 0b000              | 1 channel
 0x14+7 | 5 bits   | 0b00111            | Sample bit depth 8 bit
 0x15+4 | 36 bits  | 0b0000, 0x00000018 | Total no. of samples 24
-0x1a   | 16 bytes | (...)              | MD5 signature
+0x1a   | 16 bytes | (...)              | MD5 checksum
 
 
 ### Audio frame
@@ -725,10 +725,10 @@ Residual  | Predictor w/o shift | Predictor | Sample value
 2         | -26  | -7  | -5
 0         | 1    | 0   | 0
 
-By lining all these samples up, we get the following input for the MD5 summing process.
+By lining all these samples up, we get the following input for the MD5 checksumming process.
 
 ```
 0x004F 6F4E 08C3 A6BC F32A 4335 0DE5 D2DA F40E 1813 06FC FB00
 ```
 
-Which indeed results in the MD5 signature found in the streaminfo metadata block.
+Which indeed results in the MD5 checksum found in the streaminfo metadata block.
