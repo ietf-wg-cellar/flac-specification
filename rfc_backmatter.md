@@ -3,7 +3,7 @@
 
 # Numerical considerations
 
-In order to maintain lossless behavior, all arithmetic used in encoding and decoding sample values MUST be done with integer data types to eliminate the possibility of introducing rounding errors associated with floating-point arithmetic. Use of floating-point representations in analysis (e.g., finding a good predictor or Rice parameter) is not a concern, as long as the process of using the found predictor and Rice parameter to encode audio samples is implemented with only integer math.
+In order to maintain lossless behavior, all arithmetic used in encoding and decoding sample values must be done with integer data types to eliminate the possibility of introducing rounding errors associated with floating-point arithmetic. Use of floating-point representations in analysis (e.g., finding a good predictor or Rice parameter) is not a concern, as long as the process of using the found predictor and Rice parameter to encode audio samples is implemented with only integer math.
 
 Furthermore, the possibility of integer overflow can be eliminated by using large enough data types. Choosing a 64-bit signed data type for all arithmetic involving sample values would make sure the possibility for overflow is eliminated, but usually smaller data types are chosen for increased performance, especially in embedded devices. This appendix provides guidelines for choosing the appropriate data type for each step of encoding and decoding FLAC files.
 
@@ -117,7 +117,7 @@ Escaped Rice partitions are seldom used, as it turned out their use provides onl
 
 ## Uncommon block size
 
-For unknown reasons, some decoders have chosen to support only common block sizes except for the last block. Therefore, maximum compatibility with decoders is achieved when creating FLAC files using common block sizes, as listed in (#block-size-bits), for all but the last block.
+For unknown reasons, some decoders have chosen to support only common block sizes for all but the last block of a stream. Therefore, maximum compatibility with decoders is achieved when creating FLAC files using common block sizes, as listed in (#block-size-bits), for all but the last block of a stream.
 
 ## Uncommon bit depth
 
@@ -139,11 +139,11 @@ Besides audio with a 'non-whole byte' bit depth, some decoder implementations ha
 
 ## Multi-channel audio and uncommon sample rates
 
-Many FLAC audio players are unable to render multi-channel audio or audio with an uncommon sample rate. While this is not a concern specific to the FLAC format, it is of note when requiring maximum compatibility with decoders. Unlike the previously mentioned interoperability considerations, this is one that cannot be satisfied without sacrificing the lossless nature of the FLAC format.
+Many FLAC audio players are unable to render multi-channel audio or audio with an uncommon sample rate. While this is not a concern specific to the FLAC format, it is of note when requiring maximum compatibility with decoders. Unlike the previously mentioned interoperability considerations, this is one where compatibility cannot be improved without sacrificing the lossless nature of the FLAC format.
 
 From a non-exhaustive inquiry, it seems that a non-negligible amount of players, especially hardware players, do not support audio with 3 or more channels or sample rates other than those considered common, see (#sample-rate-bits).
 
-For those players that do support and are able to render multi-channel audio, many do not parse and use the WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag (see (#channel-mask)). This too is an interoperability consideration that cannot be satisfied without sacrificing the lossless nature of the FLAC format.
+For those players that do support and are able to render multi-channel audio, many do not parse and use the WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK tag (see (#channel-mask)). This too is an interoperability consideration where compatibility cannot be improved without sacrificing the lossless nature of the FLAC format.
 
 ## Changing audio properties mid-stream
 
@@ -409,7 +409,7 @@ Start  | Length  | Contents        | Description
 0x89+7 | 1 bit   | 0b0             | blocking strategy
 0x8a+0 | 4 bits  | 0b0110          | 8-bit block size further down
 0x8a+4 | 4 bits  | 0b1001          | sample rate 44.1 kHz
-0x8b+0 | 4 bits  | 0b1001          | right-side stereo
+0x8b+0 | 4 bits  | 0b1001          | side-right stereo
 0x8b+4 | 3 bits  | 0b100           | bit depth 16 bit
 0x8b+7 | 1 bit   | 0b0             | mandatory 0 bit
 0x8c+0 | 1 byte  | 0x00            | frame number 0
@@ -506,7 +506,7 @@ Residual  | Sample value
 -267      | -6299
 134       | -6165
 
-With this, the	 decoding of the first subframe is complete. The decoding of the second subframe is very similar, as it also uses a fixed predictor of order 1, so this is left as an exercise for the reader, the results are in the next table. The next step is undoing stereo decorrelation, which is done in the following table. As the stereo decorrelation is right-side, in which the actual ordering of the subframes is side-right, the samples in the right channel come directly from the second subframe, while the samples in the left channel are found by adding the values of both subframes for each sample.
+With this, the	 decoding of the first subframe is complete. The decoding of the second subframe is very similar, as it also uses a fixed predictor of order 1, so this is left as an exercise for the reader, the results are in the next table. The next step is undoing stereo decorrelation, which is done in the following table. As the stereo decorrelation is side-right, the samples in the right channel come directly from the second subframe, while the samples in the left channel are found by adding the values of both subframes for each sample.
 
 Subframe 1 | Subframe 2 | Left   | Right
 :----------|:-----------|:-------|:------

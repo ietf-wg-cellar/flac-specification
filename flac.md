@@ -38,6 +38,8 @@ While the FLAC format can store digital audio as well as other digital signals, 
 
 - **Linear predictor**: a predictor using linear prediction (see [@LinearPrediction]). This is also called **linear predictive coding (LPC)**. With a linear predictor, each prediction is a linear combination of past samples, hence the name. A linear predictor has a causal discrete-time finite impulse response (see [@FIR]).
 
+- **Muxing**: short for multiplexing, combining several streams or files into a single stream or file. In the context of this document, muxing more specifically refers to embedding a FLAC stream in a container as described in [#container-mappings].
+
 <reference anchor="LinearPrediction" target="https://en.wikipedia.org/wiki/Linear_prediction">
   <front>
     <title>Linear prediction - Wikipedia</title>
@@ -74,13 +76,13 @@ While the FLAC format can store digital audio as well as other digital signals, 
 
 Similar to many other audio coders, a FLAC file is encoded following the steps below. On decoding a FLAC file, these steps are undone in reverse order, i.e., from bottom to top.
 
-- `Blocking` (see (#blocking)). The input is split up into many contiguous blocks.
+- **Blocking** (see (#blocking)). The input is split up into many contiguous blocks.
 
-- `Interchannel Decorrelation` (see (#interchannel-decorrelation)). In the case of stereo streams, the FLAC format allows for transforming the left-right signal into a mid-side signal, a left-side signal or a side-right signal to remove redundancy between channels. Choosing between any of these transformations is done independently for each block.
+- **Interchannel Decorrelation** (see (#interchannel-decorrelation)). In the case of stereo streams, the FLAC format allows for transforming the left-right signal into a mid-side signal, a left-side signal or a side-right signal to remove redundancy between channels. Choosing between any of these transformations is done independently for each block.
 
-- `Prediction` (see (#prediction)). To remove redundancy in a signal, a predictor is stored for each subblock or its transformation as formed in the previous step. A predictor consists of a simple mathematical description that can be used, as the name implies, to predict a certain sample from the samples that preceded it. As this prediction is rarely exact, the error of this prediction is passed on to the next stage. The predictor of each subblock is completely independent from other subblocks. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need to be included in the compressed stream. If no usable predictor can be found for a certain subblock, the signal is stored uncompressed and the next stage is skipped.
+- **Prediction** (see (#prediction)). To remove redundancy in a signal, a predictor is stored for each subblock or its transformation as formed in the previous step. A predictor consists of a simple mathematical description that can be used, as the name implies, to predict a certain sample from the samples that preceded it. As this prediction is rarely exact, the error of this prediction is passed on to the next stage. The predictor of each subblock is completely independent from other subblocks. Since the methods of prediction are known to both the encoder and decoder, only the parameters of the predictor need to be included in the compressed stream. If no usable predictor can be found for a certain subblock, the signal is stored uncompressed and the next stage is skipped.
 
-- `Residual Coding` (see (#residual-coding)). As the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) is coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC uses Rice coding, a subset of Golomb coding, with either 4-bit or 5-bit parameters to code the residual signal.
+- **Residual Coding** (see (#residual-coding)). As the predictor does not describe the signal exactly, the difference between the original signal and the predicted signal (called the error or residual signal) is coded losslessly. If the predictor is effective, the residual signal will require fewer bits per sample than the original signal. FLAC uses Rice coding, a subset of Golomb coding, with either 4-bit or 5-bit parameters to code the residual signal.
 
 In addition, FLAC specifies a metadata system (see (#file-level-metadata)), which allows arbitrary information about the stream to be included at the beginning of the stream.
 
@@ -100,9 +102,9 @@ In many audio files, channels are correlated. The FLAC format can exploit this c
 
 - **Left-side**. The left subblock is coded and the left and right subblocks are used to code a side subframe. The side subframe is constructed in the same way as for mid-side. To decode, the right subblock is restored by subtracting the samples in the side subframe from the corresponding samples in the the left subframe.
 
-- **Right-side**. The right subblock is coded and the left and right subblocks are used to code a side subframe. Note that the actual coded subframe order is side-right. The side subframe is constructed in the same way as for mid-side. To decode, the left subblock is restored by adding the samples in the side subframe to the corresponding samples in the right subframe.
+- **Side-right**. The left and right subblocks are used to code a side subframe and the right subblock is coded. The side subframe is constructed in the same way as for mid-side. To decode, the left subblock is restored by adding the samples in the side subframe to the corresponding samples in the right subframe.
 
-The side channel needs one extra bit of bit depth as the subtraction can produce sample values twice as large as the maximum possible in any given bit depth. The mid channel in mid-side stereo does not need one extra bit, as it is shifted right one bit. The right shift of the mid channel does not lead to non-lossless behavior, because an odd sample in the mid subframe must always be accompanied by a corresponding odd sample in the side subframe, which means the lost least-significant bit can be restored by taking it from the sample in the side subframe.
+The side channel needs one extra bit of bit depth as the subtraction can produce sample values twice as large as the maximum possible in any given bit depth. The mid channel in mid-side stereo does not need one extra bit, as it is shifted right one bit. The right shift of the mid channel does not lead to lossy behavior, because an odd sample in the mid subframe must always be accompanied by a corresponding odd sample in the side subframe, which means the lost least-significant bit can be restored by taking it from the sample in the side subframe.
 
 ## Prediction
 
@@ -173,7 +175,7 @@ Uncommon blocksize 65536                    | (#uncommon-block-size)
 Predictor coefficient precision bits 0b1111 | (#linear-predictor-subframe)
 Negative predictor right shift              | (#linear-predictor-subframe)
 
-All numbers used in a FLAC bitstream are integers, there are no floating-point representations. All numbers are big-endian coded, except the field lengths used in Vorbis comments (see (#vorbis-comment)), which are little-endian coded. All numbers are unsigned except linear predictor coefficients, the linear prediction shift (see (#linear-predictor-subframe)), and numbers that directly represent samples, which are signed. None of these restrictions apply to application metadata blocks or to Vorbis comment field contents.
+All numbers used in a FLAC bitstream are integers, there are no floating-point representations. All numbers are big-endian coded, except the field lengths used in Vorbis comments (see (#vorbis-comment)), which are little-endian coded. This exception for Vorbis comments is to keep as much commonality as possible with Vorbis comments as used by the Vorbis codec (see [@Vorbis]). All numbers are unsigned except linear predictor coefficients, the linear prediction shift (see (#linear-predictor-subframe)), and numbers that directly represent samples, which are signed. None of these restrictions apply to application metadata blocks or to Vorbis comment field contents.
 
 All samples encoded to and decoded from the FLAC format MUST be in a signed representation.
 
@@ -188,19 +190,17 @@ When a FLAC file contains data that is forbidden or otherwise not valid, decoder
 - A frame header CRC (see (#frame-header-crc)) or frame footer CRC (see (#frame-footer)) does not validate.
 - One of the forbidden bit patterns described in (#tableforbiddenpatterns) above is used.
 
-# Format layout
-
-Before the formal description of the stream, an overview of the layout of the FLAC format might be helpful.
+# Format layout overview
 
 A FLAC bitstream consists of the `fLaC` (i.e., 0x664C6143) marker at the beginning of the stream, followed by a mandatory metadata block (called the STREAMINFO block), any number of other metadata blocks, and then the audio frames.
 
-FLAC supports up to 127 kinds of metadata blocks; currently, 7 kinds are defined in (#file-level-metadata).
+FLAC supports 127 kinds of metadata blocks; currently, 7 kinds are defined in (#file-level-metadata).
 
-The audio data is composed of one or more audio frames. Each frame consists of a frame header, which contains a sync code, information about the frame like the block size, sample rate, number of channels, et cetera, and an 8-bit CRC. The frame header also contains either the sample number of the first sample in the frame (for variable block size streams), or the frame number (for fixed block size streams). This allows for fast, sample-accurate seeking to be performed. Following the frame header are encoded subframes, one for each channel. The frame is then zero-padded to a byte boundary and finished with a frame footer containing a checksum for the frame. Each subframe has its own header that specifies how the subframe is encoded.
+The audio data is composed of one or more audio frames. Each frame consists of a frame header, which contains a sync code, information about the frame (like the block size, sample rate and number of channels), and an 8-bit CRC. The frame header also contains either the sample number of the first sample in the frame (for variable block size streams), or the frame number (for fixed block size streams). This allows for fast, sample-accurate seeking to be performed. Following the frame header are encoded subframes, one for each channel. The frame is then zero-padded to a byte boundary and finished with a frame footer containing a checksum for the frame. Each subframe has its own header that specifies how the subframe is encoded.
 
 In order to allow a decoder to start decoding at any place in the stream, each frame starts with a byte-aligned 15-bit sync code. However, since it is not guaranteed that the sync code does not appear elsewhere in the frame, the decoder can check that it synced correctly by parsing the rest of the frame header and validating the frame header CRC.
 
-Furthermore, to allow a decoder to start decoding at any place in the stream even without having received a streaminfo metadata block, each frame header contains some basic information about the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is pure overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame properties. When a certain property has a value that is not covered by the lookup table, the decoder is directed to find the value of that property (for example, the sample rate) at the end of the frame header or in the streaminfo metadata block. If a frame header refers to the streaminfo metadata block, the file is not 'streamable', see (#streamable-subset) for details. By using lookup tables, the file is streamable and the frame header size small for the most common forms of audio data.
+Furthermore, to allow a decoder to start decoding at any place in the stream even without having received a streaminfo metadata block, each frame header contains some basic information about the stream. This information includes sample rate, bits per sample, number of channels, etc. Since the frame header is overhead, it has a direct effect on the compression ratio. To keep the frame header as small as possible, FLAC uses lookup tables for the most commonly used values for frame properties. When a certain property has a value that is not covered by the lookup table, the decoder is directed to find the value of that property (for example, the sample rate) at the end of the frame header or in the streaminfo metadata block. If a frame header refers to the streaminfo metadata block, the file is not 'streamable', see (#streamable-subset) for details. By using lookup tables, the file is streamable and the frame header size small for the most common forms of audio data.
 
 Individual subframes (one for each channel) are coded separately within a frame, and appear serially in the stream. In other words, the encoded audio data is NOT channel-interleaved. This reduces decoder complexity at the cost of requiring larger decode buffers. Each subframe has its own header specifying the attributes of the subframe, like prediction method and order, residual coding parameters, etc. Each subframe header is followed by the encoded audio data for that channel.
 
@@ -241,6 +241,8 @@ Value   | Metadata block type
 The streaminfo metadata block has information about the whole stream, like sample rate, number of channels, total number of samples, etc. It MUST be present as the first metadata block in the stream. Other metadata blocks MAY follow. There MUST be no more than one streaminfo metadata block per FLAC stream.
 
 If the streaminfo metadata block contains incorrect or incomplete information, decoder behavior is left unspecified (i.e., up to the decoder implementation). A decoder MAY choose to stop further decoding when the information supplied by the streaminfo metadata block turns out to be incorrect or contains forbidden values. A decoder accepting information from the streaminfo block (most-significantly the maximum frame size, maximum block size, number of audio channels, number of bits per sample, and total number of samples) without doing further checks during decoding of audio frames could be vulnerable to buffer overflows. See also (#security-considerations).
+
+The following table describes the streaminfo metadata block, excluding the metadata block header.
 
 Data     | Description
 :--------|:-----------
@@ -299,7 +301,7 @@ The padding metadata block allows for an arbitrary amount of padding. This block
 
 Data     | Description
 :--------|:-----------
-`u(n)`   | n '0' bits (n MUST be a multiple of 8, i.e., a whole number of bytes, and MAY be zero)
+`u(n)`   | n '0' bits (n MUST be a multiple of 8, i.e., a whole number of bytes, and MAY be zero). n is 8 times the size described in the metadata block header.
 
 ## Application
 
@@ -308,13 +310,13 @@ The application metadata block is for use by third-party applications. The only 
 Data     | Description
 :--------|:-----------
 `u(32)`  | Registered application ID. (Visit the [registration page](https://xiph.org/flac/id.html) to register an ID with FLAC.)
-`u(n)`   | Application data (n MUST be a multiple of 8, i.e., a whole number of bytes)
+`u(n)`   | Application data (n MUST be a multiple of 8, i.e., a whole number of bytes) n is 8 times the size described in the metadata block header, minus the 32 bits already used for the application ID.
 
 ## Seektable
 
 The seektable metadata block can be used to store seek points. It is possible to seek to any given sample in a FLAC stream without a seek table, but the delay can be unpredictable since the bitrate may vary widely within a stream. By adding seek points to a stream, this delay can be significantly reduced. There MUST NOT be more than one seektable metadata block in a stream, but the table can have any number of seek points.
 
-Each seek point takes 18 bytes, so a seek table with 1% resolution within a stream adds less than 2 kilobyte of data. The number of seek points is implied by the metadata header 'length' field, i.e., equal to length / 18. There is also a special 'placeholder' seekpoint that will be ignored by decoders but can be used to reserve space for future seek point insertion.
+Each seek point takes 18 bytes, so a seek table with 1% resolution within a stream adds less than 2 kilobyte of data. The number of seek points is implied by the size described in the metadata block header, i.e., equal to size / 18. There is also a special 'placeholder' seekpoint that will be ignored by decoders but can be used to reserve space for future seek point insertion.
 
 Data       | Description
 :----------|:-----------
@@ -436,7 +438,7 @@ Data              | Description
 `u(8)`            | Number of tracks in this cuesheet.
 Cuesheet tracks   | A number of structures as specified in (#cuesheet-track) equal to the number of tracks specified previously.
 
-If the media catalog number is less than 128 bytes long, it is right-padded with NUL characters. For CD-DA, this is a thirteen digit number, followed by 115 NUL bytes.
+If the media catalog number is less than 128 bytes long, it is right-padded with 0x00 bytes. For CD-DA, this is a thirteen digit number, followed by 115 0x00 bytes.
 
 The number of lead-in samples has meaning only for CD-DA cuesheets; for other uses, it should be 0. For CD-DA, the lead-in is the TRACK 00 area where the table of contents is stored; more precisely, it is the number of samples from the first sample of the media to the first sample of the first index point of the first track. According to [@IEC.60908.1999], the lead-in MUST be silence and CD grabbing software does not usually store it; additionally, the lead-in MUST be at least two seconds but MAY be longer. For these reasons, the lead-in length is stored here so that the absolute position of the first track can be computed. Note that the lead-in stored here is the number of samples up to the first index point of the first track, not necessarily to INDEX 01 of the first track; even the first track MAY have INDEX 00 data.
 
@@ -458,7 +460,7 @@ Note that the track offset differs from the one in CD-DA, where the track's offs
 
 A track number of 0 is not allowed, because the CD-DA specification reserves this for the lead-in. For CD-DA the number MUST be 1-99, or 170 for the lead-out; for non-CD-DA, the track number MUST be 255 for the lead-out. It is recommended to start with track 1 and increase sequentially. Track numbers MUST be unique within a cuesheet.
 
-The track ISRC (International Standard Recording Code) is a 12-digit alphanumeric code; see [@ISRC-handbook]. A value of 12 ASCII NUL characters MAY be used to denote the absence of an ISRC.
+The track ISRC (International Standard Recording Code) is a 12-digit alphanumeric code; see [@ISRC-handbook]. A value of 12 ASCII 0x00 characters MAY be used to denote the absence of an ISRC.
 
 <reference anchor="ISRC-handbook" target="https://www.ifpi.org/isrc_handbook/">
     <front>
@@ -486,7 +488,7 @@ For CD-DA, a track index point number of 0 corresponds to the track pre-gap. The
 
 ## Picture
 
-The picture metadata block contains image data of a picture in some way belonging to the audio contained in the FLAC file. Its format is derived from the APIC frame in the ID3v2 specification. However, contrary to the APIC frame in ID3v2, the media type and description are prepended with a 4-byte length field instead of being null delimited strings. A FLAC file MAY contain one or more picture metadata blocks.
+The picture metadata block contains image data of a picture in some way belonging to the audio contained in the FLAC file. Its format is derived from the APIC frame in the ID3v2 specification. However, contrary to the APIC frame in ID3v2, the media type and description are prepended with a 4-byte length field instead of being 0x00 delimited strings. A FLAC file MAY contain one or more picture metadata blocks.
 
 Note that while the length fields for media type, description, and picture data are 4 bytes in length and could in theory code for a size up to 4 GiB, the total metadata block size cannot exceed what can be described by the metadata block header, i.e., 16 MiB.
 
@@ -666,7 +668,7 @@ Octets 6-7
   Bits 12-7
 ```
 
-A decoder that relies on the coded number during seeking could be vulnerable to buffer overflows or getting stuck in an infinite loop if it seeks in a stream where the coded numbers are non-consecutive or otherwise not valid. See also (#security-considerations).
+A decoder that relies on the coded number during seeking could be vulnerable to buffer overflows or getting stuck in an infinite loop if it seeks in a stream where the coded numbers are not strictly increasing or otherwise not valid. See also (#security-considerations).
 
 ### Uncommon block size
 
@@ -708,7 +710,7 @@ The FLAC format can optionally take advantage of these wasted bits by signaling 
 
 If a subframe uses wasted bits (i.e., k is not equal to 0), samples are coded ignoring k least-significant bits. For example, if a frame not employing stereo decorrelation specifies a sample size of 16 bits per sample in the frame header and k of a subframe is 3, samples in the subframe are coded as 13 bits per sample. For more details, see (#constant-subframe) on how the bit depth of a subframe is calculated. A decoder MUST add k least-significant zero bits by shifting left (padding) after decoding a subframe sample. If the frame has left/side, right/side, or mid/side stereo, a decoder MUST perform padding on the subframes before restoring the channels to left and right. The number of wasted bits per sample MUST be such that the resulting number of bits per sample (of which the calculation is explained in (#constant-subframe)) is larger than zero.
 
-Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like lossyWAV that enable users to improve compression of their files by a lossless audio codec in a non-lossless way. Because of this, the number of wasted bits k MAY change between frames and MAY differ between subframes. If the number of wasted bits changes halfway through a subframe (e.g., the first part has 2 wasted bits and the second part has 4 wasted bits) the subframe uses the lowest number of wasted bits, as otherwise non-zero bits would be discarded and the process would not be lossless.
+Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like lossyWAV which zero a number of least-sigificant bits for a block of samples, increasing the compression in a non-lossless way. Because of this, the number of wasted bits k MAY change between frames and MAY differ between subframes. If the number of wasted bits changes halfway through a subframe (e.g., the first part has 2 wasted bits and the second part has 4 wasted bits) the subframe uses the lowest number of wasted bits, as otherwise non-zero bits would be discarded and the process would not be lossless.
 
 ### Constant subframe
 In a constant subframe, only a single sample is stored. This sample is stored as an integer number coded big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the bit depth as coded in the frame header (see (#bit-depth-bits)), minus the number of used wasted bits coded in the subframe header (see (#wasted-bits-per-sample)). If a subframe is a side subframe (see (#interchannel-decorrelation)), the bit depth of that subframe is increased by 1 bit.
@@ -745,7 +747,7 @@ Coded residual   | Coded residual as defined in (#coded-residual)
 
 As the fixed predictors are specified, they do not have to be stored. The fixed predictor order, which is stored in the subframe header, specifies which predictor is used.
 
-To encode a signal with a fixed predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a fixed predictor, the residual is decoded, and then the prediction can be added for each sample. This means that decoding MUST be a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
+To encode a signal with a fixed predictor, each sample has the corresponding prediction subtracted and sent to the residual coder. To decode a signal with a fixed predictor, the residual is decoded, and then the prediction can be added for each sample. This means that decoding is necessarily a sequential process within a subframe, as for each sample, enough fully decoded previous samples are needed to calculate the prediction.
 
 For fixed predictor order 0, the prediction is always 0, thus each residual sample is equal to its corresponding input or decoded sample. The difference between a fixed predictor with order 0 and a verbatim subframe, is that a verbatim subframe stores all samples unencoded, while a fixed predictor with order 0 has all its samples processed by the residual coder.
 
@@ -763,10 +765,10 @@ Data             | Description
 `s(n)`           | Unencoded warm-up samples (n = subframe's bits per sample \* lpc order).
 `u(4)`           | (Predictor coefficient precision in bits)-1 (NOTE: 0b1111 is forbidden).
 `s(5)`           | Prediction right shift needed in bits.
-`s(n)`           | Unencoded predictor coefficients (n = predictor coefficient precision \* lpc order).
+`s(n)`           | Predictor coefficients (n = predictor coefficient precision \* lpc order).
 Coded residual   | Coded residual as defined in (#coded-residual)
 
-See (#constant-subframe) on how the warm-up samples are stored unencoded. The unencoded predictor coefficients are stored the same way as the warm-up samples, but the number of bits needed for each coefficient is defined by the predictor coefficient precision. While the prediction right shift is signed two's complement, this number MUST NOT be negative, see (#restriction-of-lpc-shift-to-non-negative-values) for an explanation why this is.
+See (#constant-subframe) on how the warm-up samples are stored unencoded. The predictor coefficients are stored as an integer number coded big-endian, signed two's complement, where the number of bits needed for each coefficient is defined by the predictor coefficient precision. While the prediction right shift is signed two's complement, this number MUST NOT be negative, see (#restriction-of-lpc-shift-to-non-negative-values) for an explanation why this is.
 
 Please note that the order in which the predictor coefficients appear in the bitstream corresponds to which **past** sample they belong to. In other words, the order of the predictor coefficients is opposite to the chronological order of the samples. So, the first predictor coefficient has to be multiplied with the sample directly before the sample that is being predicted, the second predictor coefficient has to be multiplied with the sample before that, etc.
 
@@ -817,7 +819,7 @@ Following the last subframe is the frame footer. If the last subframe is not byt
 
 # Container mappings
 
-The FLAC format can be used without any container, as it already provides for a very thin transport layer. However, the functionality of this transport is rather limited, and to be able to combine FLAC audio with video, it needs to be encapsulated by a more capable container. This presents a problem: the transport layer provided by the FLAC format mixes data that belongs to the encoded data (like block size and sample rate) with data that belongs to the transport (like checksum and timecode). The choice was made to encapsulate FLAC frames as they are, which means some data will be duplicated and potentially deviating between the FLAC frames and the encapsulating container.
+The FLAC format can be used without any container, as it already provides for the most basic features normally associated with a container. However, the functionality this basic container provides is rather limited, and for more advanced features, like combining FLAC audio with video, it needs to be encapsulated by a more capable container.  This presents a problem: because of these container features, the FLAC format mixes data that belongs to the encoded data (like block size and sample rate) with data that belongs to the container (like checksum and timecode). The choice was made to encapsulate FLAC frames as they are, which means some data will be duplicated and potentially deviating between the FLAC frames and the encapsulating container.
 
 As FLAC frames are completely independent of each other, container format features handling dependencies do not need to be used. For example, all FLAC frames embedded in Matroska are marked as keyframes when they are stored in a SimpleBlock, and tracks in an MP4 file containing only FLAC frames do not need a sync sample box.
 
@@ -867,7 +869,7 @@ The full encapsulation definition of FLAC audio in MP4 files was deemed too exte
     <refcontent>commit 78d85dd</refcontent>
 </reference>
 
-The sample entry code is 'fLaC'. The channelcount and samplesize fields in the sample entry follow the values found in the FLAC stream. The samplerate field can be different, because FLAC can carry audio with much higher sample rates than can be coded for in the sample entry. When possible, the samplerate field should contain the sample rate as found in the FLAC stream, shifted left by 16 bits to get the 16.16 fixed point representation of the samplerate field. When the FLAC stream contains a sample rate higher than can be coded, the samplerate field contains the greatest expressible regular division of the sample rate, e.g., 48000 for sample rates of 96 kHz and 192 kHz or 44100 for a sample rate of 88200 Hz. When the FLAC stream contains audio with an unusual sample rate that has no regular division, the maximum value of 65535.0 Hz is used. As FLAC streams with a high sample rate are common, a parser or decoder MUST read the value from the FLAC streaminfo metadata block or a frame header to determine the actual sample rate. The sample entry contains one 'FLAC specific box' with code 'dfLa'.
+The sample entry code is `fLaC`. The channelcount and samplesize fields in the sample entry follow the values found in the FLAC stream. The samplerate field can be different, because FLAC can carry audio with much higher sample rates than can be coded for in the sample entry. When possible, the samplerate field should contain the sample rate as found in the FLAC stream, shifted left by 16 bits to get the 16.16 fixed point representation of the samplerate field. When the FLAC stream contains a sample rate higher than can be coded, the samplerate field contains the greatest expressible regular division of the sample rate, e.g., 48000 for sample rates of 96 kHz and 192 kHz or 44100 for a sample rate of 88200 Hz. When the FLAC stream contains audio with an unusual sample rate that has no regular division, the maximum value of 65535.0 Hz is used. As FLAC streams with a high sample rate are common, a parser or decoder MUST read the value from the FLAC streaminfo metadata block or a frame header to determine the actual sample rate. The sample entry contains one 'FLAC specific box' with code 'dfLa'.
 
 The FLAC specific box extends FullBox, with version number 0 and all flags set to 0, and contains all FLAC data before the first audio frame but `fLaC` ASCII signature (i.e., all metadata blocks).
 
