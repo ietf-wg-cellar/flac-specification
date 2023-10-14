@@ -725,7 +725,7 @@ Residual  | Predictor w/o shift | Predictor | Sample value
 2         | -26  | -7  | -5
 0         | 1    | 0   | 0
 
-By lining all these samples up, we get the following input for the MD5 checksumming process.
+By lining all these samples up, we get the following input for the MD5 checksum calculation process.
 
 ```
 0x004F 6F4E 08C3 A6BC F32A 4335 0DE5 D2DA F40E 1813 06FC FB00
