@@ -252,7 +252,7 @@ Data     | Description
 `u(3)`   | (number of channels)-1. FLAC supports from 1 to 8 channels.
 `u(5)`   | (bits per sample)-1. FLAC supports from 4 to 32 bits per sample.
 `u(36)`  | Total number of interchannel samples in the stream. A value of zero here means the number of total samples is unknown.
-`u(128)` | MD5 signature of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when, despite the error, the bitstream itself is valid. A value of `0` signifies that the value is not known.
+`u(128)` | MD5 checksum of the unencoded audio data. This allows the decoder to determine if an error exists in the audio data even when, despite the error, the bitstream itself is valid. A value of `0` signifies that the value is not known.
 
 The minimum block size and the maximum block size MUST be in the 16-65535 range. The minimum block size MUST be equal to or less than the maximum block size.
 
@@ -262,7 +262,7 @@ If the minimum block size is equal to the maximum block size, the file contains 
 
 The sample rate MUST NOT be 0 when the FLAC file contains audio. A sample rate of 0 MAY be used when non-audio is represented. This is useful if data is encoded that is not along a time axis, or when the sample rate of the data lies outside the range that FLAC can represent in the streaminfo metadata block. If a sample rate of 0 is used it is recommended to store the meaning of the encoded content in a Vorbis comment field (see (#vorbis-comment)) or an application metadata block (see (#application)). This document does not define such metadata.
 
-The MD5 signature is made by performing an MD5 transformation on the samples of all channels interleaved, represented in signed, little-endian form. This interleaving is on a per-sample basis, so for a stereo file this means first the first sample of the first channel, then the first sample of the second channel, then the second sample of the first channel etc. Before performing the MD5 transformation, all samples must be byte-aligned. If the bit depth is not a whole number of bytes, the value of each sample is sign extended to the next whole number of bytes.
+The MD5 checksum is made by performing an MD5 transformation on the samples of all channels interleaved, represented in signed, little-endian form. This interleaving is on a per-sample basis, so for a stereo file this means first the first sample of the first channel, then the first sample of the second channel, then the second sample of the first channel etc. Before performing the MD5 transformation, all samples must be byte-aligned. If the bit depth is not a whole number of bytes, the value of each sample is sign extended to the next whole number of bytes.
 
 So, in the case of a 2-channel stream with 6-bit samples, bits will be lined up as follows.
 
@@ -373,7 +373,7 @@ For a more comprehensive list of possible field names, [the list of tags used in
 
 Besides fields containing information about the work itself, one field is defined for technical reasons, of which the field name is WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK. This field is used to communicate that the channels in a file differ from the default channels defined in (#channels-bits). For example, by default, a FLAC file containing two channels is interpreted to contain a left and right channel, but with this field, it is possible to describe different channel contents.
 
-The channel mask consists of flag bits indicating which channels are present, stored in a hexadecimal representation preceded by 0x. The flags only signal which channels are present, not in which order, so if a file has to be encoded in which channels are ordered differently, they have to be reordered. Please note that a file in which the channel order is defined through the WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK is not streamable (see (#streamable-subset)), as the field is not found in each frame header. The mask bits can be found in the following table.
+The channel mask consists of flag bits indicating which channels are present. The flags only signal which channels are present, not in which order, so if a file has to be encoded in which channels are ordered differently, they have to be reordered. This mask is stored with a hexadecimal representation, preceded by 0x, see the examples below. Please note that a file in which the channel order is defined through the WAVEFORMATEXTENSIBLE\_CHANNEL\_MASK is not streamable (see (#streamable-subset)), as the field is not found in each frame header. The mask bits can be found in the following table.
 
 Bit number | Channel description
 :----------|:-----------
