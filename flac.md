@@ -309,8 +309,10 @@ The application metadata block is for use by third-party applications. The only 
 
 Data     | Description
 :--------|:-----------
-`u(32)`  | Registered application ID. (Visit the [registration page](https://xiph.org/flac/id.html) to register an ID with FLAC.)
+`u(32)`  | Registered application ID.
 `u(n)`   | Application data (n MUST be a multiple of 8, i.e., a whole number of bytes) n is 8 times the size described in the metadata block header, minus the 32 bits already used for the application ID.
+
+Application ID are registered with the IANA, see [#application-id-registry].
 
 ## Seektable
 
@@ -929,7 +931,7 @@ FLAC files may contain executable code, although the FLAC format is not designed
 
 # IANA Considerations
 
-This document registers one new media type, "audio/flac", as defined in the following section.
+This document registers one new media type, "audio/flac", as defined in the following section, and creates a new IANA registry.
 
 ## Media type registration
 
@@ -986,6 +988,58 @@ Change controller: Internet Engineering Task Force
 
 Provisional registration? (standards tree only): NO
 ```
+
+## Application ID Registry
+
+This document creates a new IANA registry called the "FLAC Application Metadata Block ID" registry. The values correspond to the 32-bit identifier described in (#application).
+
+To register a new Application ID in this registry, one needs an Application ID, a description, optionally a reference to a document describing the Application ID and a Change Controller (IETF or email of registrant). The Application IDs are to be allocated according to the "First Come First Served" policy [RFC8126]. An Application ID can be any 32-bit value, but is often composed of 4 ASCII characters, to be human-readable.
+
+The FLAC Application Metadata Block ID registry is assigned the following initial values.
+
+Application ID   | ASCII rendition (if available) | Description                        | Specification       | Change controller
+:----------------|:-------------------------------|:-----------------------------------|:--------------------|:---------
+0x41544348       | ATCH                           | FlacFile                           | [@FlacFile]         | IETF
+0x42534F4C       | BSOL                           | beSolo                             |                     | IETF
+0x42554753       | BUGS                           | Bugs Player                        |                     | IETF
+0x43756573       | Cues                           | GoldWave cue points                |                     | IETF
+0x46696361       | Fica                           | CUE Splitter                       |                     | IETF
+0x46746F6C       | Ftol                           | flac-tools                         |                     | IETF
+0x4D4F5442       | MOTB                           | MOTB MetaCzar                      |                     | IETF
+0x4D505345       | MPSE                           | MP3 Stream Editor                  |                     | IETF
+0x4D754D4C       | MuML                           | MusicML: Music Metadata Language   |                     | IETF
+0x52494646       | RIFF                           | Sound Devices RIFF chunk storage   |                     | IETF
+0x5346464C       | SFFL                           | Sound Font FLAC                    |                     | IETF
+0x534F4E59       | SONY                           | Sony Creative Software             |                     | IETF
+0x5351455A       | SQEZ                           | flacsqueeze                        |                     | IETF
+0x54745776       | TtWv                           | TwistedWave                        |                     | IETF
+0x55495453       | UITS                           | UITS Embedding tools               |                     | IETF
+0x61696666       | aiff                           | FLAC AIFF chunk storage            | [@Foreign-metadata] | IETF
+0x696D6167       | imag                           | flac-image                         |                     | IETF
+0x7065656D       | peem                           | Parseable Embedded Extensible Metadata |                 | IETF
+0x71667374       | qfst                           | QFLAC Studio                       |                     | IETF
+0x72696666       | riff                           | FLAC RIFF chunk storage            | [@Foreign-metadata] | IETF
+0x74756E65       | tune                           | TagTuner                           |                     | IETF
+0x773634C0       | w64                            | FLAC Wave64 chunk storage          | [@Foreign-metadata] | IETF
+0x78626174       | xbat                           | XBAT                               |                     | IETF
+0x786D6364       | xmcd                           | xmcd                               |                     | IETF
+
+
+<reference anchor="FlacFile" target="https://web.archive.org/web/20071023070305/http://firestuff.org:80/flacfile/">
+    <front>
+        <title>FlacFile</title>
+        <author/>
+        <date month="10" year="2007"/>
+    </front>
+</reference>
+
+<reference anchor="Foreign-metadata" target="https://github.com/xiph/flac/blob/master/doc/foreign_metadata_storage.md">
+    <front>
+        <title>Specification of foreign metadata storage in FLAC</title>
+        <author/>
+        <date month="11" year="2023"/>
+    </front>
+</reference>
 
 # Acknowledgments
 
