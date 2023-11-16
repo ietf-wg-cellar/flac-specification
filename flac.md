@@ -363,9 +363,9 @@ Note that the Vorbis comment as used in Vorbis allows for on the order of 2\^64 
 
 ### Standard field names
 
-Only one standard field name is defined; the channel mask field, in (#channel-mask). No other field names are defined, because the applicability of any field name is strongly tied to the content it is associated with. For example, field names useful for describing files that contain a single work of music would be unusable when labeling archived broadcasts, recordings of any kind, or a collection of music works. Even when describing a single work of music, different conventions exists depending on the kind of music: orchestral music differs from music by solo artists or bands.
+Only one standard field name is defined: the channel mask field, in (#channel-mask). No other field names are defined because the applicability of any field name is strongly tied to the content it is associated with. For example, field names useful for describing files that contain a single work of music would be unusable when labeling archived broadcasts, recordings of any kind, or a collection of music works. Even when describing a single work of music, different conventions exist depending on the kind of music: orchestral music differs from music by solo artists or bands.
 
-Despite no field names are formally defined, there is a general trend among devices and software capable of FLAC playback that are meant to play music. Most of those recognize at least the following field names:
+Despite the fact that no field names are formally defined, there is a general trend among devices and software capable of FLAC playback that are meant to play music. Most of those recognize at least the following field names:
 
 - Title: name of the current work.
 - Artist: name of the artist generally responsible for the current work. For orchestral works, this is usually the composer; otherwise, it is often the performer.
