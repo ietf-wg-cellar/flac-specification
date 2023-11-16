@@ -373,7 +373,7 @@ Despite no field names are formally defined, there is a general trend among devi
 
 For a more comprehensive list of possible field names suited for describing a single work of music in various genres, the list of tags used in the MusicBrainz project, see [@MusicBrainz], is suggested.
 
-<reference anchor="MusicBrainz" target="http://picard-docs.musicbrainz.org/en/variables/variables.html">
+<reference anchor="MusicBrainz" target="https://picard-docs.musicbrainz.org/en/variables/variables.html">
   <front>
     <title>Tags &amp; Variables - MusicBrainz Picard v2.10 documentation</title>
     <author>
