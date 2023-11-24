@@ -925,7 +925,7 @@ See [@FLAC-decoder-testbench] for a non-exhaustive list of FLAC files with extre
     <refcontent>commit aa7b0c6</refcontent>
 </reference>
 
-FLAC files may contain executable code, although the FLAC format is not designed for it and it is uncommon. One use case where FLAC is occasionally used to store executable code is when compressing images of mixed mode CDs, which contain both audio and non-audio data, of which the non-audio portion can contain executable code.
+FLAC files may contain executable code, although the FLAC format is not designed for it and it is uncommon. One use case where FLAC is occasionally used to store executable code is when compressing images of mixed mode CDs, which contain both audio and non-audio data, of which the non-audio portion can contain executable code. In that case, the executable code is stored as if it were audio and is potentially obscured. Of course, it is also possible to store executable code as metadata, for example as a vorbis comment with help of a binary-to-text encoding or directly in an application metadata block. Applications MUST NOT execute code contained in FLAC files or present parts of FLAC files as executable code to the user, except when an application has that explicit purpose, e.g., applications reading FLAC files as disc images and presenting it as virtual disc drive.
 
 # IANA Considerations
 
