@@ -312,7 +312,7 @@ Data     | Description
 `u(32)`  | Registered application ID.
 `u(n)`   | Application data (n MUST be a multiple of 8, i.e., a whole number of bytes) n is 8 times the size described in the metadata block header, minus the 32 bits already used for the application ID.
 
-Application ID are registered with the IANA, see [#application-id-registry].
+Application IDs are registered with the IANA, see [#application-id-registry].
 
 ## Seektable
 
