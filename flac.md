@@ -993,9 +993,9 @@ Provisional registration? (standards tree only): NO
 
 This document creates a new IANA registry called the "FLAC Application Metadata Block ID" registry. The values correspond to the 32-bit identifier described in (#application).
 
-To register a new Application ID in this registry, one needs an Application ID, a description, optionally a reference to a document describing the Application ID and a Change Controller (IETF or email of registrant). The Application IDs are to be allocated according to the "First Come First Served" policy [RFC8126]. An Application ID can be any 32-bit value, but is often composed of 4 ASCII characters, to be human-readable.
+To register a new Application ID in this registry, one needs an Application ID, a description, optionally a reference to a document describing the Application ID and a Change Controller (IETF or email of registrant). The Application IDs are to be allocated according to the "First Come First Served" policy [RFC8126], so that there is no impediment to registering any Application IDs the FLAC community encounters, especially if they were used in audio files but were not registered when the audio files were encoded. An Application ID can be any 32-bit value, but is often composed of 4 ASCII characters, to be human-readable.
 
-The FLAC Application Metadata Block ID registry is assigned the following initial values.
+The FLAC Application Metadata Block ID registry is assigned the following initial values, taken from the registration page at xiph.org (see [@ID-registration-page]), which is no longer being maintained as it is replaced by this registry.
 
 Application ID   | ASCII rendition (if available) | Description                        | Specification       | Change controller
 :----------------|:-------------------------------|:-----------------------------------|:--------------------|:---------
@@ -1023,6 +1023,14 @@ Application ID   | ASCII rendition (if available) | Description                 
 0x773634C0       | w64                            | FLAC Wave64 chunk storage          | [@Foreign-metadata] | IETF
 0x78626174       | xbat                           | XBAT                               |                     | IETF
 0x786D6364       | xmcd                           | xmcd                               |                     | IETF
+
+
+<reference anchor="ID-registration-page" target="https://xiph.org/flac/id.html">
+    <front>
+        <title>FLAC - ID Registry</title>
+        <author/>
+    </front>
+</reference>
 
 
 <reference anchor="FlacFile" target="https://web.archive.org/web/20071023070305/http://firestuff.org:80/flacfile/">
