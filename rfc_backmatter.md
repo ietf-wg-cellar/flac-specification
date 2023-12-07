@@ -284,7 +284,7 @@ At this point, we would undo stereo decorrelation if that was applicable.
 
 As the last subframe ends byte-aligned, no padding bits follow it. The next 2 bytes, starting at 0x38, contain the frame CRC. As this is the only frame in the file, the file ends with the CRC.
 
-To validate the MD5 checksum, we line up the samples interleaved, byte-aligned, little endian, signed two's complement. The first sample, with value 25588, translates to 0xf463, the second sample, with value 10416,  translates to 0xb028. When doing the MD5 transformation on 0xf463b028, we get the MD5 checksum found in the header, so decoding was lossless.
+To validate the MD5 checksum, we line up the samples interleaved, byte-aligned, little endian, signed two's complement. The first sample, with value 25588, translates to 0xf463, the second sample, with value 10416,  translates to 0xb028. When computing the MD5 checksum with 0xf463b028 as input, we get the MD5 checksum found in the header, so decoding was lossless.
 
 ## Decoding example 2
 
