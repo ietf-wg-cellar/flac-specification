@@ -912,7 +912,7 @@ A list of other implementations and an overview of which parts of the format the
 
 Like any other codec (such as [@?RFC6716]), FLAC should not be used with insecure ciphers or cipher modes that are vulnerable to known plaintext attacks. Some of the header bits as well as the padding are easily predictable.
 
-Implementations of the FLAC codec need to take appropriate security considerations into account. Section 2.1 of [RFC4732] provides general information on DoS attacks on end-systems and describes some mitigation strategies. Areas of concern specific to FLAC follow.
+Implementations of the FLAC codec need to take appropriate security considerations into account. Section 2.1 of [@?RFC4732] provides general information on DoS attacks on end-systems and describes some mitigation strategies. Areas of concern specific to FLAC follow.
 
 It is extremely important for the decoder to be robust against malformed payloads. Payloads that do not conform to this specification **MUST NOT** cause the decoder to overrun its allocated memory or take an excessive amount of resources to decode. An overrun in allocated memory could lead to arbitrary code execution by an attacker. The same applies to the encoder, even though problems with encoders are typically rarer. Malformed audio streams **MUST NOT** cause the encoder to misbehave because this would allow an attacker to attack transcoding gateways.
 
