@@ -522,7 +522,7 @@ Data      | Description
 :---------|:-----------
 `u(32)`   | The picture type according to next table
 `u(32)`   | The length of the media type string in bytes.
-`u(n*8)`  | The media type string, in printable ASCII characters 0x20-0x7E. The media type MAY also be `-->` to signify that the data part is a URI of the picture instead of the picture data itself.
+`u(n*8)`  | The media type string as specified by [@!RFC2046], or the text string `-->` to signify that the data part is a URI of the picture instead of the picture data itself. This field must be in printable ASCII characters 0x20-0x7E.
 `u(32)`   | The length of the description string in bytes.
 `u(n*8)`  | The description of the picture, in UTF-8.
 `u(32)`   | The width of the picture in pixels.
@@ -559,6 +559,8 @@ Value | Picture type
 18    | Illustration
 19    | Band or artist logotype
 20    | Publisher or studio logotype
+
+The origin and use of value 17, "A bright colored fish", is unclear. This was copied to maintain compatibility with ID3v2.
 
 If not a picture but a URI is contained in this block, the following points apply:
 
