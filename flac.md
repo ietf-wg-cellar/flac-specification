@@ -205,7 +205,7 @@ Furthermore, to allow a decoder to start decoding at any place in the stream eve
 Individual subframes (one for each channel) are coded separately within a frame, and appear serially in the stream. In other words, the encoded audio data is NOT channel-interleaved. This reduces decoder complexity at the cost of requiring larger decode buffers. Each subframe has its own header specifying the attributes of the subframe, like prediction method and order, residual coding parameters, etc. Each subframe header is followed by the encoded audio data for that channel.
 
 # Streamable subset
-The FLAC format specifies a subset of itself as the FLAC streamable subset. The purpose of this is to ensure that any streams encoded according to this subset are truly "streamable", meaning that a decoder that cannot seek within the stream can still pick up in the middle of the stream and start decoding. It also makes hardware decoder implementations more practical by limiting the encoding parameters in such a way that decoder buffer sizes and other resource requirements can be easily determined. The `flac` command-line tool, part of the FLAC reference implementation (see (#implementation-status)), generates streamable subset files by default unless the `--lax` command-line option is used. The streamable subset makes the following limitations on what MAY be used in the stream:
+The FLAC format specifies a subset of itself as the FLAC streamable subset. The purpose of this is to ensure that any streams encoded according to this subset are truly "streamable", meaning that a decoder that cannot seek within the stream can still pick up in the middle of the stream and start decoding. It also makes hardware decoder implementations more practical by limiting the encoding parameters in such a way that decoder buffer sizes and other resource requirements can be easily determined. The streamable subset makes the following limitations on what MAY be used in the stream:
 
 - The sample rate bits (see (#sample-rate-bits)) in the frame header MUST be 0b0001-0b1110, i.e., the frame header MUST NOT refer to the streaminfo metadata block to describe the sample rate.
 - The bit depth bits (see (#bit-depth-bits)) in the frame header MUST be 0b001-0b111, i.e., the frame header MUST NOT refer to the streaminfo metadata block to describe the bit depth.
@@ -264,7 +264,7 @@ If the minimum block size is equal to the maximum block size, the file contains 
 
 The sample rate MUST NOT be 0 when the FLAC file contains audio. A sample rate of 0 MAY be used when non-audio is represented. This is useful if data is encoded that is not along a time axis, or when the sample rate of the data lies outside the range that FLAC can represent in the streaminfo metadata block. If a sample rate of 0 is used it is recommended to store the meaning of the encoded content in a Vorbis comment field (see (#vorbis-comment)) or an application metadata block (see (#application)). This document does not define such metadata.
 
-The MD5 checksum is made by performing an MD5 transformation on the samples of all channels interleaved, represented in signed, little-endian form. This interleaving is on a per-sample basis, so for a stereo file this means first the first sample of the first channel, then the first sample of the second channel, then the second sample of the first channel etc. Before performing the MD5 transformation, all samples must be byte-aligned. If the bit depth is not a whole number of bytes, the value of each sample is sign extended to the next whole number of bytes.
+The MD5 checksum is computed by applying the MD5 message-digest algorithm in [@!RFC1321]. The message to this algorithm consists of all the samples of all channels interleaved, represented in signed, little-endian form. This interleaving is on a per-sample basis, so for a stereo file this means first the first sample of the first channel, then the first sample of the second channel, then the second sample of the first channel etc. Before computing the checksum, all samples must be byte-aligned. If the bit depth is not a whole number of bytes, the value of each sample is sign extended to the next whole number of bytes.
 
 So, in the case of a 2-channel stream with 6-bit samples, bits will be lined up as follows.
 
@@ -474,7 +474,7 @@ Note that the track offset differs from the one in CD-DA, where the track's offs
 
 A track number of 0 is not allowed, because the CD-DA specification reserves this for the lead-in. For CD-DA the number MUST be 1-99, or 170 for the lead-out; for non-CD-DA, the track number MUST be 255 for the lead-out. It is recommended to start with track 1 and increase sequentially. Track numbers MUST be unique within a cuesheet.
 
-The track ISRC (International Standard Recording Code) is a 12-digit alphanumeric code; see [@ISRC-handbook]. A value of 12 ASCII 0x00 characters MAY be used to denote the absence of an ISRC.
+The track ISRC (International Standard Recording Code) is a 12-digit alphanumeric code; see [@!ISRC-handbook]. A value of 12 ASCII 0x00 characters MAY be used to denote the absence of an ISRC.
 
 <reference anchor="ISRC-handbook" target="https://www.ifpi.org/isrc_handbook/">
     <front>
@@ -502,7 +502,15 @@ For CD-DA, a track index point number of 0 corresponds to the track pre-gap. The
 
 ## Picture
 
-The picture metadata block contains image data of a picture in some way belonging to the audio contained in the FLAC file. Its format is derived from the APIC frame in the ID3v2 specification. However, contrary to the APIC frame in ID3v2, the media type and description are prepended with a 4-byte length field instead of being 0x00 delimited strings. A FLAC file MAY contain one or more picture metadata blocks.
+The picture metadata block contains image data of a picture in some way belonging to the audio contained in the FLAC file. Its format is derived from the APIC frame in the ID3v2 specification, see [@?ID3v2]. However, contrary to the APIC frame in ID3v2, the media type and description are prepended with a 4-byte length field instead of being 0x00 delimited strings. A FLAC file MAY contain one or more picture metadata blocks.
+
+<reference anchor="ID3v2" target="https://web.archive.org/web/20220903174949/https://id3.org/id3v2.4.0-frames">
+    <front>
+        <title>id3v2.4.0-frames.txt</title>
+        <author initials="M" surname="Nilsson" fullname="Martin Nilsson" />
+        <date month="11" year="2000"/>
+    </front>
+</reference>
 
 Note that while the length fields for media type, description, and picture data are 4 bytes in length and could in theory code for a size up to 4 GiB, the total metadata block size cannot exceed what can be described by the metadata block header, i.e., 16 MiB.
 
@@ -531,7 +539,7 @@ The following table contains all the defined picture types. Values other than th
 Value | Picture type
 :-----|:-----------
 0     | Other
-1     | PNG file icon of 32x32 pixels
+1     | PNG file icon of 32x32 pixels, see [@?RFC2083]
 2     | General file icon
 3     | Front cover
 4     | Back cover
@@ -724,7 +732,34 @@ The FLAC format can optionally take advantage of these wasted bits by signaling 
 
 If a subframe uses wasted bits (i.e., k is not equal to 0), samples are coded ignoring k least-significant bits. For example, if a frame not employing stereo decorrelation specifies a sample size of 16 bits per sample in the frame header and k of a subframe is 3, samples in the subframe are coded as 13 bits per sample. For more details, see (#constant-subframe) on how the bit depth of a subframe is calculated. A decoder MUST add k least-significant zero bits by shifting left (padding) after decoding a subframe sample. If the frame has left/side, right/side, or mid/side stereo, a decoder MUST perform padding on the subframes before restoring the channels to left and right. The number of wasted bits per sample MUST be such that the resulting number of bits per sample (of which the calculation is explained in (#constant-subframe)) is larger than zero.
 
-Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec. There are also audio processors like lossyWAV which zero a number of least-sigificant bits for a block of samples, increasing the compression in a non-lossless way. Because of this, the number of wasted bits k MAY change between frames and MAY differ between subframes. If the number of wasted bits changes halfway through a subframe (e.g., the first part has 2 wasted bits and the second part has 4 wasted bits) the subframe uses the lowest number of wasted bits, as otherwise non-zero bits would be discarded and the process would not be lossless.
+Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec, see [@?MLP]. There are also audio processors like lossyWAV, see [@?lossyWAV], which zero a number of least-sigificant bits for a block of samples, increasing the compression in a non-lossless way. Because of this, the number of wasted bits k MAY change between frames and MAY differ between subframes. If the number of wasted bits changes halfway through a subframe (e.g., the first part has 2 wasted bits and the second part has 4 wasted bits) the subframe uses the lowest number of wasted bits, as otherwise non-zero bits would be discarded and the process would not be lossless.
+
+<reference anchor="MLP" target="https://www.aes.org/e-lib/online/browse.cfm?elib=8082">
+    <front>
+        <title>The MLP Lossless Compression System</title>
+        <author initials="MA" surname="Gerzon" fullname="Michael A. Gerzon"/>
+        <author initials="PG" surname="Craven" fullname="Peter G. Craven">
+            <organization>Algol Applications Ltd, Hove, England</organization>
+        </author>
+        <author initials="JR" surname="Stuart" fullname="J. Robert Stuart">
+            <organization>Meridian Audio Ltd, Huntingdon, England</organization>
+        </author>
+        <author initials="MJ" surname="Law" fullname="Malcolm J. Law">
+            <organization>Algol Applications Ltd, Hove, England</organization>
+        </author>
+        <author initials="RJ" surname="Wilson" fullname="Rhonda J. Wilson">
+            <organization>Meridian Audio Ltd, Huntingdon, England</organization>
+        </author>
+        <date month="09" year="1999"/>
+    </front>
+</reference>
+
+<reference anchor="lossyWAV" target="https://wiki.hydrogenaud.io/index.php?title=LossyWAV">
+    <front>
+        <title>lossyWAV - Hydrogenaudio Knowledgebase</title>
+        <author/>
+    </front>
+</reference>
 
 ### Constant subframe
 In a constant subframe, only a single sample is stored. This sample is stored as an integer number coded big-endian, signed two's complement. The number of bits used to store this sample depends on the bit depth of the current subframe. The bit depth of a subframe is equal to the bit depth as coded in the frame header (see (#bit-depth-bits)), minus the number of used wasted bits coded in the subframe header (see (#wasted-bits-per-sample)). If a subframe is a side subframe (see (#interchannel-decorrelation)), the bit depth of that subframe is increased by 1 bit.
@@ -839,7 +874,7 @@ As FLAC frames are completely independent of each other, container format featur
 
 ## Ogg mapping
 
-The Ogg container format is defined in [@?RFC3533]. The first packet of a logical bitstream carrying FLAC data is structured according to the following table.
+The Ogg container format is defined in [@!RFC3533]. The first packet of a logical bitstream carrying FLAC data is structured according to the following table.
 
 Data     | Description
 :--------|:-----------
@@ -860,11 +895,11 @@ The granule position of all pages containing header packets MUST be 0. For pages
 
 The granule position of the first audio data page with a completed packet MAY be larger than the number of samples contained in packets that complete on that page. In other words, the apparent sample number of the first sample in the stream following from the granule position and the audio data MAY be larger than 0. This allows, for example, a server to cast a live stream to several clients that joined at different moments, without rewriting the granule position for each client.
 
-If an audio stream is encoded where audio properties (sample rate, number of channels, or bit depth) change at some point in the stream, this should be dealt with by finishing encoding of the current Ogg stream and starting a new Ogg stream, concatenated to the previous one. This is called chaining in Ogg. See the Ogg specification [@?RFC3533] for details.
+If an audio stream is encoded where audio properties (sample rate, number of channels, or bit depth) change at some point in the stream, this should be dealt with by finishing encoding of the current Ogg stream and starting a new Ogg stream, concatenated to the previous one. This is called chaining in Ogg. See the Ogg specification [@!RFC3533] for details.
 
 ## Matroska mapping
 
-The Matroska container format is defined in [@?I-D.ietf-cellar-matroska]. The codec ID (EBML path `\Segment\Tracks\TrackEntry\CodecID`) assigned to signal tracks carrying FLAC data is `A_FLAC` in ASCII. All FLAC data before the first audio frame (i.e., the `fLaC` ASCII signature and all metadata blocks) is stored as CodecPrivate data (EBML path `\Segment\Tracks\TrackEntry\CodecPrivate`).
+The Matroska container format is defined in [@!I-D.ietf-cellar-matroska]. The codec ID (EBML path `\Segment\Tracks\TrackEntry\CodecID`) assigned to signal tracks carrying FLAC data is `A_FLAC` in ASCII. All FLAC data before the first audio frame (i.e., the `fLaC` ASCII signature and all metadata blocks) is stored as CodecPrivate data (EBML path `\Segment\Tracks\TrackEntry\CodecPrivate`).
 
 Each FLAC frame (including all of its subframes) is treated as a single frame in the Matroska context.
 
@@ -872,7 +907,7 @@ If an audio stream is encoded where audio properties (sample rate, number of cha
 
 ## ISO Base Media File Format (MP4) mapping
 
-The full encapsulation definition of FLAC audio in MP4 files was deemed too extensive to include in this document. A definition document can be found at [@FLAC-in-MP4-specification]. The definition document is summarized here.
+The full encapsulation definition of FLAC audio in MP4 files was deemed too extensive to include in this document. A definition document can be found at [@FLAC-in-MP4-specification].
 
 <reference anchor="FLAC-in-MP4-specification" target=" https://github.com/xiph/flac/blob/master/doc/isoflac.txt">
     <front>
@@ -882,14 +917,6 @@ The full encapsulation definition of FLAC audio in MP4 files was deemed too exte
     </front>
     <refcontent>commit 78d85dd</refcontent>
 </reference>
-
-The sample entry code is `fLaC`. The channelcount and samplesize fields in the sample entry follow the values found in the FLAC stream. The samplerate field can be different, because FLAC can carry audio with much higher sample rates than can be coded for in the sample entry. When possible, the samplerate field should contain the sample rate as found in the FLAC stream, shifted left by 16 bits to get the 16.16 fixed point representation of the samplerate field. When the FLAC stream contains a sample rate higher than can be coded, the samplerate field contains the greatest expressible regular division of the sample rate, e.g., 48000 for sample rates of 96 kHz and 192 kHz or 44100 for a sample rate of 88200 Hz. When the FLAC stream contains audio with an unusual sample rate that has no regular division, the maximum value of 65535.0 Hz is used. As FLAC streams with a high sample rate are common, a parser or decoder MUST read the value from the FLAC streaminfo metadata block or a frame header to determine the actual sample rate. The sample entry contains one 'FLAC specific box' with code 'dfLa'.
-
-The FLAC specific box extends FullBox, with version number 0 and all flags set to 0, and contains all FLAC data before the first audio frame but `fLaC` ASCII signature (i.e., all metadata blocks).
-
-If an audio stream is encoded where audio properties (sample rate, number of channels or bit depth) change at some point in the stream, this MUST be dealt with in a MP4 generic manner, e.g., with several `stsd` atoms and different sample-description-index values in the `stsc` atom.
-
-Each FLAC frame is a single sample in the context of MP4 files.
 
 # Implementation status
 
