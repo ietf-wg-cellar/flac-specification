@@ -38,23 +38,7 @@ While the FLAC format can store digital audio as well as other digital signals, 
 
 - **Linear predictor**: a predictor using linear prediction (see [@LinearPrediction]). This is also called **linear predictive coding (LPC)**. With a linear predictor, each prediction is a linear combination of past samples, hence the name. A linear predictor has a causal discrete-time finite impulse response (see [@FIR]).
 
-- **Muxing**: short for multiplexing, combining several streams or files into a single stream or file. In the context of this document, muxing more specifically refers to embedding a FLAC stream in a container as described in [#container-mappings].
-
-<reference anchor="LinearPrediction" target="https://en.wikipedia.org/wiki/Linear_prediction">
-  <front>
-    <title>Linear prediction - Wikipedia</title>
-    <author/>
-    <date/>
-  </front>
-</reference>
-
-<reference anchor="FIR" target="https://en.wikipedia.org/wiki/Finite_impulse_response">
-  <front>
-    <title>Finite impulse response - Wikipedia</title>
-    <author/>
-    <date/>
-  </front>
-</reference>
+- **Muxing**: short for multiplexing, combining several streams or files into a single stream or file. In the context of this document, muxing more specifically refers to embedding a FLAC stream in a container as described in (#container-mappings).
 
 - **Fixed predictor**: a linear predictor in which the model parameters are the same across all FLAC files, and thus do not need to be stored.
 
@@ -64,6 +48,20 @@ While the FLAC format can store digital audio as well as other digital signals, 
 
 - **Rice code**: A variable-length code (see [@VarLengthCode]) that compresses data by making use of the observation that, after using an effective predictor, most residual samples are closer to zero than the original samples, while still allowing for a small part of the samples to be much larger.
 
+<reference anchor="LinearPrediction" target="https://en.wikipedia.org/wiki/Linear_prediction">
+  <front>
+    <title>Linear prediction - Wikipedia</title>
+    <author/>
+    <date/>
+  </front>
+</reference>
+<reference anchor="FIR" target="https://en.wikipedia.org/wiki/Finite_impulse_response">
+  <front>
+    <title>Finite impulse response - Wikipedia</title>
+    <author/>
+    <date/>
+  </front>
+</reference>
 <reference anchor="VarLengthCode" target="https://en.wikipedia.org/wiki/Variable-length_code">
   <front>
     <title>Variable-length code - Wikipedia</title>
@@ -312,7 +310,7 @@ Data     | Description
 `u(32)`  | Registered application ID.
 `u(n)`   | Application data (n MUST be a multiple of 8, i.e., a whole number of bytes) n is 8 times the size described in the metadata block header, minus the 32 bits already used for the application ID.
 
-Application IDs are registered with the IANA, see [#application-id-registry].
+Application IDs are registered with the IANA, see (#application-id-registry).
 
 ## Seektable
 
@@ -824,7 +822,7 @@ See (#constant-subframe) on how the warm-up samples are stored unencoded. The pr
 Please note that the order in which the predictor coefficients appear in the bitstream corresponds to which **past** sample they belong to. In other words, the order of the predictor coefficients is opposite to the chronological order of the samples. So, the first predictor coefficient has to be multiplied with the sample directly before the sample that is being predicted, the second predictor coefficient has to be multiplied with the sample before that, etc.
 
 ### Coded residual
-The first two bits in a coded residual indicate which coding method is used. See the table below`.
+The first two bits in a coded residual indicate which coding method is used. See the table below.
 
 Value       | Description
 -----------:|:-----------
