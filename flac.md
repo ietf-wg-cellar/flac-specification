@@ -38,7 +38,7 @@ While the FLAC format can store digital audio as well as other digital signals, 
 
 - **Linear predictor**: a predictor using linear prediction (see [@LinearPrediction]). This is also called **linear predictive coding (LPC)**. With a linear predictor, each prediction is a linear combination of past samples, hence the name. A linear predictor has a causal discrete-time finite impulse response (see [@FIR]).
 
-- **Muxing**: short for multiplexing, combining several streams or files into a single stream or file. In the context of this document, muxing more specifically refers to embedding a FLAC stream in a container as described in [#container-mappings].
+- **Muxing**: short for multiplexing, combining several streams or files into a single stream or file. In the context of this document, muxing more specifically refers to embedding a FLAC stream in a container as described in (#container-mappings).
 
 <reference anchor="LinearPrediction" target="https://en.wikipedia.org/wiki/Linear_prediction">
   <front>
@@ -47,7 +47,6 @@ While the FLAC format can store digital audio as well as other digital signals, 
     <date/>
   </front>
 </reference>
-
 <reference anchor="FIR" target="https://en.wikipedia.org/wiki/Finite_impulse_response">
   <front>
     <title>Finite impulse response - Wikipedia</title>
@@ -312,7 +311,7 @@ Data     | Description
 `u(32)`  | Registered application ID.
 `u(n)`   | Application data (n MUST be a multiple of 8, i.e., a whole number of bytes) n is 8 times the size described in the metadata block header, minus the 32 bits already used for the application ID.
 
-Application IDs are registered with the IANA, see [#application-id-registry].
+Application IDs are registered with the IANA, see (#application-id-registry).
 
 ## Seektable
 
