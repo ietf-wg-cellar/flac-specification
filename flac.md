@@ -822,7 +822,7 @@ See (#constant-subframe) on how the warm-up samples are stored unencoded. The pr
 Please note that the order in which the predictor coefficients appear in the bitstream corresponds to which **past** sample they belong to. In other words, the order of the predictor coefficients is opposite to the chronological order of the samples. So, the first predictor coefficient has to be multiplied with the sample directly before the sample that is being predicted, the second predictor coefficient has to be multiplied with the sample before that, etc.
 
 ### Coded residual
-The first two bits in a coded residual indicate which coding method is used. See the table below`.
+The first two bits in a coded residual indicate which coding method is used. See the table below.
 
 Value       | Description
 -----------:|:-----------
