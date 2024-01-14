@@ -539,7 +539,7 @@ The following table contains all the defined picture types. Values other than th
 Value | Picture type
 :-----|:-----------
 0     | Other
-1     | PNG file icon of 32x32 pixels, see [@?RFC2083]
+1     | PNG file icon of 32x32 pixels, see [@!RFC2083]
 2     | General file icon
 3     | Front cover
 4     | Back cover
@@ -560,7 +560,7 @@ Value | Picture type
 19    | Band or artist logotype
 20    | Publisher or studio logotype
 
-The origin and use of value 17, "A bright colored fish", is unclear. This was copied to maintain compatibility with ID3v2.
+The origin and use of value 17, "A bright colored fish", is unclear. This was copied to maintain compatibility with ID3v2. Applications are discouraged from offering this value to users when embedding a picture.
 
 If not a picture but a URI is contained in this block, the following points apply:
 
