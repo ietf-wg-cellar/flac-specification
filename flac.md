@@ -40,6 +40,14 @@ While the FLAC format can store digital audio as well as other digital signals, 
 
 - **Muxing**: short for multiplexing, combining several streams or files into a single stream or file. In the context of this document, muxing more specifically refers to embedding a FLAC stream in a container as described in (#container-mappings).
 
+- **Fixed predictor**: a linear predictor in which the model parameters are the same across all FLAC files, and thus do not need to be stored.
+
+- **Predictor order**: the number of past samples that a predictor uses. For example, a 4th order predictor uses the 4 samples directly preceding a certain sample to predict it. In FLAC, samples used in a predictor are always consecutive, and are always the samples directly before the sample that is being predicted.
+
+- **Residual**: The audio signal that remains after a predictor has been subtracted from a subblock. If the predictor has been able to remove redundancy from the signal, the samples of the remaining signal (the **residual samples**) will have, on average, a smaller numerical value than the original signal.
+
+- **Rice code**: A variable-length code (see [@VarLengthCode]) that compresses data by making use of the observation that, after using an effective predictor, most residual samples are closer to zero than the original samples, while still allowing for a small part of the samples to be much larger.
+
 <reference anchor="LinearPrediction" target="https://en.wikipedia.org/wiki/Linear_prediction">
   <front>
     <title>Linear prediction - Wikipedia</title>
@@ -54,15 +62,6 @@ While the FLAC format can store digital audio as well as other digital signals, 
     <date/>
   </front>
 </reference>
-
-- **Fixed predictor**: a linear predictor in which the model parameters are the same across all FLAC files, and thus do not need to be stored.
-
-- **Predictor order**: the number of past samples that a predictor uses. For example, a 4th order predictor uses the 4 samples directly preceding a certain sample to predict it. In FLAC, samples used in a predictor are always consecutive, and are always the samples directly before the sample that is being predicted.
-
-- **Residual**: The audio signal that remains after a predictor has been subtracted from a subblock. If the predictor has been able to remove redundancy from the signal, the samples of the remaining signal (the **residual samples**) will have, on average, a smaller numerical value than the original signal.
-
-- **Rice code**: A variable-length code (see [@VarLengthCode]) that compresses data by making use of the observation that, after using an effective predictor, most residual samples are closer to zero than the original samples, while still allowing for a small part of the samples to be much larger.
-
 <reference anchor="VarLengthCode" target="https://en.wikipedia.org/wiki/Variable-length_code">
   <front>
     <title>Variable-length code - Wikipedia</title>
