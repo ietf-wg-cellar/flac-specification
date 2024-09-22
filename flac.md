@@ -274,7 +274,7 @@ SSAAAAAASSBBBBBBSSCCCCCC
 |   |   |  Bits of 1st sample of 2nd channel
 |   |  Sign extension bits of 1st sample of 2nd channel
 |  Bits of 1st sample of 1st channel
-Sign extention bits of 1st sample of 1st channel
+Sign extension bits of 1st sample of 1st channel
 
 ```
 
