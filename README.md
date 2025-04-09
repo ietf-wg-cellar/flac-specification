@@ -1,11 +1,5 @@
 # The FLAC Specification
 
-This document defines FLAC, which stands for Free Lossless Audio Codec, a free, open-source codec for lossless audio compression and decompression.
-
-This is currently a work in progress and welcomes [contributions and feedback](CONTRIBUTING.md).
-
-Discussion of the plans for standardization should be regulated to the [CELLAR listserv](https://datatracker.ietf.org/wg/cellar/charter/).
-
-See also the last published [IETF draft](https://datatracker.ietf.org/doc/draft-ietf-cellar-flac/).
-
-The [IETF Guidelines for Conduct](https://tools.ietf.org/html/rfc7154) gives the guidance for acting.
+This git repository was used in developing the FLAC specification document that is now published as [RFC 9639](https://www.rfc-editor.org/info/rfc9639).
+Currently, it only contains the example files used in the document. Additionally, GitHub has some wiki items linked to this repo, which could be regarded
+part of the repository in some way, which are used in the published document. See https://github.com/ietf-wg-cellar/flac-specification/wiki
