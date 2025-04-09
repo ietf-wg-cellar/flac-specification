@@ -274,7 +274,7 @@ SSAAAAAASSBBBBBBSSCCCCCC
 |   |   |  Bits of 1st sample of 2nd channel
 |   |  Sign extension bits of 1st sample of 2nd channel
 |  Bits of 1st sample of 1st channel
-Sign extention bits of 1st sample of 1st channel
+Sign extension bits of 1st sample of 1st channel
 
 ```
 
@@ -732,7 +732,7 @@ The FLAC format can optionally take advantage of these wasted bits by signaling 
 
 If a subframe uses wasted bits (i.e., k is not equal to 0), samples are coded ignoring k least-significant bits. For example, if a frame not employing stereo decorrelation specifies a sample size of 16 bits per sample in the frame header and k of a subframe is 3, samples in the subframe are coded as 13 bits per sample. For more details, see (#constant-subframe) on how the bit depth of a subframe is calculated. A decoder MUST add k least-significant zero bits by shifting left (padding) after decoding a subframe sample. If the frame has left/side, right/side, or mid/side stereo, a decoder MUST perform padding on the subframes before restoring the channels to left and right. The number of wasted bits per sample MUST be such that the resulting number of bits per sample (of which the calculation is explained in (#constant-subframe)) is larger than zero.
 
-Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec, see [@?MLP]. There are also audio processors like lossyWAV, see [@?lossyWAV], which zero a number of least-sigificant bits for a block of samples, increasing the compression in a non-lossless way. Because of this, the number of wasted bits k MAY change between frames and MAY differ between subframes. If the number of wasted bits changes halfway through a subframe (e.g., the first part has 2 wasted bits and the second part has 4 wasted bits) the subframe uses the lowest number of wasted bits, as otherwise non-zero bits would be discarded and the process would not be lossless.
+Besides audio files that have a certain number of wasted bits for the whole file, there exist audio files in which the number of wasted bits varies. There are DVD-Audio discs in which blocks of samples have had their least-significant bits selectively zeroed to slightly improve the compression of their otherwise lossless Meridian Lossless Packing codec, see [@?MLP]. There are also audio processors like lossyWAV, see [@?lossyWAV], which zero a number of least-significant bits for a block of samples, increasing the compression in a non-lossless way. Because of this, the number of wasted bits k MAY change between frames and MAY differ between subframes. If the number of wasted bits changes halfway through a subframe (e.g., the first part has 2 wasted bits and the second part has 4 wasted bits) the subframe uses the lowest number of wasted bits, as otherwise non-zero bits would be discarded and the process would not be lossless.
 
 <reference anchor="MLP" target="https://www.aes.org/e-lib/online/browse.cfm?elib=8082">
     <front>
